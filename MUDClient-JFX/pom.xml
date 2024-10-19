@@ -1,0 +1,102 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.prelle</groupId>
+  <artifactId>mudclient-jfx</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>MUDClient-JFX</name>
+  <description>MUD client written in Java+JavaFX</description>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<javafx.version>22.0.2</javafx.version>
+		<maven.deploy.skip>false</maven.deploy.skip>
+		<maven.install.skip>false</maven.install.skip>
+		<javafx.plugin.version>0.0.8</javafx.plugin.version>
+		<client.plugin.version>1.0.21</client.plugin.version>
+		<maven.compiler.target>22</maven.compiler.target>
+		<maven.compiler.source>22</maven.compiler.source>
+	</properties>
+
+	<repositories>
+    	<repository>
+        	<id>jitpack.io</id>
+        	<url>https://jitpack.io</url>
+    	</repository>
+    	<repository>
+    		<id>terminalfx-repo</id>
+    		<url>https://github.com/javaterminal/terminalfx/raw/master/releases</url>
+    	</repository>
+	</repositories>
+
+	<dependencies>
+	  <dependency>
+		  <groupId>org.prelle</groupId>
+		  <artifactId>telnet</artifactId>
+		  <version>0.0.1-SNAPSHOT</version>
+	  </dependency>
+	  <dependency>
+		  <groupId>org.prelle</groupId>
+		  <artifactId>tile-library</artifactId>
+		  <version>0.0.1-SNAPSHOT</version>
+	  </dependency>
+	  <dependency>
+		  	<groupId>org.prelle</groupId>
+  			<artifactId>tile-service-jfx</artifactId>
+  			<version>0.0.1-SNAPSHOT</version>
+	  </dependency>
+	  <dependency>
+		  <groupId>org.prelle</groupId>
+		  <artifactId>libterminal-jfx</artifactId>
+		  <version>0.0.1-SNAPSHOT</version>
+	  </dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-base</artifactId>
+			<version>${javafx.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-graphics</artifactId>
+			<version>${javafx.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-controls</artifactId>
+			<version>${javafx.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-swing</artifactId>
+			<version>${javafx.version}</version>
+		</dependency>
+
+		<dependency>
+    		<groupId>com.github.PavelKastornyy.ansi4j</groupId>
+    		<artifactId>ansi4j-core-api</artifactId>
+    		<version>ansi4j-1.1.0</version>
+		</dependency>
+		<dependency>
+    		<groupId>com.github.PavelKastornyy.ansi4j</groupId>
+    		<artifactId>ansi4j-core-impl</artifactId>
+    		<version>ansi4j-1.1.0</version>
+		</dependency>
+<dependency>
+        <groupId>com.googlecode.lanterna</groupId>
+        <artifactId>lanterna</artifactId>
+        <version>3.1.2</version>
+    </dependency>
+
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>2.22.1</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-jpl</artifactId>
+			<version>2.22.1</version>
+			<scope>runtime</scope>
+		</dependency>
+	</dependencies>
+</project>

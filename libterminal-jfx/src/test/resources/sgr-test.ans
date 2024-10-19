@@ -1,0 +1,18 @@
+                    Graphic rendition test pattern:
+
+vanilla                                 [1mbold[0m[0m
+                       
+     [4munderline[0m                               [4m[1mbold underline[0m
+
+[5mblink[0m                                   [5m[1mbold blink[0m                          [0m
+
+     [4m[5munderline blink[0m                         [4m[1m[5mbold underline blink[0m
+
+[7mnegative[0m                                [7m[1mbold negative[0m                       [0m
+
+     [4m[7munderline negative[0m                       [4m[7m[1mbold underline negative[0m
+
+[7m[5mblink negative[0m                          [7m[5m[1mbold blink negative[0m                 [0m
+
+     [4m[5m[7munderline blink negative[0m                 [4m[5m[7m[1mbold underline blink negative[0m
+

@@ -1,0 +1,276 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  	<parent>
+  		<groupId>org.prelle</groupId>
+  		<artifactId>mudclient</artifactId>
+  		<version>0.0.1-SNAPSHOT</version>
+  	</parent>
+  <artifactId>realmrunner_cli</artifactId>
+  <version>0.0.1</version>
+  <name>Realm Runner CLI</name>
+  <description>MUD client for a terminal emulator written in Java</description>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.deploy.skip>true</maven.deploy.skip>
+		<maven.install.skip>true</maven.install.skip>
+		<maven.compiler.target>21</maven.compiler.target>
+		<maven.compiler.source>21</maven.compiler.source>
+		<mainClassName>org.prelle.mudclient.terminal.MUDClientTerminal</mainClassName>
+		<client.plugin.version>1.0.24</client.plugin.version>
+	</properties>
+
+	<dependencies>
+	  <dependency>
+		  <groupId>org.prelle</groupId>
+		  <artifactId>telnet</artifactId>
+		  <version>0.0.1-SNAPSHOT</version>
+	  </dependency>
+	  <dependency>
+		  <groupId>org.prelle</groupId>
+		  <artifactId>mudclient-base</artifactId>
+		  <version>0.0.1-SNAPSHOT</version>
+	  </dependency>
+	  <dependency>
+		  <groupId>org.prelle</groupId>
+		  <artifactId>libansi</artifactId>
+		  <version>0.0.1-SNAPSHOT</version>
+	  </dependency>
+	  <dependency>
+		  <groupId>org.prelle</groupId>
+		  <artifactId>mudansi</artifactId>
+		  <version>0.0.1-SNAPSHOT</version>
+	  </dependency>
+	  <dependency>
+		  <groupId>org.prelle</groupId>
+		  <artifactId>libterminal-api</artifactId>
+		  <version>0.0.1-SNAPSHOT</version>
+	  </dependency>
+	  <dependency>
+		  <groupId>org.prelle</groupId>
+		  <artifactId>libterminal-native</artifactId>
+		  <version>0.0.1-SNAPSHOT</version>
+	  </dependency>
+		<dependency>
+    		<groupId>javazoom</groupId>
+    		<artifactId>jlayer</artifactId>
+    		<version>1.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+    		<groupId>org.yaml</groupId>
+    		<artifactId>snakeyaml</artifactId>
+    		<version>2.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.prelle</groupId>
+			<artifactId>mud-framework</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+		  	<groupId>org.prelle</groupId>
+  			<artifactId>tile-library</artifactId>
+  			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>2.22.1</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-jpl</artifactId>
+			<version>2.22.1</version>
+			<scope>runtime</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+    			<groupId>org.apache.maven.plugins</groupId>
+    			<artifactId>maven-assembly-plugin</artifactId>
+    			<executions>
+        			<execution>
+            			<phase>package</phase>
+            			<goals>
+                			<goal>single</goal>
+            			</goals>
+            			<configuration>
+                			<archive>
+                				<manifest>
+                    				<mainClass>${mainClassName}</mainClass>
+                				</manifest>
+                			</archive>
+                			<descriptorRefs>
+                    			<descriptorRef>jar-with-dependencies</descriptorRef>
+                			</descriptorRefs>
+            			</configuration>
+        			</execution>
+    			</executions>
+			</plugin>
+			
+			<plugin>
+				<groupId>com.gluonhq</groupId>
+				<artifactId>gluonfx-maven-plugin</artifactId>
+				<version>${client.plugin.version}</version>
+				<configuration>
+					<!-- Uncomment to run on iOS: -->
+					<target>${gluonfx.target}</target>
+					<mainClass>${mainClassName}</mainClass>
+					<runtimeArgs>
+					<!-- Added as command line params when on Android (but not on desktop) -->
+						<arg>-Dproject.version=${project.version}</arg>
+					</runtimeArgs>
+					<nativeImageArgs>
+						<!--arg>-H:DefaultLocale=en</arg-->
+						<arg>-H:IncludeLocales=en,de</arg>
+						<arg>-Dproject.version=${project.version}</arg>
+					</nativeImageArgs>
+					<!--linkerArgs>
+       				<arg>${java.home}/lib/static/linux-amd64/glibc/libmlib_image.a</arg>
+    				</linkerArgs-->
+					<releaseConfiguration>
+						<description>CLI MUD Client</description>
+						<vendor>Stefan Prelle</vendor>
+						<version>${project.version}</version>
+						<!-- macOS -->
+						<macAppCategory>public.app-category.role-playing-games</macAppCategory>
+						<macAppStore>false</macAppStore>
+						<skipSigning>true</skipSigning>
+						<!-- macOS / iOS -->
+						<bundleName>Commlink 6</bundleName>
+						<bundleVersion>${env.GITHUB_RUN_NUMBER}</bundleVersion>
+
+						<!-- Android -->
+						<appLabel>RealmRunner</appLabel>
+						<versionCode>${env.GITHUB_RUN_NUMBER}</versionCode>
+						<versionName>${project.version}</versionName>
+					</releaseConfiguration>
+				</configuration>
+			</plugin>
+			
+			<plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+            <outputDirectory>target/jmods</outputDirectory>
+        </configuration>
+    </plugin>
+    
+    <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+            <execution>
+                <id>copy-dependencies</id>
+                <phase>package</phase>
+                <goals>
+                    <goal>copy-dependencies</goal>
+                </goals>
+                <configuration>
+                    <includeScope>runtime</includeScope>
+                    <outputDirectory>target/jmods</outputDirectory>
+                </configuration>
+            </execution>
+        </executions>
+    </plugin>
+
+			
+			
+			<plugin>
+    <groupId>org.panteleyev</groupId>
+    <artifactId>jpackage-maven-plugin</artifactId>
+    <version>1.6.5</version>
+
+    <configuration>
+        <name>RealmRunner</name>
+        <appVersion>${project.version}</appVersion>
+        <arguments>
+        	<argument>192.168.0.2</argument>
+        	<argument>4000</argument>
+        </arguments>
+        <type>APP_IMAGE</type>
+        <vendor>Stefan Prelle</vendor>
+        <runtimeImage>${java.home}</runtimeImage>
+        <module>org.prelle.realmrunner_cli/${mainClassName}</module>
+        <modulePaths>
+        	<modulePath>target/jmods</modulePath>
+         </modulePaths>
+        <destination>target/dist</destination>
+        <javaOptions>
+            <option>--enable-preview</option>
+            <option>-Dfile.encoding=UTF-8</option>
+        </javaOptions>
+        <winConsole>true</winConsole>
+        <winDirChooser>true</winDirChooser>
+        <verbose>true</verbose>
+    </configuration>
+
+    <executions>
+        <execution>
+            <id>mac</id>
+            <configuration>
+                <icon>src/jpackage/osx/Commlink6.icns</icon>
+            </configuration>
+        </execution>
+        <execution>
+            <id>win</id>
+            <configuration>
+                <icon>src/jpackage/win/Commlink6_128.ico</icon>
+                <winMenu>true</winMenu>
+            </configuration>
+        </execution>
+        <execution>
+            <id>linux</id>
+            <configuration>
+                <icon>src/jpackage/linux/Commlink6.png</icon>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+
+			
+			
+<!--			<plugin>
+        		<groupId>com.github.akman</groupId>
+		        <artifactId>jpackage-maven-plugin</artifactId>
+		        <version>0.1.5</version>
+		        <dependencies>
+		        	<dependency>
+              			<groupId>org.ow2.asm</groupId>
+              			<artifactId>asm</artifactId>
+              			<version>9.6</version>
+            		</dependency>
+		        </dependencies>
+            			<configuration>
+              				<name>RealmRunner</name>
+              				<appversion>0.2</appversion>
+              				<vendor>Stefan Prelle</vendor>
+              				<module>org.prelle.realmrunner_cli/${mainClassName}</module>
+            			</configuration>
+        		<executions>
+          			<execution>
+            			<phase>verify</phase>
+            			<goals>
+              				<goal>jpackage</goal>
+            			</goals>
+          			</execution>
+        		</executions>
+      		</plugin>
+-->      </plugins>
+	</build>
+</project>

@@ -1,0 +1,12 @@
+<!ELEMENT symbolset (symbol+)>
+
+<!ELEMENT symbol    (title,description?)? >
+<!ATTLIST symbol 
+    nr      CDATA #REQUIRED
+    frames  CDATA #IMPLIED
+    walk    CDATA #IMPLIED
+    transp  CDATA #IMPLIED
+>
+
+<!ELEMENT title    (#PCDATA) >
+<!ELEMENT description    (#PCDATA) >

@@ -1,0 +1,15 @@
+TOP:  F1 - Room Description
+      F2 - Channels
+
+LEFT: F3 - Stats
+      F4 - Skills
+      F5 - Tasks
+
+RIGHT: F6 - Inventory
+       F7 - Player List
+       F8 - Quests
+
+MAP:  F9 - Tilemap
+      F10 - Automap
+
+      

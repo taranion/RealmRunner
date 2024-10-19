@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE symbolset PUBLIC "-//PRELLE//TileMUD Symbols 0.1//EN" "symbols.dtd">
+<symbolset>
+  <symbol nr="0"><title>Tiefes Wasser</title></symbol>
+  <symbol nr="1"><title></title></symbol>
+  <symbol nr="2"><title></title></symbol>
+  <symbol nr="3"><title></title></symbol>
+  <symbol nr="4"><title></title></symbol>
+  <symbol nr="5"><title></title></symbol>
+  <symbol nr="6"><title></title></symbol>
+  <symbol nr="7"><title></title></symbol>
+  <symbol nr="8"><title></title></symbol>
+  <symbol nr="9"><title></title></symbol>
+  <symbol nr="10"><title></title></symbol>
+  <symbol nr="11"><title></title></symbol>
+  <symbol nr="12"><title></title></symbol>
+  <symbol nr="13"><title></title></symbol>
+  <symbol nr="14"><title></title></symbol>
+  <symbol nr="15"><title></title></symbol>
+
+  <symbol nr="16"><title>Schiff, links</title></symbol>
+  <symbol nr="17"><title>Schiff, hoch</title></symbol>
+  <symbol nr="18"><title>Schiff, rechts</title></symbol>
+  <symbol nr="19"><title>Schiff, runter</title></symbol>
+  <symbol nr="20"><title>Pferd, links</title></symbol>
+  <symbol nr="21"><title>Pferd, rechts</title></symbol>
+  <symbol nr="22"><title>Steinfußboden</title></symbol>
+  <symbol nr="23"><title>Brücke</title></symbol>
+  <symbol nr="24"><title>Ballon</title></symbol>
+  <symbol nr="25"><title>Brückengeländer</title></symbol>
+  <symbol nr="26"><title>Brückengeländer</title></symbol>
+  <symbol nr="27"><title>Leiter hoch</title></symbol>
+  <symbol nr="28"><title>Leiter runter</title></symbol>
+  <symbol nr="29"><title>Schreinruine</title></symbol>
+  <symbol nr="30"><title>Schrein</title></symbol>
+  <symbol nr="31"><title>Avatar</title></symbol>
+
+  <symbol nr="32" frames="2"><title>Magier</title></symbol>
+  <symbol nr="33" frames="2"><title>Krieger1</title></symbol>
+  <symbol nr="34" frames="2"><title>Krieger2</title></symbol>
+  <symbol nr="35" frames="2"><title>Elementarist</title></symbol>
+  <symbol nr="36" frames="2"><title>Krieger3</title></symbol>
+  <symbol nr="37" frames="2"><title>Krieger4</title></symbol>
+  <symbol nr="38" frames="2"><title>Ranger</title></symbol>
+  <symbol nr="39" frames="2"><title>Schafhirte</title></symbol>
+</symbolset>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-default-dtd-file:nil
+sgml-omittag:f
+sgml-shorttag:t
+End:
+-->

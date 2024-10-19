@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE symbolset PUBLIC "-//PRELLE//TileMUD Symbols 0.1//EN" "symbols.dtd">
+<symbolset>
+  <symbol nr="0"><title>Tiefes Wasser</title></symbol>
+  <symbol nr="1"><title>Tiefes Wasser</title></symbol>
+  <symbol nr="2"><title>Tiefes Wasser</title></symbol>
+  <symbol nr="3"><title>Tiefes Wasser</title></symbol>
+  <symbol nr="4"><title>Tiefes Wasser</title></symbol>
+  <symbol nr="5"><title>Tiefes Wasser</title></symbol>
+  <symbol nr="6"><title>Tiefes Wasser</title></symbol>
+  <symbol nr="7"><title>Tiefes Wasser</title></symbol>
+  <symbol nr="8"><title>Tiefes Wasser</title></symbol>
+  <symbol nr="9"><title>Tiefes Wasser</title></symbol>
+  <symbol nr="10"><title>Tiefes Wasser</title></symbol>
+  <symbol nr="11"><title>Tiefes Wasser</title></symbol>
+  <symbol nr="12"><title>Tiefes Wasser</title></symbol>
+  <symbol nr="13"><title>Küstennahes Wasser</title></symbol>
+  <symbol nr="14"><title>Flaches Wasser</title></symbol>
+  <symbol nr="15"><title>Grasland am Wasser</title></symbol>
+
+  <symbol nr="16"><title>Grasland am Wasser</title></symbol>
+  <symbol nr="17"><title>Grasland am Wasser</title></symbol>
+  <symbol nr="18"><title>Grasland am Wasser</title></symbol>
+  <symbol nr="19"><title>Grasland am Wasser</title></symbol>
+  <symbol nr="20"><title>Grasland am Wasser</title></symbol>
+  <symbol nr="21"><title>Grasland am Wasser</title></symbol>
+  <symbol nr="22"><title>Grasland am Wasser</title></symbol>
+  <symbol nr="23"><title>Grasland</title></symbol>
+  <symbol nr="24"><title>Sumpf</title></symbol>
+  <symbol nr="25"><title>Büsche</title></symbol>
+  <symbol nr="26"><title>bewaldete Ebene</title></symbol>
+  <symbol nr="27"><title>Lichter Wald</title></symbol>
+  <symbol nr="28" transp="0"><title>Wald</title></symbol>
+  <symbol nr="29" transp="0"><title>Dichter Wald</title></symbol>
+  <symbol nr="30"><title>Lichtung</title></symbol>
+  <symbol nr="31"><title>Felsiges Grasland</title></symbol>
+
+  <symbol nr="32"><title>Felsiger Boden</title></symbol>
+  <symbol nr="33"><title>Felsiges Grasland</title></symbol>
+  <symbol nr="34"><title>Gebirgsrand</title></symbol>
+  <symbol nr="35" transp="0"><title>Gebirge</title></symbol>
+  <symbol nr="36" walk="0" transp="0"><title>Hoher Berg</title></symbol>
+  <symbol nr="37"><title>Gebirgsrand</title></symbol>
+  <symbol nr="38"><title>Wüstenrand</title></symbol>
+  <symbol nr="39"><title>Wüste</title></symbol>
+  <symbol nr="40"><title>Wüstenrand</title></symbol>
+  <symbol nr="41"><title>Waldrand</title></symbol>
+  <symbol nr="42"><title>Waldrand</title></symbol>
+  <symbol nr="43"><title>Hütte</title></symbol>
+  <symbol nr="44"><title>Dorf</title></symbol>
+  <symbol nr="45"><title>Turm</title></symbol>
+  <symbol nr="46"><title>Burg</title></symbol>
+  <symbol nr="47"><title>Stadt</title></symbol>
+
+  <symbol nr="48"><title>Ruine</title></symbol>
+  <symbol nr="49"><title>Tempel</title></symbol>
+  <symbol nr="50"><title>Pyramide</title></symbol>
+  <symbol nr="51"><title>Schrein</title></symbol>
+  <symbol nr="52" transp="0"><title>Höhle</title></symbol>
+  <symbol nr="53" transp="0"><title>Verlies</title></symbol>
+  <symbol nr="54"><title>Fluß</title></symbol>
+  <symbol nr="55"><title>Fluß</title></symbol>
+  <symbol nr="56"><title>Fluß</title></symbol>
+  <symbol nr="57"><title>Fluß</title></symbol>
+  <symbol nr="58"><title>Fluß</title></symbol>
+  <symbol nr="59"><title>Fluß</title></symbol>
+  <symbol nr="60"><title>Fluß</title></symbol>
+  <symbol nr="61"><title>Fluß</title></symbol>
+  <symbol nr="62"><title>Fluß</title></symbol>
+  <symbol nr="63"><title>Fluß</title></symbol>
+
+  <symbol nr="64"><title>Flußquelle</title></symbol>
+  <symbol nr="65"><title>Flußquelle</title></symbol>
+  <symbol nr="66"><title>Flußquelle</title></symbol>
+  <symbol nr="67"><title>Flußquelle</title></symbol>
+  <symbol nr="68"><title>Weg</title></symbol>
+  <symbol nr="69"><title>Weg</title></symbol>
+  <symbol nr="70"><title>Weg</title></symbol>
+  <symbol nr="71"><title>Weg</title></symbol>
+  <symbol nr="72"><title>Weg</title></symbol>
+  <symbol nr="73"><title>Weg</title></symbol>
+  <symbol nr="74"><title>Wegkreuzung</title></symbol>
+  <symbol nr="75"><title>Brücke</title></symbol>
+  <symbol nr="76"><title>Brücke</title></symbol>
+  <symbol nr="77"><title>Brücke</title></symbol>
+  <symbol nr="78"><title>Brücke</title></symbol>
+  <symbol nr="79"><title>Anleger</title></symbol>
+
+  <symbol nr="80"><title>Anleger</title></symbol>
+  <symbol nr="81"><title>Anleger</title></symbol>
+  <symbol nr="82"><title>Anleger</title></symbol>
+  <symbol nr="83"><title>See</title></symbol>
+  <symbol nr="84"><title>Schild</title></symbol>
+  <symbol nr="85"><title>Grab</title></symbol>
+  <symbol nr="86"><title>Großstadt</title></symbol>
+  <symbol nr="87"><title>Eingangstor zur Stadt</title></symbol>
+  <symbol nr="88"><title>Großstadt</title></symbol>
+  <symbol nr="89"><title></title></symbol>
+  <symbol nr="90"><title></title></symbol>
+  <symbol nr="91"><title></title></symbol>
+</symbolset>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-default-dtd-file:nil
+sgml-omittag:f
+sgml-shorttag:t
+End:
+-->
