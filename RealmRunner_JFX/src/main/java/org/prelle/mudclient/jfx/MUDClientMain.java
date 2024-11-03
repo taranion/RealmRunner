@@ -1,7 +1,11 @@
 package org.prelle.mudclient.jfx;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.lang.System.Logger.Level;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +14,9 @@ import org.prelle.fxterminal.TerminalView;
 import org.prelle.mud.symbol.DefaultSymbolManager;
 import org.prelle.mud.symbol.SymbolManager;
 import org.prelle.mud.symbol.jfx.JavaFXTileGraphicLoader;
+import org.prelle.mudclient.network.ConnectionDialog;
+import org.prelle.mudclient.network.DataFileManager;
+import org.prelle.mudclient.network.MainConfig;
 import org.prelle.mudclient.network.Session;
 import org.prelle.mudclient.network.SessionListener;
 import org.prelle.mudclient.network.SessionManager;
@@ -17,6 +24,12 @@ import org.prelle.terminal.emulated.Emulation;
 import org.prelle.terminal.emulated.Terminal;
 import org.prelle.terminal.emulated.Terminal.Size;
 import org.prelle.tilelibrary.SwingTileGraphicLoader;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.introspector.Property;
+import org.yaml.snakeyaml.nodes.NodeTuple;
+import org.yaml.snakeyaml.nodes.Tag;
+import org.yaml.snakeyaml.representer.Representer;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -35,6 +48,8 @@ public class MUDClientMain extends Application {
 
 	static record HistoryEntry(String text, Node node) {
 	}
+
+	private MainConfig mainConfig;
 
 	private SymbolManager symbols;
 
@@ -70,6 +85,13 @@ public class MUDClientMain extends Application {
 				Paths.get("/home/prelle/git/MUD2024/Example MUD","src/main/resources/static/symbols"),
 //				new SwingTileGraphicLoader(Paths.get("/home/prelle/git/MUD2024/Example MUD","src/main/resources/static/symbols")));
 				new JavaFXTileGraphicLoader(Paths.get("/home/prelle/git/MUD2024/Example MUD","src/main/resources/static/symbols")));
+		try {
+			readConfig();
+			DataFileManager.configure(mainConfig);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	//-------------------------------------------------------------------
@@ -115,13 +137,19 @@ public class MUDClientMain extends Application {
 		stage.setScene(scene);
 		stage.setWidth(1000);
 		stage.show();
+		
+		Stage dialog = new Stage();
+		Scene dialogScene = new Scene(new ConnectionDialog(mainConfig));
+		dialog.setScene(dialogScene);
+		dialog.showAndWait();
+		
 
 		Thread thread = new Thread(() -> {
 			System.getLogger("client").log(Level.INFO, "Now create session");
 try {
-				session = SessionManager.createSession("rom.mud.de", 4000);
+	//			session = SessionManager.createSession("rom.mud.de", 4000);
 	//			session = SessionManager.createSession("mg.mud.de", 4711);
-	//			session = SessionManager.createSession("awakemud.com", 4000);
+				session = SessionManager.createSession("awakemud.com", 4000);
 	//			session = SessionManager.createSession("localhost", 4000);
 				session.connect(new SessionListener() {
 
@@ -170,6 +198,43 @@ try {
 	//-------------------------------------------------------------------
 	private void sendInput(String text) {
 		session.sendMessage(text);
+	}
+
+	//-------------------------------------------------------------------
+	public void readConfig() throws FileNotFoundException {
+		DumperOptions options = new DumperOptions();
+        options.setIndent(2);
+        options.setPrettyFlow(true);
+        // Fix below - additional configuration
+        options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+
+		Representer representer = new Representer(options) {
+		    @Override
+		    protected NodeTuple representJavaBeanProperty(Object javaBean, Property property, Object propertyValue,Tag customTag) {
+		        // if value of property is null, ignore it.
+		        if (propertyValue == null) {
+		            return null;
+		        }
+		        else {
+		            return super.representJavaBeanProperty(javaBean, property, propertyValue, customTag);
+		        }
+		    }
+		};
+		representer.addClassTag(MainConfig.class, Tag.MAP);
+
+
+
+		Yaml yaml = new Yaml(representer);
+		String homeDir = System.getProperty("user.home", "/tmp");
+		Path configFile = Paths.get(homeDir, ".realmrunner.yml");
+		System.out.println("Try to read config from "+configFile.toAbsolutePath());
+		try {
+			mainConfig = (Files.exists(configFile))?yaml.loadAs(new FileReader(configFile.toFile()), MainConfig.class):(new MainConfig());
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("Main config = "+mainConfig);
 	}
 
 }

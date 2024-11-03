@@ -34,6 +34,11 @@
 		  <artifactId>telnet</artifactId>
 		  <version>0.0.1-SNAPSHOT</version>
 	  </dependency>
+      <dependency>
+          <groupId>org.prelle</groupId>
+          <artifactId>mudclient-base</artifactId>
+          <version>0.0.1-SNAPSHOT</version>
+      </dependency>
 	  <dependency>
 		  <groupId>org.prelle</groupId>
 		  <artifactId>tile-library</artifactId>
@@ -69,7 +74,11 @@
 			<artifactId>javafx-swing</artifactId>
 			<version>${javafx.version}</version>
 		</dependency>
-
+        <dependency>
+            <groupId>org.prelle</groupId>
+            <artifactId>javafx-extensions</artifactId>
+            <version>5.1.0-SNAPSHOT</version>
+        </dependency>
 		<dependency>
     		<groupId>com.github.PavelKastornyy.ansi4j</groupId>
     		<artifactId>ansi4j-core-api</artifactId>
@@ -80,11 +89,11 @@
     		<artifactId>ansi4j-core-impl</artifactId>
     		<version>ansi4j-1.1.0</version>
 		</dependency>
-<dependency>
-        <groupId>com.googlecode.lanterna</groupId>
-        <artifactId>lanterna</artifactId>
-        <version>3.1.2</version>
-    </dependency>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>2.2</version>
+        </dependency>
 
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
