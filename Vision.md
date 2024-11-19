@@ -9,17 +9,17 @@ This project aims to be a MUD codebase that
 
 ## MUD/Roguelike hybrid - What is that?
 
-![RoM](/home/prelle/git/MUD2024_Wiki/RoM.png)
+![RoM](RoM.png)
 
 MUDs (MUSHes, MOOs, ...) are traditionally text centric, where the textual description creates mental images, eventually enhanced with sound effects. Locations are described as "rooms" and you move your avatar from one room to another by text commands like "north". Depending on the MU* elements like PvE combat, PvP combat, roleplaying, exploring, grinding, questing are sometimes part of MU*s, sometimes not.
 
-![RogueLike](/home/prelle/git/MUD2024_Wiki/RogueLike.jpg)
+![RogueLike](RogueLike.jpg)
 
 Roguelikes are prodecural generated environments, usually experienced as single player PvE experiences, where discovering, improving and survival are important aspects of the game. Visually they are tile-based, meaning a 2D grid map where each tile represents either a NPC/critter, an item or part of the surrounding.
 
 There are already several MUDs that included roguelike elements, usually in form of a ASCII map for overland travels. Rarely has this been done for zones with rooms, because existing codebases simply haven't been built with gridbased maps in mind.
 
-![Hybrid](/home/prelle/git/MUD2024_Wiki/Hybrid.png)
+![Hybrid](Hybrid.png)
 
 Having a visual representation of the world like in Roguelikes, but also text descriptions for places, is a key feature this codebase wants to support. You can read more about **how** this is done here.
 
