@@ -3,6 +3,7 @@ package org.prelle.mudclient.jfx;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,16 +15,12 @@ import org.prelle.fxterminal.TerminalView;
 import org.prelle.mud.symbol.DefaultSymbolManager;
 import org.prelle.mud.symbol.SymbolManager;
 import org.prelle.mud.symbol.jfx.JavaFXTileGraphicLoader;
-import org.prelle.mudclient.network.ConnectionDialog;
-import org.prelle.mudclient.network.DataFileManager;
-import org.prelle.mudclient.network.MainConfig;
-import org.prelle.mudclient.network.Session;
-import org.prelle.mudclient.network.SessionListener;
-import org.prelle.mudclient.network.SessionManager;
-import org.prelle.terminal.emulated.Emulation;
+import org.prelle.realmrunner.network.Config;
+import org.prelle.realmrunner.network.DataFileManager;
+import org.prelle.realmrunner.network.MainConfig;
 import org.prelle.terminal.emulated.Terminal;
 import org.prelle.terminal.emulated.Terminal.Size;
-import org.prelle.tilelibrary.SwingTileGraphicLoader;
+import org.prelle.terminal.emulated.delete.Emulation;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.introspector.Property;
@@ -45,6 +42,8 @@ import javafx.stage.Stage;
  *
  */
 public class MUDClientMain extends Application {
+	
+	private final static Logger logger = System.getLogger("MUDClientMain");
 
 	static record HistoryEntry(String text, Node node) {
 	}
@@ -138,18 +137,26 @@ public class MUDClientMain extends Application {
 		stage.setWidth(1000);
 		stage.show();
 		
-		Stage dialog = new Stage();
-		Scene dialogScene = new Scene(new ConnectionDialog(mainConfig));
-		dialog.setScene(dialogScene);
-		dialog.showAndWait();
+		Stage dialogStage = new Stage();
+		ConnectionDialog choices = new ConnectionDialog(mainConfig);
+		Scene dialogScene = new Scene(choices);
+		dialogStage.setScene(dialogScene);
+		dialogStage.showAndWait();
 		
+		Config connectWith = choices.getSelected();
+		logger.log(Level.DEBUG, "Connect to {0}", connectWith);
+		if (connectWith!=null) {
+		
+		}
+	}
 
+	private void connectWith(Config connectWith) {
 		Thread thread = new Thread(() -> {
-			System.getLogger("client").log(Level.INFO, "Now create session");
-try {
+			logger.log(Level.INFO, "Now create session");
+			try {
 	//			session = SessionManager.createSession("rom.mud.de", 4000);
 	//			session = SessionManager.createSession("mg.mud.de", 4711);
-				session = SessionManager.createSession("awakemud.com", 4000);
+				session = SessionManager.createSession(connectWith.getServer(), connectWith.getPort());
 	//			session = SessionManager.createSession("localhost", 4000);
 				session.connect(new SessionListener() {
 
@@ -186,15 +193,16 @@ try {
 						mapView.setData(data.getRawData());
 					}
 				});
-} catch (IOException e) {
-	// TODO Auto-generated catch block
-	e.printStackTrace();
-}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
 		});
 		thread.start();
-	}
 
+	}
+	
 	//-------------------------------------------------------------------
 	private void sendInput(String text) {
 		session.sendMessage(text);

@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.prelle</groupId>
-  <artifactId>mudclient</artifactId>
+  <artifactId>realmrunner</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>MUD Client</name>
   <packaging>pom</packaging>
@@ -10,32 +10,48 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.deploy.skip>true</maven.deploy.skip>
 		<maven.install.skip>false</maven.install.skip>
-		<maven.compiler.target>17</maven.compiler.target>
-		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.release>21</maven.compiler.release>
+		<revision>0.0.1-SNAPSHOT</revision>
 	</properties>
 
 	<modules>
 	   <module>libterminal-core</module>
 	   <module>libterminal-emulated</module>
 	   <module>libterminal-native</module>
-		<module>MUDClient-Base</module>
+<!--       <module>libterminal-jfx</module>
+-->		<module>MUDClient-Base</module>
 		<module>RealmRunner_CLI</module>
-        <module>RealmRunner_JFX</module>
+        <!--module>RealmRunner_JFX</module-->
 	</modules>
 
 	<dependencyManagement>
-	<dependencies>
-		<dependency>
+	   <dependencies>
+		  <dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.18.34</version>
-		</dependency>
-		<dependency>
+			<version>1.18.36</version>
+		  </dependency>
+          <dependency>
+            <groupId>org.prelle</groupId>
+            <artifactId>libansi</artifactId>
+            <version>0.1.0</version>
+          </dependency>
+        <dependency>
+            <groupId>org.prelle</groupId>
+            <artifactId>gmcp4j</artifactId>
+            <version>0.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.prelle</groupId>
+            <artifactId>telnet</artifactId>
+            <version>0.1.0</version>
+        </dependency>
+		  <dependency>
     		<groupId>com.google.code.gson</groupId>
     		<artifactId>gson</artifactId>
     		<version>2.10.1</version>
-		</dependency>
-	</dependencies>
+		  </dependency>
+	   </dependencies>
 	</dependencyManagement>
 
 	<build>
@@ -48,7 +64,7 @@
 				<path>
 					<groupId>org.projectlombok</groupId>
 					<artifactId>lombok</artifactId>
-					<version>1.18.34</version>
+					<version>1.18.36</version>
 				</path>
 			</annotationProcessorPaths>
         </configuration>

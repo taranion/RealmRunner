@@ -1,0 +1,64 @@
+name: Compile Linux Self
+on: [push]
+#on:
+#  push:
+#    # Sequence of patterns matched against refs/tags
+#    tags:
+#    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+env:
+  LANG: "en_EN.UTF-8"
+
+jobs:
+  compile-linux-native:
+    runs-on: [self-hosted, Linux]
+    steps:
+    - name: checkout sources
+      uses: actions/checkout@v4
+
+    - name: setup-graalvm-ce
+      uses: gluonhq/setup-graalvm@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+         # GraalVM version. Default: latest
+         graalvm: 'latest'
+         # Java version. Since GraalVM 22, either java11, java17 or java23. Before GraalVM 22, empty. Default: java23
+         jdk: 'java23'
+         # Architecture flag. Available options are 'x86_64' (default) and 'aarch64'. The latter is available for M1 runners starting GraalVM 22.1.
+         arch: 'x86_64'
+
+    - name: Set Release version env variable
+      run: |
+        echo "RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
+
+    - name: Compile
+      run:  mvn -U -s settings.xml clean gluonfx:compile -Pdesktop-binary
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        LANG: en_EN
+        CC: gcc-11
+        CXX: g++-11
+      
+#    - name: Install missing packages
+#      run: sudo apt-get install libgtk-3-dev libasound2-dev libavcodec-dev libavformat-dev libavutil-dev libgl-dev  libpango1.0-dev libxtst-dev
+
+    - name: Link
+      run:  mvn gluonfx:link -Pdesktop-binary
+
+    - name: Create Native Installer
+      run:  mvn gluonfx:package -Pdesktop
+
+#    - name: Logs
+#      if: always()      
+#      run: cat target/gluonfx/x86_64-linux/gvm/log/client-debug0.log
+        
+    - name: Show result
+      run: ls -l target/ 
+        
+    - name: Prepare staging
+      run: |
+        mkdir -p staging ; 
+        cp target/gluonfx/x86_64-linux/CommLink6 staging/CommLink6-${{ env.RELEASE_VERSION }} ;
+        chmod 755 staging/*  ;
+        ls staging
+        
