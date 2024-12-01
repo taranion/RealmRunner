@@ -20,7 +20,7 @@
 	   <module>libterminal-native</module>
 <!--       <module>libterminal-jfx</module>
 -->		<module>MUDClient-Base</module>
-		<module>RealmRunner_CLI</module>
+		<!--module>RealmRunner_CLI</module-->
         <!--module>RealmRunner_JFX</module-->
 	</modules>
 
