@@ -1,4 +1,4 @@
-package org.prelle.mudclient.network;
+package org.prelle.realmrunner.network;
 
 import org.prelle.mud4j.gmcp.Char.Stats;
 import org.prelle.mud4j.gmcp.Char.Vitals;

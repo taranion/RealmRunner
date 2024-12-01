@@ -1,4 +1,4 @@
-package org.prelle.mudclient.network;
+package org.prelle.realmrunner.network;
 
 import java.io.File;
 import java.io.IOException;

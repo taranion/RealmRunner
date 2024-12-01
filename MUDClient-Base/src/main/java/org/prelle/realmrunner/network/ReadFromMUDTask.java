@@ -1,4 +1,4 @@
-package org.prelle.mudclient.network;
+package org.prelle.realmrunner.network;
 
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;

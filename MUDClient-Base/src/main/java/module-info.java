@@ -1,5 +1,5 @@
 module org.prelle.mud.client.base {
-	exports org.prelle.mudclient.network;
+	exports org.prelle.realmrunner.network;
 
 	requires java.desktop;
 	requires java.net.http;
@@ -9,4 +9,7 @@ module org.prelle.mud.client.base {
 	requires org.prelle.telnet;
 	requires org.yaml.snakeyaml;
 	requires lombok;
+	
+	provides java.lang.System.LoggerFinder with org.prelle.realmrunner.network.RRLoggerFinder;
+	
 }

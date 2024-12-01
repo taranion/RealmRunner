@@ -1,5 +1,6 @@
-package org.prelle.mudclient.network;
+package org.prelle.realmrunner.network;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,6 +16,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class MainConfig extends AbstractConfig {
+	
+	public static Path CONFIG_DIR;
 
 	private Map<String, Config> world = new LinkedHashMap<>();
 

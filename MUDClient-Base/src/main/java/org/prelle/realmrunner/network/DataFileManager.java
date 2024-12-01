@@ -1,4 +1,4 @@
-package org.prelle.mudclient.network;
+package org.prelle.realmrunner.network;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -41,6 +41,7 @@ public class DataFileManager {
 		DataFileManager.mainConfig = config;
 		// Determine main data directory
 		mainDataDir = Paths.get(System.getProperty("user.home"), "RealmRunner_WorldData");
+		mainDataDir = MainConfig.CONFIG_DIR.resolve("worlds");
 		if (config.getDataDir()!=null) {
 			String tmp = config.getDataDir().trim();
 			String sep = FileSystems.getDefault().getSeparator();

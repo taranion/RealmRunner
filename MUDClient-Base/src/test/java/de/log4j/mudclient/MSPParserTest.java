@@ -2,8 +2,8 @@ package de.log4j.mudclient;
 
 import javax.sound.sampled.AudioSystem;
 
-import org.prelle.mudclient.network.SoundManager;
-import org.prelle.mudclient.network.SoundManager.PlayCommand;
+import org.prelle.realmrunner.network.SoundManager;
+import org.prelle.realmrunner.network.SoundManager.PlayCommand;
 
 public class MSPParserTest {
 

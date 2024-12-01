@@ -1,43 +1,32 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.prelle</groupId>
+        <artifactId>realmrunner</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
 
-  	<parent>
-  		<groupId>org.prelle</groupId>
-  		<artifactId>mud2024</artifactId>
-  		<version>0.0.1-SNAPSHOT</version>
-  	</parent>
-
-  <artifactId>mudclient-base</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-  <name>MUDClient-Base</name>
-  <description>MUD client written in Java+JavaFX</description>
-
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.target>21</maven.compiler.target>
-		<maven.compiler.source>21</maven.compiler.source>
-	</properties>
+    <artifactId>mudclient-base</artifactId>
+    <name>MUDClient-Base</name>
+    <description>MUD client written in Java+JavaFX</description>
 
 	<dependencies>
 	  	<dependency>
 			<groupId>org.prelle</groupId>
 		  	<artifactId>telnet</artifactId>
-		  	<version>0.0.1-SNAPSHOT</version>
 	  	</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<scope>provided</scope>
 		</dependency>
 	  	<dependency>
 			<groupId>org.prelle</groupId>
 		  	<artifactId>libterminal-api</artifactId>
-		  	<version>0.0.1-SNAPSHOT</version>
+            <version>${revision}</version>
 	  	</dependency>
 		<dependency>
 			<groupId>org.prelle</groupId>
   			<artifactId>gmcp4j</artifactId>
-  			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
     		<groupId>org.yaml</groupId>

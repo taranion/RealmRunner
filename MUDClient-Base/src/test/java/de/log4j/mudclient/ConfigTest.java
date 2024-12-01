@@ -2,8 +2,8 @@ package de.log4j.mudclient;
 
 import java.io.StringWriter;
 
-import org.prelle.mudclient.network.Config;
-import org.prelle.mudclient.network.MainConfig;
+import org.prelle.realmrunner.network.Config;
+import org.prelle.realmrunner.network.MainConfig;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.introspector.Property;
