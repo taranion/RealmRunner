@@ -10,7 +10,7 @@ env:
 
 jobs:
   compile-linux-native:
-    runs-on: [self-hosted, Linux]
+    runs-on: [Linux]
     steps:
     - name: checkout sources
       uses: actions/checkout@v4
