@@ -1,9 +1,9 @@
 package org.prelle.fxterminal;
 
 import org.prelle.fxterminal.impl.FXTerminalSkin;
-import org.prelle.terminal.emulated.Emulation;
 import org.prelle.terminal.emulated.Terminal;
 import org.prelle.terminal.emulated.Terminal.Size;
+import org.prelle.terminal.emulated.delete.Emulation;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;

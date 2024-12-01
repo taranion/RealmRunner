@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import org.prelle.terminal.emulated.ColorPalette;
+import org.prelle.terminal.emulated.delete.ColorPalette;
 
 public class GraphicsRenditionTest {
 
@@ -12,7 +12,7 @@ public class GraphicsRenditionTest {
 
 		//-------------------------------------------------------------------
 		public static String CSI(int n, int...param) {
-			StringBuffer buf = new StringBuffer( ((char)0x9D)+n);
+			StringBuffer buf = new StringBuffer( ((char)0x1B)+"["+n);
 			for (int p : param)
 				buf.append(";"+p);
 			return buf+"m";

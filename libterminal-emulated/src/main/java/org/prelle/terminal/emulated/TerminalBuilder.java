@@ -1,6 +1,10 @@
 package org.prelle.terminal.emulated;
 
 import org.prelle.ansi.ANSIInputStream;
+import org.prelle.terminal.emulated.delete.ActiveTerminalController;
+import org.prelle.terminal.emulated.delete.Emulation;
+import org.prelle.terminal.emulated.delete.ITerminalView;
+import org.prelle.terminal.emulated.delete.PassiveController;
 
 /**
  *

@@ -1,4 +1,4 @@
-package org.prelle.terminal.emulated;
+package org.prelle.terminal.emulated.delete;
 
 /**
  * @see https://strasis.com/documentation/limelight-xe/reference/ecma-48-sgr-codes

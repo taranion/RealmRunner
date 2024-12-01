@@ -4,9 +4,9 @@ import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 
 import org.prelle.fxterminal.TerminalView;
-import org.prelle.terminal.emulated.CharInfo;
-import org.prelle.terminal.emulated.Style;
-import org.prelle.terminal.emulated.Style.RGB;
+import org.prelle.terminal.emulated.delete.CharInfo;
+import org.prelle.terminal.emulated.delete.Style;
+import org.prelle.terminal.emulated.delete.Style.RGB;
 import org.prelle.terminal.emulated.TerminalModel;
 
 import static org.prelle.fxterminal.impl.Properties.RECREATE;
@@ -138,7 +138,7 @@ public class FXTerminalSkin extends SkinBase<TerminalView> implements TerminalGr
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.fxterminal.impl.TerminalGraphic#drawText(int, int, java.lang.String, org.prelle.fxterminal.impl.Style)
+	 * @see org.prelle.fxterminal.impl.TerminalGraphic#drawText(int, int, java.lang.String, org.prelle.terminal.emulated.delete.Style)
 	 */
 	@Override
 	public void drawText(int x, int y, String text, Style style) {

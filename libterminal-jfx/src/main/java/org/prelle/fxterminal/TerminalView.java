@@ -8,10 +8,10 @@ import java.lang.System.Logger.Level;
 
 import org.prelle.fxterminal.impl.FXTerminalSkin;
 import org.prelle.fxterminal.impl.Properties;
-import org.prelle.terminal.emulated.CharInfo;
-import org.prelle.terminal.emulated.ITerminalView;
-import org.prelle.terminal.emulated.ITerminalViewListener;
 import org.prelle.terminal.emulated.Terminal;
+import org.prelle.terminal.emulated.delete.CharInfo;
+import org.prelle.terminal.emulated.delete.ITerminalView;
+import org.prelle.terminal.emulated.delete.ITerminalViewListener;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -161,7 +161,7 @@ public class TerminalView extends Control implements ITerminalView {
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.terminal.ITerminalView#addTerminalListener(org.prelle.terminal.ITerminalViewListener)
+	 * @see org.prelle.terminal.emulated.delete.ITerminalView#addTerminalListener(org.prelle.terminal.emulated.delete.ITerminalViewListener)
 	 */
 	@Override
 	public void addTerminalListener(ITerminalViewListener callback) {
@@ -171,7 +171,7 @@ public class TerminalView extends Control implements ITerminalView {
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.terminal.ITerminalView#update(int, int, org.prelle.terminal.CharInfo)
+	 * @see org.prelle.terminal.emulated.delete.ITerminalView#update(int, int, org.prelle.terminal.emulated.delete.CharInfo)
 	 */
 	@Override
 	public void update(int x, int y, CharInfo glyph) {
@@ -191,7 +191,7 @@ public class TerminalView extends Control implements ITerminalView {
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.terminal.ITerminalView#clear()
+	 * @see org.prelle.terminal.emulated.delete.ITerminalView#clear()
 	 */
 	@Override
 	public void clear() {

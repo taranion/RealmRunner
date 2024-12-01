@@ -11,6 +11,8 @@ import org.prelle.terminal.TerminalMode;
  *
  */
 public class TerminalEmulatorModel implements TerminalEmulator {
+	
+	
 
 	//-------------------------------------------------------------------
 	/**

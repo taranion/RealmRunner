@@ -1,22 +1,26 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.prelle</groupId>
+  
+  <parent>
+    <groupId>org.prelle</groupId>
+    <artifactId>realmrunner</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+  
   <artifactId>libterminal-api</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
   <name>LibTerminal API</name>
   <description>Terminal Emulation base classes</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.target>21</maven.compiler.target>
-		<maven.compiler.source>21</maven.compiler.source>
+        <maven.deploy.skip>true</maven.deploy.skip>
+		<maven.compiler.release>21</maven.compiler.release>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.prelle</groupId>
   			<artifactId>libansi</artifactId>
-  			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>

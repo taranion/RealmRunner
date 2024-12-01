@@ -1,6 +1,6 @@
-package org.prelle.terminal.emulated;
+package org.prelle.terminal.emulated.delete;
 
-import org.prelle.terminal.emulated.Style.RGB;
+import org.prelle.terminal.emulated.delete.Style.RGB;
 
 /**
  *

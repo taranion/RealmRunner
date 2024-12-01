@@ -3,6 +3,10 @@ package org.prelle.terminal.emulated;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 
+import org.prelle.terminal.emulated.delete.ITerminalView;
+import org.prelle.terminal.emulated.delete.ITerminalViewListener;
+import org.prelle.terminal.emulated.delete.PassiveController;
+
 /**
  *
  */

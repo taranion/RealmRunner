@@ -1,4 +1,4 @@
-package org.prelle.terminal.emulated;
+package org.prelle.terminal.emulated.delete;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -8,6 +8,8 @@ import java.nio.charset.Charset;
 
 import org.prelle.ansi.ANSIInputStream;
 import org.prelle.ansi.AParsedElement;
+import org.prelle.terminal.emulated.TerminalController;
+import org.prelle.terminal.emulated.TerminalModel;
 
 /**
  * Create a controller that requires write operations called directly

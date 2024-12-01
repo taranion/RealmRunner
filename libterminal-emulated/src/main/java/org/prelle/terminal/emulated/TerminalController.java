@@ -11,9 +11,14 @@ import org.prelle.ansi.AParsedElement;
 import org.prelle.ansi.C0Fragment;
 import org.prelle.ansi.ControlSequenceFragment;
 import org.prelle.ansi.PrintableFragment;
-import org.prelle.terminal.emulated.Style.Blink;
-import org.prelle.terminal.emulated.Style.FontWeight;
-import org.prelle.terminal.emulated.Style.RGB;
+import org.prelle.terminal.emulated.delete.ColorPalette;
+import org.prelle.terminal.emulated.delete.Emulation;
+import org.prelle.terminal.emulated.delete.ITerminalView;
+import org.prelle.terminal.emulated.delete.ITerminalViewListener;
+import org.prelle.terminal.emulated.delete.Style;
+import org.prelle.terminal.emulated.delete.Style.Blink;
+import org.prelle.terminal.emulated.delete.Style.FontWeight;
+import org.prelle.terminal.emulated.delete.Style.RGB;
 
 /**
  *
@@ -251,7 +256,7 @@ public abstract class TerminalController implements ITerminalViewListener {
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.terminal.emulated.ITerminalViewListener#viewportChanged(org.prelle.terminal.emulated.ITerminalView, int, int)
+	 * @see org.prelle.terminal.emulated.delete.ITerminalViewListener#viewportChanged(org.prelle.terminal.emulated.delete.ITerminalView, int, int)
 	 */
 	@Override
 	public void viewportChanged(ITerminalView src, int w, int h) {

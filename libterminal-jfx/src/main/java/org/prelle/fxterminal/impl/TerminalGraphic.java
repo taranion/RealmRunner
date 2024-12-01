@@ -1,6 +1,6 @@
 package org.prelle.fxterminal.impl;
 
-import org.prelle.terminal.emulated.Style;
+import org.prelle.terminal.emulated.delete.Style;
 
 import javafx.scene.paint.Paint;
 

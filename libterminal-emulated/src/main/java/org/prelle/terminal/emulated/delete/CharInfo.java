@@ -1,4 +1,4 @@
-package org.prelle.terminal.emulated;
+package org.prelle.terminal.emulated.delete;
 
 public class CharInfo {
 
