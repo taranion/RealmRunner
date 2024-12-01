@@ -32,7 +32,7 @@ jobs:
         echo "RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
 
     - name: Compile
-      run:  mvn -U -s settings.xml clean gluonfx:compile -Pdesktop-binary
+      run:  mvn -U clean gluonfx:compile -Pdesktop-binary
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         LANG: en_EN
@@ -61,4 +61,25 @@ jobs:
         cp target/gluonfx/x86_64-linux/CommLink6 staging/CommLink6-${{ env.RELEASE_VERSION }} ;
         chmod 755 staging/*  ;
         ls staging
-        
+
+
+  compile-linux-jre:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout sources
+      uses: actions/checkout@master
+    - uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '20'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set Release version env variable
+      run: |
+        echo "RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV            
+    - name: Compile update artifact
+      run: mvn install -Pinterpreted
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
