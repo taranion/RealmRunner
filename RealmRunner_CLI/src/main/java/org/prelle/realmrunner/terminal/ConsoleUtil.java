@@ -1,4 +1,4 @@
-package org.prelle.mudclient.terminal;
+package org.prelle.realmrunner.terminal;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

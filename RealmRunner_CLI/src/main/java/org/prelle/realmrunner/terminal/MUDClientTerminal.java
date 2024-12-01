@@ -1,14 +1,16 @@
-package org.prelle.mudclient.terminal;
+package org.prelle.realmrunner.terminal;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,9 +42,6 @@ import org.prelle.ansi.control.AreaControls;
 import org.prelle.ansi.control.CursorControls;
 import org.prelle.ansi.control.DisplayControl;
 import org.prelle.ansi.control.ReportingControls;
-import org.prelle.mud.map.SymbolMap;
-import org.prelle.mud.symbol.SymbolSet;
-import org.prelle.mud.symbol.TileGraphicService;
 import org.prelle.mud4j.gmcp.GMCPHandler;
 import org.prelle.mud4j.gmcp.GMCPManager;
 import org.prelle.mud4j.gmcp.Char.CharPackage;
@@ -67,19 +66,20 @@ import org.prelle.mudansi.TerminalCapabilities;
 import org.prelle.mudansi.UIGridFormat;
 import org.prelle.mudansi.UIGridFormat.Area;
 import org.prelle.mudansi.UIGridFormat.AreaDefinition;
+import org.prelle.realmrunner.network.AbstractConfig;
+import org.prelle.realmrunner.network.Config;
+import org.prelle.realmrunner.network.DataFileManager;
+import org.prelle.realmrunner.network.LineBufferListener;
+import org.prelle.realmrunner.network.MUDSession;
+import org.prelle.realmrunner.network.MUDSessionGMCPListener;
+import org.prelle.realmrunner.network.MainConfig;
+import org.prelle.realmrunner.network.RRLogger;
+import org.prelle.realmrunner.network.ReadFromConsoleTask;
+import org.prelle.realmrunner.network.ReadFromMUDTask;
+import org.prelle.realmrunner.network.SessionConfig;
+import org.prelle.realmrunner.network.SoundManager;
+import org.prelle.realmrunner.network.SessionConfig.SessionConfigBuilder;
 import org.prelle.mudansi.UserInterfaceFormat;
-import org.prelle.mudclient.network.AbstractConfig;
-import org.prelle.mudclient.network.Config;
-import org.prelle.mudclient.network.DataFileManager;
-import org.prelle.mudclient.network.LineBufferListener;
-import org.prelle.mudclient.network.MUDSession;
-import org.prelle.mudclient.network.MUDSessionGMCPListener;
-import org.prelle.mudclient.network.MainConfig;
-import org.prelle.mudclient.network.ReadFromConsoleTask;
-import org.prelle.mudclient.network.ReadFromMUDTask;
-import org.prelle.mudclient.network.SessionConfig;
-import org.prelle.mudclient.network.SessionConfig.SessionConfigBuilder;
-import org.prelle.mudclient.network.SoundManager;
 import org.prelle.telnet.TelnetCommand;
 import org.prelle.telnet.TelnetConstants.ControlCode;
 import org.prelle.telnet.TelnetOption;
@@ -93,7 +93,6 @@ import org.prelle.terminal.TerminalEmulator;
 import org.prelle.terminal.TerminalMode;
 import org.prelle.terminal.console.UnixConsole;
 import org.prelle.terminal.console.WindowsConsole;
-import org.prelle.tilelibrary.SwingTileGraphicLoader;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.introspector.Property;
@@ -101,10 +100,15 @@ import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 
+import com.graphicmud.map.SymbolMap;
+import com.graphicmud.symbol.SymbolSet;
+import com.graphicmud.symbol.TileGraphicService;
 import com.sun.jna.Platform;
 
 import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.Player;
+
+import static org.prelle.realmrunner.network.MainConfig.CONFIG_DIR;
 
 /**
  *
@@ -112,13 +116,14 @@ import javazoom.jl.player.Player;
 public class MUDClientTerminal implements TelnetSocketListener, LineBufferListener,
 	AardwolfMushclientListener, MUDSessionGMCPListener  {
 
-	private final static Logger logger = System.getLogger("mud.client");
+	private static Logger logger ;
 	private final static String AREA_ROOMDESC = "RoomDesc";
 
 	private MainConfig mainConfig;
 	private MUDSession session;
 	private TerminalCapabilities capabilities;
 	private TerminalEmulator console;
+	private Charset charset = StandardCharsets.US_ASCII;
 	private UserInterfaceFormat uiFormat;
 	private UIGridFormat format;
 	private GMCPHandler gmcpHandler;
@@ -149,7 +154,7 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 
 	//-------------------------------------------------------------------
 	public MUDClientTerminal(String world, String server, int port) throws Exception {
-		logger.log(Level.ERROR, "\n\n");
+		setupLogging();
 		readConfig();
 		DataFileManager.configure(mainConfig);
 		sound = new JLayerSoundManager();
@@ -180,23 +185,27 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 		} else {
 			builder.server("localhost").port(4000);
 		}
-		graphic = new SwingTileGraphicLoader(DataFileManager.getCurrentDataDir().resolve("tilesets"));
+//		graphic = new SwingTileGraphicLoader(DataFileManager.getCurrentDataDir().resolve("tilesets"));
 		SessionConfig config = builder.build();
 
 		if (Platform.isWindows()) {
 			console = new WindowsConsole();
+			charset = Charset.forName("CP-437", StandardCharsets.ISO_8859_1);
 		} else {
 			console = new UnixConsole();
+			if (System.getenv("LC_ALL")!=null && System.getenv("LC_ALL").contains("UTF-8")) {
+				charset = StandardCharsets.UTF_8;
+			}
 		}
-		logger.log(Level.INFO, "Console is "+console);
+		logger.log(Level.DEBUG, "Console is "+console.getClass().getSimpleName());
 		setupTimer();
 		int[] size = console.getConsoleSize();
-		logger.log(Level.INFO, "size is "+Arrays.toString(size));
+		logger.log(Level.DEBUG, "size is "+Arrays.toString(size));
 		terminalHeight = size[1];
 		terminalWidth  = size[0];
 
-		console.getInputStream().setLoggingListener( (type,text) -> logger.log(Level.TRACE, "CONSOLE <-- {0} = {1}", type,text));
-		console.getOutputStream().setLoggingListener( (type,text) -> {if (!"PRINT".equals(type)) logger.log(Level.INFO, "CONSOLE --> {0} = {1}", type,text);});
+		console.getInputStream().setLoggingListener( (type,text) -> logger.log(Level.DEBUG, "CONSOLE <-- {0} = {1}", type,text));
+		console.getOutputStream().setLoggingListener( (type,text) -> {if (!"PRINT".equals(type)) logger.log(Level.DEBUG, "CONSOLE --> {0} = {1}", type,text);});
 		console.setLocalEchoActive(false);
 		console.setMode(TerminalMode.RAW);
 		readFromConsole = new ReadFromConsoleTask(console, activeConfig, (LineBufferListener)this);
@@ -252,8 +261,6 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 		GMCPManager.registerPackage(new CharPackage());
 		GMCPManager.registerPackage(new TilemapPackage());
 		
-		installShutdown();
-		
 		try {
 			setupSession(config, activeConfig);
 		} catch (Exception e) {
@@ -263,6 +270,17 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 		}
 	}
 
+	//-------------------------------------------------------------------
+	private void setupLogging() {
+		String homeDir = System.getProperty("user.home", "/tmp");
+		CONFIG_DIR = Platform.isWindows()?
+				Paths.get(homeDir, ".realmrunner")
+				:
+				Paths.get(homeDir, ".realmrunner");
+
+		System.out.println("LOGFILE: "+RRLogger.LOGFILE);
+		logger = System.getLogger("mud.client");
+	}
 
 	//-------------------------------------------------------------------
 	public void readConfig() throws FileNotFoundException {
@@ -289,21 +307,36 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 
 
 		Yaml yaml = new Yaml(representer);
-		String homeDir = System.getProperty("user.home", "/tmp");
-		Path configFile = Paths.get(homeDir, ".realmrunner.yml");
-		System.out.println("Try to read config from "+configFile.toAbsolutePath());
+		Path configFile = CONFIG_DIR.resolve("config.yml");
+		System.out.println("CONFIG : "+configFile.toAbsolutePath());
+		logger.log(Level.DEBUG, "Try to read config from {0}",configFile.toAbsolutePath());
 		try {
+			if (!Files.exists(configFile)) {
+				Files.createDirectories(configFile.getParent());
+				Files.createFile(configFile);
+			}
 			mainConfig = (Files.exists(configFile))?yaml.loadAs(new FileReader(configFile.toFile()), MainConfig.class):(new MainConfig());
-		} catch (FileNotFoundException e) {
+			if (mainConfig==null) {
+				logger.log(Level.INFO, "Config exists, but is empty");
+				mainConfig = new MainConfig();
+				FileWriter out = new FileWriter(configFile.toFile());
+				yaml.dump(mainConfig, out);
+				out.flush();
+			}
+			logger.log(Level.WARNING, "mainConfig = "+mainConfig);
+			System.out.println("mainConfig = "+mainConfig);
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.err.println("Failed accessing or creating config at "+configFile);
+			System.exit(1);
 		}
-		System.out.println("Main config = "+mainConfig);
 	}
 
 	//-------------------------------------------------------------------
 	private void learnTerminal(ReadFromConsoleTask readTask) {
 		logger.log(Level.DEBUG, "ENTER: learnTerminal");
+		logger.log(Level.INFO, "ENV = "+System.getenv("LC_ALL"));
 		ANSIOutputStream out = console.getOutputStream();
 		CapabilityDetector detector = new CapabilityDetector(out);
 		readTask.setWhenNotForwarding( frag -> {
@@ -413,6 +446,7 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 	//-------------------------------------------------------------------
 	private void setupInterface() {
 		logger.log(Level.INFO, "###############################Set up a split screen interface");
+		installShutdown();
 		ANSIOutputStream out = console.getOutputStream();
 
 		format = new UIGridFormat(out,terminalWidth, terminalHeight, capabilities.isEditRectangular());
@@ -436,7 +470,7 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 
 		logger.log(Level.INFO, "Format.dump: "+format.dump());
 		try {
-			format.recreate(StandardCharsets.ISO_8859_1);
+			format.recreate(charset);
 			CursorControls.enableCursor(out, false);
 			lineBufferChanged("", 0);
 		} catch (IOException e) {
@@ -788,15 +822,7 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 
 
 		try {
-			CursorControls.savePositionDEC(out);
-			format.showMarkupIn(AREA_ROOMDESC, buf.toString());
-
-			List<MarkupElement> markup = MarkupParser.convertText(buf.toString());
-			List<String> toSend = FormatUtil.convertText(markup, terminalWidth-15);
-//			uiFormat.sendRoomDescription(out, toSend);
-			// Or
-			logger.log(Level.INFO, String.join("\n", toSend));
-			CursorControls.restorePositionDEC(out);
+			format.showMarkupIn(AREA_ROOMDESC, buf.toString(), true);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -890,7 +916,7 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.mudclient.network.LineBufferListener#lineBufferChanged(java.lang.String, int)
+	 * @see org.prelle.realmrunner.network.LineBufferListener#lineBufferChanged(java.lang.String, int)
 	 */
 	@Override
 	public void lineBufferChanged(String content, int cursorPosition) {
@@ -898,7 +924,7 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 		logger.log(Level.TRACE, "###############lineBufferChanged({0}, {1})", content, cursorPosition);
 		try {
 			CursorControls.savePositionDEC(console.getOutputStream());
-			format.showMarkupIn(UIGridFormat.ID_INPUT, content);
+			format.showMarkupIn(UIGridFormat.ID_INPUT, content, false);
 			console.getOutputStream().write(new SelectGraphicRendition(Meaning.BLINKING_ON));
 			console.getOutputStream().write("\u2588");
 			console.getOutputStream().write(new SelectGraphicRendition(Meaning.BLINK_OFF));
@@ -912,7 +938,7 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.mudclient.network.LineBufferListener#processCommandTyped(java.lang.String)
+	 * @see org.prelle.realmrunner.network.LineBufferListener#processCommandTyped(java.lang.String)
 	 */
 	@Override
 	public String processCommandTyped(String typed) {

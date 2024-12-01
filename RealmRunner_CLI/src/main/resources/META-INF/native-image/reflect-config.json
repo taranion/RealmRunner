@@ -1,0 +1,23 @@
+[
+{
+  "name":"org.prelle.realmrunner.network.AbstractConfig",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.prelle.realmrunner.network.Config",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.prelle.realmrunner.network.MainConfig",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+}
+]

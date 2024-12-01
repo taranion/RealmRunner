@@ -1,4 +1,4 @@
-package org.prelle.mudclient.terminal;
+package org.prelle.realmrunner.terminal;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -6,7 +6,7 @@ import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.nio.file.Path;
 
-import org.prelle.mudclient.network.SoundManager;
+import org.prelle.realmrunner.network.SoundManager;
 
 import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.Player;
@@ -26,7 +26,7 @@ public class JLayerSoundManager extends SoundManager {
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.mudclient.network.SoundManager#playMP3(java.nio.file.Path, int)
+	 * @see org.prelle.realmrunner.network.SoundManager#playMP3(java.nio.file.Path, int)
 	 */
 	@Override
 	public void playMP3(Path file, int volume) {

@@ -3,54 +3,49 @@
 
   	<parent>
   		<groupId>org.prelle</groupId>
-  		<artifactId>mudclient</artifactId>
+  		<artifactId>realmrunner</artifactId>
   		<version>0.0.1-SNAPSHOT</version>
   	</parent>
+  	
   <artifactId>realmrunner_cli</artifactId>
-  <version>0.0.1</version>
   <name>Realm Runner CLI</name>
   <description>MUD client for a terminal emulator written in Java</description>
 
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.deploy.skip>true</maven.deploy.skip>
-		<maven.install.skip>true</maven.install.skip>
-		<maven.compiler.target>21</maven.compiler.target>
-		<maven.compiler.source>21</maven.compiler.source>
-		<mainClassName>org.prelle.mudclient.terminal.MUDClientTerminal</mainClassName>
+		<mainClassName>org.prelle.realmrunner.terminal.MUDClientTerminal</mainClassName>
 		<client.plugin.version>1.0.24</client.plugin.version>
+		<javafx.plugin.version>0.0.8</javafx.plugin.version>
+		<javafx.version>20.0.1</javafx.version>
 	</properties>
 
 	<dependencies>
 	  <dependency>
 		  <groupId>org.prelle</groupId>
 		  <artifactId>telnet</artifactId>
-		  <version>0.0.1-SNAPSHOT</version>
 	  </dependency>
 	  <dependency>
 		  <groupId>org.prelle</groupId>
 		  <artifactId>mudclient-base</artifactId>
-		  <version>0.0.1-SNAPSHOT</version>
+		  <version>${revision}</version>
 	  </dependency>
 	  <dependency>
 		  <groupId>org.prelle</groupId>
 		  <artifactId>libansi</artifactId>
-		  <version>0.0.1-SNAPSHOT</version>
 	  </dependency>
 	  <dependency>
 		  <groupId>org.prelle</groupId>
 		  <artifactId>mudansi</artifactId>
-		  <version>0.0.1-SNAPSHOT</version>
+          <version>0.0.1</version>
 	  </dependency>
 	  <dependency>
 		  <groupId>org.prelle</groupId>
 		  <artifactId>libterminal-api</artifactId>
-		  <version>0.0.1-SNAPSHOT</version>
+          <version>${revision}</version>
 	  </dependency>
 	  <dependency>
 		  <groupId>org.prelle</groupId>
 		  <artifactId>libterminal-native</artifactId>
-		  <version>0.0.1-SNAPSHOT</version>
+          <version>${revision}</version>
 	  </dependency>
 		<dependency>
     		<groupId>javazoom</groupId>
@@ -60,7 +55,6 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
     		<groupId>org.yaml</groupId>
@@ -69,34 +63,16 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.prelle</groupId>
-			<artifactId>mud-framework</artifactId>
+			<groupId>com.graphicmud</groupId>
+			<artifactId>graphicmud-core</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-		  	<groupId>org.prelle</groupId>
+		  	<groupId>com.graphicmud</groupId>
   			<artifactId>tile-library</artifactId>
   			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-		
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-core</artifactId>
-			<version>2.22.1</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-jpl</artifactId>
-			<version>2.22.1</version>
-			<scope>runtime</scope>
-		</dependency>
-		
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-		</dependency>
-	</dependencies>
+      </dependencies>
 
 	<build>
 		<plugins>
@@ -124,6 +100,20 @@
 			</plugin>
 			
 			<plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>${javafx.plugin.version}</version>
+                <configuration>
+                    <mainClass>${mainClassName}</mainClass>
+                    <options>
+                        <option>-agentlib:native-image-agent=config-merge-dir=src/main/resources/META-INF/native-image</option>
+                        <option>-Dproject.version={$p${project.version}}</option>
+                    </options>
+                </configuration>
+            </plugin>
+
+			
+			<plugin>
 				<groupId>com.gluonhq</groupId>
 				<artifactId>gluonfx-maven-plugin</artifactId>
 				<version>${client.plugin.version}</version>
@@ -144,15 +134,15 @@
        				<arg>${java.home}/lib/static/linux-amd64/glibc/libmlib_image.a</arg>
     				</linkerArgs-->
 					<releaseConfiguration>
-						<description>CLI MUD Client</description>
+ 						<description>RealmRunner</description>
 						<vendor>Stefan Prelle</vendor>
 						<version>${project.version}</version>
 						<!-- macOS -->
-						<macAppCategory>public.app-category.role-playing-games</macAppCategory>
+						<macAppCategory>public.app-category.game</macAppCategory>
 						<macAppStore>false</macAppStore>
 						<skipSigning>true</skipSigning>
 						<!-- macOS / iOS -->
-						<bundleName>Commlink 6</bundleName>
+						<bundleName>RealmRunnerCLI</bundleName>
 						<bundleVersion>${env.GITHUB_RUN_NUMBER}</bundleVersion>
 
 						<!-- Android -->
@@ -175,7 +165,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
-            <execution>
+<!--            <execution>
                 <id>copy-dependencies</id>
                 <phase>package</phase>
                 <goals>
@@ -186,23 +176,22 @@
                     <outputDirectory>target/jmods</outputDirectory>
                 </configuration>
             </execution>
-        </executions>
+-->        </executions>
     </plugin>
 
 			
 			
-			<plugin>
-    <groupId>org.panteleyev</groupId>
-    <artifactId>jpackage-maven-plugin</artifactId>
-    <version>1.6.5</version>
-
-    <configuration>
-        <name>RealmRunner</name>
-        <appVersion>${project.version}</appVersion>
-        <arguments>
-        	<argument>192.168.0.2</argument>
-        	<argument>4000</argument>
-        </arguments>
+		<plugin>
+            <groupId>org.panteleyev</groupId>
+            <artifactId>jpackage-maven-plugin</artifactId>
+            <version>1.6.5</version>
+            <configuration>
+                <name>RealmRunner</name>
+                <appVersion>${project.version}</appVersion>
+                <arguments>
+        	       <argument>192.168.0.2</argument>
+        	       <argument>4000</argument>
+                </arguments>
         <type>APP_IMAGE</type>
         <vendor>Stefan Prelle</vendor>
         <runtimeImage>${java.home}</runtimeImage>
@@ -219,29 +208,7 @@
         <winDirChooser>true</winDirChooser>
         <verbose>true</verbose>
     </configuration>
-
-    <executions>
-        <execution>
-            <id>mac</id>
-            <configuration>
-                <icon>src/jpackage/osx/Commlink6.icns</icon>
-            </configuration>
-        </execution>
-        <execution>
-            <id>win</id>
-            <configuration>
-                <icon>src/jpackage/win/Commlink6_128.ico</icon>
-                <winMenu>true</winMenu>
-            </configuration>
-        </execution>
-        <execution>
-            <id>linux</id>
-            <configuration>
-                <icon>src/jpackage/linux/Commlink6.png</icon>
-            </configuration>
-        </execution>
-    </executions>
-</plugin>
+    </plugin>
 
 			
 			
