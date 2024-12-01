@@ -9,7 +9,7 @@ env:
   LANG: "en_EN.UTF-8"
 
 jobs:
-  compile-linux-native:
+  compile:
     runs-on: ubuntu-latest
     steps:
     - name: checkout sources
@@ -67,25 +67,4 @@ jobs:
         cp target/gluonfx/x86_64-linux/CommLink6 staging/CommLink6-${{ env.RELEASE_VERSION }} ;
         chmod 755 staging/*  ;
         ls staging
-
-
-  compile-linux-jre:
-    runs-on: ubuntu-latest
-    steps:
-    - name: checkout sources
-      uses: actions/checkout@master
-    - uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '21'
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Set Release version env variable
-      run: |
-        echo "RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV            
-    - name: Compile update artifact
-      run: mvn install -Pinterpreted
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

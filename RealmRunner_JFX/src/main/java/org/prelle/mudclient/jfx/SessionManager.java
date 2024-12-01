@@ -1,4 +1,4 @@
-package org.prelle.mudclient.network;
+package org.prelle.mudclient.jfx;
 
 /**
  * 

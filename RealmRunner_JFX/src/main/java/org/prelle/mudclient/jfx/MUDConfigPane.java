@@ -1,6 +1,7 @@
-package org.prelle.mudclient.network;
+package org.prelle.mudclient.jfx;
 
 import org.prelle.javafx.TitledComponent;
+import org.prelle.realmrunner.network.Config;
 
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;

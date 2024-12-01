@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+  <Appenders>
+<!-- 		<Console name="Console" target="SYSTEM_OUT"> -->
+<!-- 			<PatternLayout pattern="%5p [%15c] (%F:%L) - %m%n" /> -->
+<!-- 		</Console> -->
+		<File name="File" fileName="/tmp/mudclient.txt">
+			<PatternLayout pattern="%5p [%15c] (%F:%L) - %m%n" />
+		</File>
+	</Appenders>
+	<Loggers>
+		<Root level="DEBUG">
+			<AppenderRef ref="File" />
+		</Root>
+    	<Logger name="sun" level="ERROR"/>
+    	<Logger name="xml" level="WARN"/>
+    	<Logger name="jdk" level="warn"/>
+    	<Logger name="java" level="INFO"/>
+    	<Logger name="javafx" level="INFO"/>
+    	<Logger name="network" level="TRACE"/>
+    	<Logger name="telnet" level="INFO"/>
+    	<Logger name="org.prelle.ansi" level="INFO"/>
+    	<Logger name="mud" level="INFO"/>
+	</Loggers>
+</Configuration>

@@ -1,4 +1,4 @@
-package org.prelle.mudclient.network;
+package org.prelle.mudclient.jfx;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,10 +11,8 @@ import java.util.List;
 
 import org.prelle.telnet.TelnetOption;
 import org.prelle.telnet.TelnetSocket;
-import org.prelle.telnet.TelnetSocketListener;
-import org.prelle.telnet.TelnetSubnegotiationHandler;
 import org.prelle.telnet.TelnetSocket.State;
-import org.prelle.telnet.mud.MUDTilemapProtocol.TileMapData;
+import org.prelle.telnet.TelnetSocketListener;
 
 /**
  *
