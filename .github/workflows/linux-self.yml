@@ -32,7 +32,7 @@ jobs:
         echo "RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
 
     - name: Compile dependencies
-      run: mvn -U clean install
+      run: mvn -U clean install -Dgpg.skip
 
     - name: Compile JRE
       run: cd RealmRunner_CLI ; mvn clean package ; ls target

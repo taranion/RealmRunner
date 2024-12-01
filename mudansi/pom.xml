@@ -110,7 +110,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
+<!--            <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
                 <version>0.6.0</version>
@@ -119,7 +119,7 @@
                     <publishingServerId>ossrh</publishingServerId>
                 </configuration>
             </plugin>
-        </plugins>
+-->        </plugins>
     </build>
 
 
