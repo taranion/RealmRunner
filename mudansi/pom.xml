@@ -8,7 +8,6 @@
   </parent>
 
     <artifactId>mudansi</artifactId>
-    <version>0.0.1</version>
     
     <name>MUDANSI</name>
     <description>ANSI terminal formats for MUDs</description>

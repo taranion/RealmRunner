@@ -26,11 +26,13 @@ public class RRLogger implements Logger {
 		}
 	}
 	
-	private final String name;
+	private String name;
+	private Level minLevel;
 
 	//-------------------------------------------------------------------
-	public RRLogger(String name) {
+	public RRLogger(String name, Level minLevel) {
 		 this.name = name;
+		 this.minLevel = minLevel;
 	}
 
 	//-------------------------------------------------------------------
@@ -50,7 +52,7 @@ public class RRLogger implements Logger {
 	public boolean isLoggable(Level level) {
 		if (name.startsWith("java")) return false;
 		if (name.startsWith("jdk.")) return false;
-		return level.getSeverity() >= Level.DEBUG.getSeverity();
+		return level.getSeverity()>=minLevel.getSeverity();
 	}
 
 	//-------------------------------------------------------------------
