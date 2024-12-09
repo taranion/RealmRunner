@@ -33,9 +33,9 @@
 		  <artifactId>libansi</artifactId>
 	  </dependency>
 	  <dependency>
-		  <groupId>org.prelle</groupId>
+		  <groupId>com.graphicmud</groupId>
 		  <artifactId>mudansi</artifactId>
-          <version>0.0.1</version>
+          <version>0.0.2-SNAPSHOT</version>
 	  </dependency>
 	  <dependency>
 		  <groupId>org.prelle</groupId>

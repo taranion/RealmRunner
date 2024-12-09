@@ -34,18 +34,27 @@ public class AbstractConfig {
 	 * the buffer, but flush after every character. Relevant for prompts not
 	 * ending with a newline.
 	 */
-	private boolean missingGAWorkaround;
-	private boolean sendCRbeforeLF;
+	private Boolean missingGAWorkaround;
+	private Boolean sendCRbeforeLF;
 	/**
 	 * Shall codes passed by the terminal to the MUD be sent?
 	 */
-	private boolean ignoreControlCodesFromTerminal = false;
+	private Boolean ignoreControlCodesFromTerminal;
 
 	//-------------------------------------------------------------------
-	/**
-	 */
 	public AbstractConfig() {
 		// TODO Auto-generated constructor stub
+	}
+
+	//-------------------------------------------------------------------
+	public AbstractConfig(AbstractConfig copy) {
+		this.ignoreControlCodesFromTerminal = copy.ignoreControlCodesFromTerminal;
+		this.localEcho = copy.localEcho;
+		this.missingGAWorkaround = copy.missingGAWorkaround;
+		this.music = copy.music;
+		this.sendCRbeforeLF = copy.sendCRbeforeLF;
+		this.serverLayoutControl = copy.serverLayoutControl;
+		this.sound = copy.sound;
 	}
 
 }

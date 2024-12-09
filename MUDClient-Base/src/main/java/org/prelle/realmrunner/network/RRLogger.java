@@ -77,8 +77,26 @@ public class RRLogger implements Logger {
 		if (isLoggable(level)) {
 			if (bundle!=null)
 				format = bundle.getString(format);
-			String formatted = MessageFormat.format(format, params);
-			LOGWRITER.format("%5s [%18s]: %s\r\n", level, name, formatted);
+			
+			String formatted = format;
+			try {
+				formatted = MessageFormat.format(format, params);
+			} catch (IllegalArgumentException e) {}
+			String prefix = "";
+			try {
+				throw new RuntimeException("trace");
+			} catch (Exception e) {
+				StackTraceElement element = e.getStackTrace()[2];
+				if (element.getClassName().equals("de.rpgframework.MultiLanguageResourceBundle"))
+					element = e.getStackTrace()[5];
+				prefix="("+element.getClassName().substring(element.getClassName().lastIndexOf(".")+1)+".java:"+element.getLineNumber()+") : ";
+			}
+			try {
+				LOGWRITER.format("%5s [%18s] (%s): %s\r\n", level, name, prefix,formatted);
+			} catch (Exception e) {
+				LOGWRITER.write(format+"\n");
+				e.printStackTrace(LOGWRITER);
+			}
 			LOGWRITER.flush();
         }
 	}

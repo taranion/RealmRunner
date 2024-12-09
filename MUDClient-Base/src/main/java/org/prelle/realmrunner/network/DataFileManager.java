@@ -40,7 +40,6 @@ public class DataFileManager {
 	public static void configure(MainConfig config) throws IOException {
 		DataFileManager.mainConfig = config;
 		// Determine main data directory
-		mainDataDir = Paths.get(System.getProperty("user.home"), "RealmRunner_WorldData");
 		mainDataDir = MainConfig.CONFIG_DIR.resolve("worlds");
 		if (config.getDataDir()!=null) {
 			String tmp = config.getDataDir().trim();

@@ -3,6 +3,7 @@ package org.prelle.realmrunner.network;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.net.SocketException;
+import java.nio.charset.Charset;
 import java.util.function.Function;
 
 import org.prelle.ansi.ANSIInputStream;
@@ -31,6 +32,7 @@ public class ReadFromMUDTask implements Runnable, TelnetSocketListener {
 	private TelnetSocket mud;
 	private ANSIOutputStream forwardTo;
 	private AbstractConfig config;
+	private Charset encoding;
 	private boolean inMXPMode;
 	private boolean inMSPMode;
 	private StringBuffer lineBuffer = new StringBuffer();
@@ -39,10 +41,12 @@ public class ReadFromMUDTask implements Runnable, TelnetSocketListener {
 	private Function<AParsedElement, AParsedElement> controlSequenceFilter;
 
 	//-------------------------------------------------------------------
-	public ReadFromMUDTask(TelnetSocket mud, ANSIOutputStream forwardTo, AbstractConfig config) {
+	public ReadFromMUDTask(TelnetSocket mud, ANSIOutputStream forwardTo, AbstractConfig config, Charset defaultEncoding) {
 		this.mud = mud;
 		this.forwardTo = forwardTo;
 		this.config    = config;
+		this.encoding  = defaultEncoding;
+		
 		mud.addSocketListener(this);
 	}
 
@@ -55,10 +59,14 @@ public class ReadFromMUDTask implements Runnable, TelnetSocketListener {
 		try {
 			TelnetInputStream in = (TelnetInputStream)mud.getInputStream();
 			ANSIInputStream ain = new ANSIInputStream(in);
+			ain.setEncoding(encoding);
 			ain.setCollectPrintable(false);
 			ain.setLoggingListener( (type,text) -> {
-				if (!"PRINTABLE".equals(type))
+				if (!"PRINTABLE".equals(type)) {
+					if (text.startsWith("C0(CR") || text.startsWith("C0(LF")) return;
+					if (text.startsWith("SGR")) return;
 					logger.log(Level.INFO, "MUD <-- {0} = {1}", type,text);
+				}
 			});
 			while (true) {
 				AParsedElement frag = ain.readFragment();

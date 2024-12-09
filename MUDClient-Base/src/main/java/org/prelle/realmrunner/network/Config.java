@@ -14,12 +14,18 @@ public class Config extends AbstractConfig {
 	private int    port;
 	private String login;
 	private String password;
+	private String serverEncoding;
 
 	//-------------------------------------------------------------------
 	/**
 	 */
 	public Config() {
 		// TODO Auto-generated constructor stub
+	}
+
+	//-------------------------------------------------------------------
+	public Config(AbstractConfig copy) {
+		super(copy);
 	}
 
 }

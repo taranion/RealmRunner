@@ -3,6 +3,7 @@ package org.prelle.realmrunner.network;
 import java.io.IOException;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -10,7 +11,6 @@ import java.util.function.Consumer;
 import org.prelle.ansi.ANSIInputStream;
 import org.prelle.ansi.ANSIOutputStream;
 import org.prelle.ansi.AParsedElement;
-import org.prelle.ansi.AParsedElement.Type;
 import org.prelle.ansi.C0Code;
 import org.prelle.ansi.C0Fragment;
 import org.prelle.ansi.PrintableFragment;
@@ -63,7 +63,7 @@ public class ReadFromConsoleTask implements Runnable, LineModeListener {
 		while (true) {
 			try {
 				AParsedElement fragment = in.readFragment();
-				logger.log(Level.DEBUG, "Typed {0}  forwardMode={1}", fragment, forwardMode, mustCreateLocalEcho);
+				logger.log(Level.TRACE, "Typed {0}  forwardMode={1}, mustLocalEcho={2}, lineBuffering={3}", fragment, forwardMode, mustCreateLocalEcho, lineBufferingMode);
 
 				switch (fragment) {
 				case PrintableFragment print -> {
@@ -81,7 +81,9 @@ public class ReadFromConsoleTask implements Runnable, LineModeListener {
 							logger.log(Level.INFO, "ENTER");
 							console.getOutputStream().write("\r\n");
 							String toSend = lineBufferListener.processCommandTyped(lineBuffer.toString());
-							forwardTo.write(toSend+"\r\n");
+							if (toSend!=null && forwardTo!=null) {
+								forwardTo.write(toSend+"\r\n");
+							}
 							lineBuffer.delete(0, lineBuffer.length());
 							lineBufferListener.lineBufferChanged("", 0);
 							continue;
@@ -157,7 +159,7 @@ public class ReadFromConsoleTask implements Runnable, LineModeListener {
 					}
 					default -> {
 						logger.log(Level.WARNING, "TODO: Check for cursor movement");
-						if (!config.isIgnoreControlCodesFromTerminal()) {
+						if (config.getIgnoreControlCodesFromTerminal()==null || !config.getIgnoreControlCodesFromTerminal()) {
 //							if (!isLineBuffering) {
 							logger.log(Level.WARNING, "  send to MUD "+fragment);
 							forwardTo.write(fragment);
@@ -168,6 +170,12 @@ public class ReadFromConsoleTask implements Runnable, LineModeListener {
 					  }
 					} // switch
 				} // if (forwardTo!=null)
+			} catch (SocketException e) {
+				logger.log(Level.ERROR, "Connection lost");
+				try { 
+					console.getOutputStream().write("\r\nConnection lost.r\n"); 
+					forwardTo.close();
+				} catch (IOException ee) {}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

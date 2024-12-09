@@ -19,8 +19,8 @@
     	<Logger name="javafx" level="INFO"/>
     	<Logger name="network" level="TRACE"/>
     	<Logger name="telnet" level="INFO"/>
-    	<Logger name="org.prelle.ansi" level="INFO"/>
-    	<Logger name="mud" level="INFO"/>
+    	<Logger name="org.prelle.ansi" level="DEBUG"/>
+    	<Logger name="mud" level="DEBUG"/>
     	<Logger name="mud.client" level="DEBUG"/>
 	</Loggers>
 </Configuration>

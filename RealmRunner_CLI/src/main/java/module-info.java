@@ -13,6 +13,7 @@ module org.prelle.realmrunner_cli {
 	requires org.yaml.snakeyaml;
 	requires org.prelle.mud.client.base;
 	requires graphicmud.core;
+	requires graphicmud.tiles.jfx;
 	
 	uses java.lang.System.LoggerFinder;
 }
