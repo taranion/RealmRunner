@@ -42,7 +42,7 @@ jobs:
       run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml clean package ; ls target
 
     - name: Fat jar artifact
-      run: mkdir artifacts ; cp RealmRunner_CLI/target/realmrunner_cli-*with-dependencies.jar artifacts/realmrunner-${{ env.RELEASE_VERSION }}.jar
+      run: mkdir artifacts ; ls RealmRunner_CLI/target/ ; cp RealmRunner_CLI/target/realmrunner_cli-*with-dependencies.jar artifacts/realmrunner-${{ env.RELEASE_VERSION }}.jar ; ls artifacts/
     - uses: actions/upload-artifact@v4
       with:
         name: realmrunner-${{ env.RELEASE_VERSION }}.jar
