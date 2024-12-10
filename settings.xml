@@ -30,7 +30,7 @@
             <name>Central Testing repository</name>
             <url>https://central.sonatype.com/api/v1/publisher/deployments/download</url>
             <releases>
-                <enabled>false</enabled>
+                <enabled>true</enabled>
             </releases>
             <snapshots>
                 <enabled>true</enabled>
