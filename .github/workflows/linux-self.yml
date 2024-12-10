@@ -7,6 +7,9 @@ on: [push]
 #    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 env:
   LANG: "en_EN.UTF-8"
+  CENTRAL_SNAPSHOTS_TOKEN: ${{ secrets.CENTRAL_SNAPSHOTS_TOKEN }}
+  OSSRH_USER_TOKEN: ${{ secrets.OSSRH_USER_TOKEN }}
+  OSSRH_PWD_TOKEN: ${{ secrets.OSSRH_PWD_TOKEN }}
 
 jobs:
   compile:
@@ -36,39 +39,10 @@ jobs:
 
     - name: Compile CLI JRE
       run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml clean package ; ls target
-      env:
-        CENTRAL_SNAPSHOTS_TOKEN: ${{ secrets.CENTRAL_SNAPSHOTS_TOKEN }}
-        OSSRH_USER_TOKEN: ${{ secrets.OSSRH_USER_TOKEN }}
-        OSSRH_PWD_TOKEN: ${{ secrets.OSSRH_PWD_TOKEN }}
-      
-    - name: Compile
-      run:  cd RealmRunner_CLI ; mvn -U clean gluonfx:compile
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        LANG: en_EN
-        CC: gcc-11
-        CXX: g++-11
-      
-#    - name: Install missing packages
-#      run: sudo apt-get install libgtk-3-dev libasound2-dev libavcodec-dev libavformat-dev libavutil-dev libgl-dev  libpango1.0-dev libxtst-dev
 
-    - name: Link
-      run:  cd RealmRunner_CLI ; mvn gluonfx:link -Pdesktop-binary
-
-    - name: Create Native Installer
-      run:  cd RealmRunner_CLI ; mvn gluonfx:package -Pdesktop-binary
-
-#    - name: Logs
-#      if: always()      
-#      run: cat target/gluonfx/x86_64-linux/gvm/log/client-debug0.log
-        
-    - name: Show result
-      run: ls -l target/ 
-        
-    - name: Prepare staging
-      run: |
-        mkdir -p staging ; 
-        cp target/gluonfx/x86_64-linux/CommLink6 staging/CommLink6-${{ env.RELEASE_VERSION }} ;
-        chmod 755 staging/*  ;
-        ls staging
-
+    - name: Fat jar artifact
+      run: mkdir -p ../artifacts ; cp realmrunner_cli-*with-dependencies.jar ../artifacts/realmrunner-${{ env.RELEASE_VERSION }}.jar
+    - uses: actions/upload-artifact@v4
+      with:
+        name: realmrunner-${{ env.RELEASE_VERSION }}.jar
+        path: arftifacts/realmrunner-${{ env.RELEASE_VERSION }}.jar
