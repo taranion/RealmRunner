@@ -9,8 +9,10 @@ import java.util.Map.Entry;
 
 import org.prelle.ansi.ANSIOutputStream;
 import org.prelle.mud4j.gmcp.GMCPManager;
+import org.prelle.mud4j.gmcp.Char.CharPackage;
 import org.prelle.mud4j.gmcp.Char.Stats;
 import org.prelle.mud4j.gmcp.Char.Vitals;
+import org.prelle.mud4j.gmcp.CharSkills.CharSkillsPackage;
 import org.prelle.mud4j.gmcp.Client.ClientMediaPackage;
 import org.prelle.mud4j.gmcp.Client.ClientMediaPlay;
 import org.prelle.mud4j.gmcp.Room.GMCPRoomInfo;
@@ -57,6 +59,8 @@ public class MUDSession implements TelnetSocketListener, TelnetOptionListener, G
 		TelnetOptionRegistry.register(TelnetOption.MUSHCLIENT.getCode(), new AardwolfMushclientProtocol());
 
 		GMCPManager.registerPackage(new ClientMediaPackage());
+		GMCPManager.registerPackage(new CharPackage());
+		GMCPManager.registerPackage(new CharSkillsPackage());
 
 		// Detect terminal type
 		String term = System.getenv("TERM");

@@ -131,7 +131,6 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 	private TerminalEmulator console;
 	private Charset charset = StandardCharsets.US_ASCII;
 	private UIGridFormat format;
-	private GMCPHandler gmcpHandler;
 	private ReadFromConsoleTask readFromConsole;
 	private SoundManager sound;
 	private TileGraphicService graphic;

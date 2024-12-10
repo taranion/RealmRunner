@@ -1,0 +1,45 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0   https://maven.apache.org/xsd/settings-1.0.0.xsd">
+	<servers>
+        <server>
+            <id>central</id>
+            <username>${env.OSSRH_USER_TOKEN}</username>
+            <password>${env.OSSRH_PWD_TOKEN}</password>
+        </server>
+        <server>
+            <id>central.manual.testing</id>
+            <configuration>
+                <httpHeaders>
+                    <property>
+                        <name>Authorization</name>
+                        <value>Bearer ${env.OSSRH_PWD_TOKEN}</value>
+                    </property>
+                </httpHeaders>
+            </configuration>
+    </server>
+	</servers>
+  <profiles>
+    <profile>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <gpg.keyname>${env.GPG_KEY}</gpg.keyname>
+        <gpg.passphrase>${env.GPG_PWD}</gpg.passphrase>
+      </properties>
+      <repositories>
+      </repositories>
+    </profile>
+    <profile>
+      <id>central-snapshots</id>
+      <repositories>
+        <repository>
+          <id>central.manual.testing</id>
+          <name>Central Testing repository</name>
+          <url>https://central.sonatype.com/api/v1/publisher/deployments/download</url>
+        </repository>
+      </repositories>
+    </profile>
+  </profiles>
+</settings>
