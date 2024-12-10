@@ -73,12 +73,12 @@
 		<dependency>
 			<groupId>com.graphicmud</groupId>
 			<artifactId>graphicmud-core</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.0.1</version>
 		</dependency>
 		<dependency>
 		  	<groupId>com.graphicmud</groupId>
-  			<artifactId>tile-library</artifactId>
-  			<version>0.0.1-SNAPSHOT</version>
+  			<artifactId>tile-service-swing</artifactId>
+  			<version>0.0.2-SNAPSHOT</version>
 		</dependency>
       </dependencies>
 
