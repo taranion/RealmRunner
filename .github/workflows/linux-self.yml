@@ -32,13 +32,13 @@ jobs:
         echo "RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
 
     - name: Compile dependencies
-      run: mvn -U -s settings.xml clean install -Dgpg.skip -Pcentral-snapshots
+      run: mvn -U -s settings.xml clean install -Dgpg.skip
 
-    - name: Compile JRE
-      run: cd RealmRunner_CLI ; mvn -s ../settings.xml clean package -Pcentral-snapshots ; ls target
+    - name: Compile CLI JRE
+      run: cd RealmRunner_CLI ; mvn -s ../settings.xml clean package ; ls target
       
     - name: Compile
-      run:  cd RealmRunner_CLI ; mvn -U clean gluonfx:compile -Pdesktop-binary
+      run:  cd RealmRunner_CLI ; mvn -U clean gluonfx:compile
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         LANG: en_EN
