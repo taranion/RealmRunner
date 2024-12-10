@@ -35,10 +35,10 @@ jobs:
       run: mvn -U -s settings.xml clean install -Dgpg.skip -Pcentral-snapshots
 
     - name: Compile JRE
-      run: cd RealmRunner_CLI ; mvn clean package ; ls target
+      run: cd RealmRunner_CLI ; mvn -s settings.xml clean package -Pcentral-snapshots ; ls target
       
     - name: Compile
-      run:  cd RealmRunner_CLI ; mvn -U clean gluonfx:compile -Pdesktop-binary
+      run:  cd RealmRunner_CLI ; mvn -U -s settings.xml clean gluonfx:compile -Pdesktop-binary
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         LANG: en_EN
