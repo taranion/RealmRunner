@@ -13,7 +13,7 @@
                 <httpHeaders>
                     <property>
                         <name>Authorization</name>
-                        <value>Bearer ${env.OSSRH_PWD_TOKEN}</value>
+                        <value>Bearer ${env.CENTRAL_SNAPSHOTS_TOKEN}</value>
                     </property>
                 </httpHeaders>
             </configuration>
