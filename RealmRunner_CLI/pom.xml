@@ -33,11 +33,6 @@
 		  <artifactId>libansi</artifactId>
 	  </dependency>
 	  <dependency>
-		  <groupId>com.graphicmud</groupId>
-		  <artifactId>mudansi</artifactId>
-          <version>0.0.2-SNAPSHOT</version>
-	  </dependency>
-	  <dependency>
 		  <groupId>org.prelle</groupId>
 		  <artifactId>libterminal-api</artifactId>
           <version>${revision}</version>
@@ -68,7 +63,7 @@
             <version>1.0.20</version>
         </dependency>
 
-
+        <!-- Graphic MUD code sharing -->
 
 		<dependency>
 			<groupId>com.graphicmud</groupId>
@@ -80,6 +75,11 @@
   			<artifactId>tile-service-swing</artifactId>
   			<version>0.0.2-SNAPSHOT</version>
 		</dependency>
+      <dependency>
+          <groupId>com.graphicmud</groupId>
+          <artifactId>mudansi</artifactId>
+          <version>0.0.2-SNAPSHOT</version>
+      </dependency>
       </dependencies>
 
     <repositories>

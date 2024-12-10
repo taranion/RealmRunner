@@ -32,10 +32,10 @@ jobs:
         echo "RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
 
     - name: Compile dependencies
-      run: mvn -U -s settings.xml clean install -Dgpg.skip
+      run: mvn -UB -s settings.xml clean install -Dgpg.skip
 
     - name: Compile CLI JRE
-      run: cd RealmRunner_CLI ; mvn -s ../settings.xml clean package ; ls target
+      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml clean package ; ls target
       
     - name: Compile
       run:  cd RealmRunner_CLI ; mvn -U clean gluonfx:compile
