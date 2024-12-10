@@ -24,15 +24,6 @@
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
-      <properties>
-        <gpg.keyname>${env.GPG_KEY}</gpg.keyname>
-        <gpg.passphrase>${env.GPG_PWD}</gpg.passphrase>
-      </properties>
-      <repositories>
-      </repositories>
-    </profile>
-    <profile>
-      <id>central-snapshots</id>
       <repositories>
         <repository>
           <id>central.manual.testing</id>
