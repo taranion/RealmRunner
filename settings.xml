@@ -26,9 +26,15 @@
       </activation>
       <repositories>
         <repository>
-          <id>central.manual.testing</id>
-          <name>Central Testing repository</name>
-          <url>https://central.sonatype.com/api/v1/publisher/deployments/download</url>
+            <id>central.manual.testing</id>
+            <name>Central Testing repository</name>
+            <url>https://central.sonatype.com/api/v1/publisher/deployments/download</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
         <repository>
             <id>ossrh</id>
