@@ -45,5 +45,5 @@ jobs:
       run: mkdir artifacts ; ls RealmRunner_CLI/target/ ; cp RealmRunner_CLI/target/realmrunner_cli-*with-dependencies.jar artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.jar ; ls artifacts/
     - uses: actions/upload-artifact@v4
       with:
-        name: realmrunner-cli-${{ env.RELEASE_VERSION }}.jar
+        name: realmrunner-cli-${{ env.RELEASE_VERSION }}
         path: artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.jar
