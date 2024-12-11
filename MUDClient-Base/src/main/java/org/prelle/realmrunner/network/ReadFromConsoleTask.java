@@ -145,6 +145,7 @@ public class ReadFromConsoleTask implements Runnable, LineModeListener {
 						switch (c0.getCode()) {
 						case C0Code.LF:
 							//if (config.isSendCRbeforeLF()) {
+							forwardTo.write(C0Code.LF);
 							logger.log(Level.INFO, "Inject CR");
 							forwardTo.write(C0Code.CR);
 							//}
