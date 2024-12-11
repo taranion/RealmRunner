@@ -1,6 +1,7 @@
 package org.prelle.terminal;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import org.prelle.ansi.ANSIInputStream;
 import org.prelle.ansi.ANSIOutputStream;
@@ -29,4 +30,9 @@ public interface TerminalEmulator {
 	//-------------------------------------------------------------------
 	public int[] getConsoleSize() throws IOException, InterruptedException;
 
+	//-------------------------------------------------------------------
+	/**
+	 * @return Array with Input encoding and Output encoding
+	 */
+	public Charset[] getEncodings();
 }

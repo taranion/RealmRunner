@@ -3,6 +3,8 @@ package org.prelle.terminal.console;
 import java.io.IOException;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -398,7 +400,12 @@ public class WindowsConsole implements TerminalEmulator {
 		return new int[] {consoleInfo.dwSize.X,consoleInfo.dwSize.Y};
 	}
 	
-	private void getEncodings() {
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.terminal.TerminalEmulator#getEncodings()
+	 */
+	@Override
+	public Charset[] getEncodings() {
         Kernel32 kernel32 = Kernel32.INSTANCE;
 		// Eingabe- und Ausgabecodepage abfragen
         int inputCP = kernel32.GetConsoleCP();
@@ -410,24 +417,25 @@ public class WindowsConsole implements TerminalEmulator {
         logger.log(Level.INFO, "Output codepage {0}", outputCP);
 
         // Optional: Codepage als Java-Charset-Namen umwandeln
-        String inputEncoding = codePageToEncoding(inputCP);
-        String outputEncoding = codePageToEncoding(outputCP);
+        Charset inputEncoding = codePageToEncoding(inputCP);
+        Charset outputEncoding = codePageToEncoding(outputCP);
 
         System.out.println("Eingabe-Encoding: " + inputEncoding);
         System.out.println("Ausgabe-Encoding: " + outputEncoding);
         logger.log(Level.INFO, "Input encoding {0}", inputEncoding);
         logger.log(Level.INFO, "Output encoding {0}", outputEncoding);
+        return new Charset[] {inputEncoding, outputEncoding};
 	}
 
 	// Hilfsmethode zur Umwandlung einer Windows-Codepage in ein Java-Encoding
-    public static String codePageToEncoding(int codePage) {
+    public static Charset codePageToEncoding(int codePage) {
         switch (codePage) {
-            case 65001: return "UTF-8";
-            case 1252: return "Windows-1252";
-            case 850: return "IBM850";
-            case 437: return "IBM437";
+            case 65001: return StandardCharsets.UTF_8;
+            case 1252: return Charset.forName("Windows-1252");
+            case 850: return Charset.forName("IBM850");
+            case 437: return Charset.forName("IBM437");
             // Fügen Sie hier weitere Codepages hinzu, falls erforderlich
-            default: return "CP" + codePage; // Standardmäßig die Codepage-Nummer verwenden
+            default: return Charset.forName("CP" + codePage); // Standardmäßig die Codepage-Nummer verwenden
         }
     }
 }

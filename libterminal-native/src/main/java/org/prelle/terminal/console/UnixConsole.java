@@ -3,6 +3,8 @@ package org.prelle.terminal.console;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -208,6 +210,18 @@ public class UnixConsole implements TerminalEmulator {
 	@Override
 	public ANSIInputStream getInputStream() {
 		return in;
+	}
+	
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.terminal.TerminalEmulator#getEncodings()
+	 */
+	@Override
+	public Charset[] getEncodings() {
+		if (System.getenv("LC_ALL")!=null && System.getenv("LC_ALL").contains("UTF-8")) {
+			return new Charset[] {StandardCharsets.UTF_8, StandardCharsets.UTF_8};
+		}
+		return new Charset[] {StandardCharsets.ISO_8859_1, StandardCharsets.ISO_8859_1};
 	}
 
 }

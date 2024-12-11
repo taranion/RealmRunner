@@ -182,13 +182,11 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 		if (Platform.isWindows()) {
 			logger.log(Level.INFO, "Create a windows console");
 			console = new WindowsConsole();
-			charset = Charset.forName("CP437", StandardCharsets.ISO_8859_1);
+			charset = console.getEncodings()[1];
 		} else {
 			logger.log(Level.INFO, "Create a unix console");
 			console = new UnixConsole();
-			if (System.getenv("LC_ALL")!=null && System.getenv("LC_ALL").contains("UTF-8")) {
-				charset = StandardCharsets.UTF_8;
-			}
+			charset = console.getEncodings()[1];
 		}
 		logger.log(Level.DEBUG, "Console is {0} with charset {1}",console.getClass().getSimpleName(), charset);
 		setupTimer();

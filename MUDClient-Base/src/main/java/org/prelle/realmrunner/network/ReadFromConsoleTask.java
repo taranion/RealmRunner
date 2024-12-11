@@ -150,7 +150,8 @@ public class ReadFromConsoleTask implements Runnable, LineModeListener {
 							//}
 							break;
 						case C0Code.CR:
-							logger.log(Level.INFO, "Swallow CR");
+							logger.log(Level.INFO, "Don't Swallow CR");
+							forwardTo.write(C0Code.CR);
 							break;
 						default:
 							logger.log(Level.DEBUG, "Forward "+c0);
