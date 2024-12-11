@@ -4,6 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.System.Logger;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
@@ -18,6 +19,7 @@ public class RRLogger implements Logger {
 	
 	static {
 		try {
+			Files.createDirectories(MainConfig.CONFIG_DIR);
 			LOGWRITER = new PrintWriter(new FileWriter(LOGFILE.toFile()));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
