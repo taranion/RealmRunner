@@ -152,7 +152,7 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 		} else if (args.length>0) {
 			new MUDClientTerminal(args[0], null, 0);
 		} else {
-			new MUDClientTerminal("starmourn", null, 0);
+			new MUDClientTerminal(null, null, 0);
 		}
 	}
 
@@ -237,8 +237,6 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 //		console.getOutputStream().flush();
 //		System.exit(1);
 		setupInterface();
-		capabilities.report(console.getOutputStream());
-		console.getOutputStream().write("\r\n");
 		logger.log(Level.DEBUG, "---Interface all set up ---- now connect --------------------------");
 //		console.setLocalEchoActive(true);
 //		console.setMode(TerminalMode.LINE_MODE);
@@ -539,7 +537,9 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 			
 			Path configFile = CONFIG_DIR.resolve("config.yml");
 			out.write("Reading your configuration from "+configFile.toRealPath()+"\r\n");
-			out.write("\r\n".repeat(20));
+			capabilities.report(out);
+			out.write("\r\n");
+			out.write("\r\n".repeat(2));
 			out.write("Usage:\r\n"
 					+ "#SESSION <name> <host> <port> [<charset>] - connect to the given server \r\n"
 					+ "                                            Optionally define server <charset>\r\n"
