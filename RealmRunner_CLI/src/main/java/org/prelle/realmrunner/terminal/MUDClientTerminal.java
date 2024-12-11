@@ -237,6 +237,8 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 //		console.getOutputStream().flush();
 //		System.exit(1);
 		setupInterface();
+		capabilities.report(console.getOutputStream());
+		console.getOutputStream().write("\r\n");
 		logger.log(Level.DEBUG, "---Interface all set up ---- now connect --------------------------");
 //		console.setLocalEchoActive(true);
 //		console.setMode(TerminalMode.LINE_MODE);
