@@ -88,7 +88,7 @@ public class ReadFromConsoleTask implements Runnable, LineModeListener {
 							lineBufferListener.lineBufferChanged("", 0);
 							continue;
 						} else
-							logger.log(Level.INFO, "HUHU");
+							console.getOutputStream().write("\r\n");
 						break;
 					case C0Code.DEL:
 						if (lineBufferingMode && !lineBuffer.isEmpty()) {
