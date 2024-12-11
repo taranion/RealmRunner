@@ -180,9 +180,11 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 		}
 
 		if (Platform.isWindows()) {
+			logger.log(Level.INFO, "Create a windows console");
 			console = new WindowsConsole();
 			charset = Charset.forName("CP437", StandardCharsets.ISO_8859_1);
 		} else {
+			logger.log(Level.INFO, "Create a unix console");
 			console = new UnixConsole();
 			if (System.getenv("LC_ALL")!=null && System.getenv("LC_ALL").contains("UTF-8")) {
 				charset = StandardCharsets.UTF_8;
@@ -974,7 +976,7 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 	 */
 	@Override
 	public void lineBufferChanged(String content, int cursorPosition) {
-		logger.log(Level.INFO, "##lineBufferChanged({0}, {1})", content, cursorPosition);
+//		logger.log(Level.INFO, "##lineBufferChanged({0}, {1})", content, cursorPosition);
 		try {
 			CursorControls.savePositionDEC(console.getOutputStream());
 			format.showLinebuffer(content, false);

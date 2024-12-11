@@ -1,6 +1,8 @@
 package org.prelle.terminal.console;
 
 import java.io.IOException;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,6 +21,8 @@ import com.sun.jna.ptr.IntByReference;
  * @see https://learn.microsoft.com/en-us/windows/console/high-level-console-modes
  */
 public class WindowsConsole implements TerminalEmulator {
+	
+	private final static Logger logger = System.getLogger("terminal.windows");
 	
 	private static enum InputFlag {
 		/**
@@ -402,6 +406,8 @@ public class WindowsConsole implements TerminalEmulator {
 
         System.out.println("Eingabe-Codepage: " + inputCP);
         System.out.println("Ausgabe-Codepage: " + outputCP);
+        logger.log(Level.INFO, "Input codepage {0}", inputCP);
+        logger.log(Level.INFO, "Output codepage {0}", outputCP);
 
         // Optional: Codepage als Java-Charset-Namen umwandeln
         String inputEncoding = codePageToEncoding(inputCP);
@@ -409,6 +415,8 @@ public class WindowsConsole implements TerminalEmulator {
 
         System.out.println("Eingabe-Encoding: " + inputEncoding);
         System.out.println("Ausgabe-Encoding: " + outputEncoding);
+        logger.log(Level.INFO, "Input encoding {0}", inputEncoding);
+        logger.log(Level.INFO, "Output encoding {0}", outputEncoding);
 	}
 
 	// Hilfsmethode zur Umwandlung einer Windows-Codepage in ein Java-Encoding
