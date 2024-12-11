@@ -47,3 +47,12 @@ jobs:
       with:
         name: realmrunner-cli-${{ env.RELEASE_VERSION }}
         path: artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.jar
+        
+    - name: Compile
+      run:  mvn -B -s settings.xml gluonfx:compile
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        LANG: en_EN
+        CC: gcc-11
+        CXX: g++-11
+        

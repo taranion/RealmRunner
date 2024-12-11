@@ -163,13 +163,8 @@
             <configuration>
                 <name>RealmRunner</name>
                 <appVersion>${project.version}</appVersion>
-                <arguments>
-        	       <argument>192.168.0.2</argument>
-        	       <argument>4000</argument>
-                </arguments>
-        <type>APP_IMAGE</type>
-        <vendor>Stefan Prelle</vendor>
-        <runtimeImage>${java.home}</runtimeImage>
+                <vendor>Stefan Prelle</vendor>
+                <runtimeImage>${java.home}</runtimeImage>
         <module>org.prelle.realmrunner_cli/${mainClassName}</module>
         <modulePaths>
         	<modulePath>target/jmods</modulePath>
@@ -184,6 +179,54 @@
         <verbose>true</verbose>
     </configuration>
     </plugin>
+
+            <plugin>
+                <groupId>com.gluonhq</groupId>
+                <artifactId>gluonfx-maven-plugin</artifactId>
+                <version>${client.plugin.version}</version>
+                <configuration>
+                    <!-- Uncomment to run on iOS: -->
+                    <target>${gluonfx.target}</target>
+                    <verbose>true</verbose>
+                    <bundlesList>
+                    </bundlesList>
+                    <resourcesList>
+                     </resourcesList>
+                    <mainClass>${mainClassName}</mainClass>
+                    <runtimeArgs>
+                    <!-- Added as command line params when on Android (but not on desktop) -->
+                        <arg>-Dproject.version=${project.version}</arg>
+                    </runtimeArgs>
+                    <nativeImageArgs>
+                        <!--arg>-H:DefaultLocale=en</arg-->
+                        <arg>-H:IncludeLocales=en,de</arg>
+                        <arg>-H:+UnlockExperimentalVMOptions</arg>
+                        <arg>--initialize-at-build-time=org.prelle.realmrunner.network.RRLoggerFinder,org.prelle.realmrunner.network.RRLogger</arg>
+                    </nativeImageArgs>
+                    <!--linkerArgs>
+                    <arg>${java.home}/lib/static/linux-amd64/glibc/libmlib_image.a</arg>
+                    </linkerArgs-->
+                    <attachList>
+                    </attachList>
+                    <releaseConfiguration>
+                        <description>Terminal MUD client</description>
+                        <vendor>Stefan Prelle</vendor>
+                        <version>${project.version}</version>
+                        <!-- macOS -->
+                        <macAppCategory>public.app-category.role-playing-games</macAppCategory>
+                        <macAppStore>false</macAppStore>
+                        <skipSigning>true</skipSigning>
+                        <!-- macOS / iOS -->
+                        <bundleName>RealmRunner</bundleName>
+                        <bundleVersion>${env.GITHUB_RUN_NUMBER}</bundleVersion>
+
+                        <!-- Android -->
+                        <appLabel>RealmRunner</appLabel>
+                        <versionCode>${env.GITHUB_RUN_NUMBER}</versionCode>
+                        <versionName>${project.version}</versionName>
+                    </releaseConfiguration>
+                </configuration>
+            </plugin>
 
 			
 			
