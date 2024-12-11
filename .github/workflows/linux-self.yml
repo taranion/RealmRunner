@@ -11,6 +11,9 @@ env:
   OSSRH_USER_TOKEN: ${{ secrets.OSSRH_USER_TOKEN }}
   OSSRH_PWD_TOKEN: ${{ secrets.OSSRH_PWD_TOKEN }}
   DEPLOYMENT_ID: b54e1b31-6b17-4fab-9d30-c7c1d10e79a3
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  CC: gcc-11
+  CXX: g++-11
 
 jobs:
   compile:
@@ -50,19 +53,14 @@ jobs:
         
     - name: Compile
       run:  cd RealmRunner_CLI ; mvn -B -s ../settings.xml gluonfx:build
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        LANG: en_EN
-        CC: gcc-11
-        CXX: g++-11
 
     - name: Create Native Installer
-      run:  mvn gluonfx:package
+      run:  cd RealmRunner_CLI ; mvn -B -s ../settings.xml gluonfx:package
 
         #    - name: Logs
         #      if: always()      
         #      run: cat target/gluonfx/x86_64-linux/gvm/log/client-debug0.log
 
     - name: Show result
-      run: ls -l target/ 
+      run: ls -l RealmRunner_CLI/target/ 
         
