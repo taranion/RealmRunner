@@ -49,10 +49,20 @@ jobs:
         path: artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.jar
         
     - name: Compile
-      run:  cd RealmRunner_CLI ; mvn -B -s ../settings.xml gluonfx:compile
+      run:  cd RealmRunner_CLI ; mvn -B -s ../settings.xml gluonfx:build
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         LANG: en_EN
         CC: gcc-11
         CXX: g++-11
+
+    - name: Create Native Installer
+      run:  mvn gluonfx:package
+
+        #    - name: Logs
+        #      if: always()      
+        #      run: cat target/gluonfx/x86_64-linux/gvm/log/client-debug0.log
+
+    - name: Show result
+      run: ls -l target/ 
         
