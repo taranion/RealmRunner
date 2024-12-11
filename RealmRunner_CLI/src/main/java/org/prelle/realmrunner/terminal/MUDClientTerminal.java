@@ -285,6 +285,9 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 				Paths.get(homeDir, ".realmrunner");
 
 		System.out.println("LOGFILE: "+RRLogger.LOGFILE);
+		try {
+			Files.createDirectories(MainConfig.CONFIG_DIR);
+		} catch (IOException e) {e.printStackTrace();}
 		logger = System.getLogger("mud.client");
 	}
 
