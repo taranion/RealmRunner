@@ -42,7 +42,7 @@ jobs:
       run: mvn -U -B -s settings.xml clean install -Dgpg.skip
 
     - name: Compile CLI JRE
-      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml clean package ; ls target
+      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml clean package gluonfx:build; ls target
 
     - name: Fat jar artifact
       run: mkdir artifacts ; ls RealmRunner_CLI/target/ ; cp RealmRunner_CLI/target/realmrunner_cli-*with-dependencies.jar artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.jar ; ls artifacts/
@@ -50,17 +50,4 @@ jobs:
       with:
         name: realmrunner-cli-${{ env.RELEASE_VERSION }}
         path: artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.jar
-        
-    - name: Compile
-      run:  cd RealmRunner_CLI ; mvn -B -s ../settings.xml gluonfx:build
-
-    - name: Create Native Installer
-      run:  cd RealmRunner_CLI ; mvn -B -s ../settings.xml gluonfx:package
-
-        #    - name: Logs
-        #      if: always()      
-        #      run: cat target/gluonfx/x86_64-linux/gvm/log/client-debug0.log
-
-    - name: Show result
-      run: ls -l RealmRunner_CLI/target/ 
         
