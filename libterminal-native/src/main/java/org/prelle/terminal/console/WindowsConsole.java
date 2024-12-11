@@ -219,12 +219,12 @@ public class WindowsConsole implements TerminalEmulator {
 		IntByReference consoleMode = new IntByReference();
 		Kernel32.INSTANCE.GetConsoleMode(stdOutHandle, consoleMode);
 		int current = consoleMode.getValue();
-		System.out.println("setOutputFlags vorher: "+current);
+		logger.log(Level.DEBUG,"setOutputFlags vorher: "+current);
 
 		for (OutputFlag flag : flags)
 			current |= flag.val;
 
-		System.out.println("setOutputFlags nachher: "+current);
+		logger.log(Level.DEBUG,"setOutputFlags nachher: "+current);
 		Kernel32.INSTANCE.SetConsoleMode(stdOutHandle, current);
 	}
 
@@ -233,12 +233,12 @@ public class WindowsConsole implements TerminalEmulator {
 		IntByReference consoleMode = new IntByReference();
 		Kernel32.INSTANCE.GetConsoleMode(stdOutHandle, consoleMode);
 		int current = consoleMode.getValue();
-		System.out.println("clearOutputFlags vorher: "+current);
+		logger.log(Level.DEBUG,"clearOutputFlags vorher: "+current);
 
 		for (OutputFlag flag : flags)
 			current &= ~flag.val;
 
-		System.out.println("clearOutputFlags nachher: "+current);
+		logger.log(Level.DEBUG,"clearOutputFlags nachher: "+current);
 		Kernel32.INSTANCE.SetConsoleMode(stdOutHandle, current);
 	}
 
@@ -264,8 +264,8 @@ public class WindowsConsole implements TerminalEmulator {
 		  for (InputFlag flag : InputFlag.values()) {
 			  if ( (mode & flag.value())>0) flags.add(flag.name()); else notSet.add(flag.name());
 		  }
-		  System.out.println("STD IN "+mode+"= "+String.join(",", flags));
-		  System.out.println("STD IN not set = "+String.join(",", notSet));
+		  logger.log(Level.DEBUG,"STD IN "+mode+"= "+String.join(",", flags));
+		  logger.log(Level.DEBUG,"STD IN not set = "+String.join(",", notSet));
 
 		  Kernel32.INSTANCE.GetConsoleMode(stdOutHandle, consoleMode);
 		  mode = consoleMode.getValue();
@@ -274,8 +274,8 @@ public class WindowsConsole implements TerminalEmulator {
 		  for (OutputFlag flag : OutputFlag.values()) {
 			  if ( (mode & flag.value())>0) flags.add(flag.name()); else notSet.add(flag.name());
 		  }
-		  System.out.println("STD OUT "+mode+"= "+String.join(",", flags));
-		  System.out.println("STD OUT not set = "+String.join(",", notSet));
+		  logger.log(Level.DEBUG,"STD OUT "+mode+"= "+String.join(",", flags));
+		  logger.log(Level.DEBUG,"STD OUT not set = "+String.join(",", notSet));
 	}
 
 	
@@ -288,7 +288,7 @@ public class WindowsConsole implements TerminalEmulator {
 		IntByReference consoleMode = new IntByReference();
 		Kernel32.INSTANCE.GetConsoleMode(stdInHandle, consoleMode);
 		int current = consoleMode.getValue();
-		System.out.println("IN SetConsoleMode vorher: "+current);
+		logger.log(Level.INFO,"IN SetConsoleMode vorher: "+current);
 
 		current |= InputFlag.ENABLE_VIRTUAL_TERMINAL_INPUT.value();
 		if (mode==TerminalMode.RAW) {
@@ -300,7 +300,7 @@ public class WindowsConsole implements TerminalEmulator {
 //			current |= InputFlag.ENABLE_PROCESSED_INPUT.value();
 //			current |= InputFlag.ENABLE_ECHO_INPUT.value();
 		}
-		System.out.println("IN SetConsoleMode nachher: "+current);
+		logger.log(Level.INFO,"IN SetConsoleMode nachher: "+current);
 		Kernel32.INSTANCE.SetConsoleMode(stdInHandle, current);
 		return this;
 	}
@@ -411,8 +411,6 @@ public class WindowsConsole implements TerminalEmulator {
         int inputCP = kernel32.GetConsoleCP();
         int outputCP = kernel32.GetConsoleOutputCP();
 
-        System.out.println("Eingabe-Codepage: " + inputCP);
-        System.out.println("Ausgabe-Codepage: " + outputCP);
         logger.log(Level.INFO, "Input codepage {0}", inputCP);
         logger.log(Level.INFO, "Output codepage {0}", outputCP);
 
@@ -420,8 +418,6 @@ public class WindowsConsole implements TerminalEmulator {
         Charset inputEncoding = codePageToEncoding(inputCP);
         Charset outputEncoding = codePageToEncoding(outputCP);
 
-        System.out.println("Eingabe-Encoding: " + inputEncoding);
-        System.out.println("Ausgabe-Encoding: " + outputEncoding);
         logger.log(Level.INFO, "Input encoding {0}", inputEncoding);
         logger.log(Level.INFO, "Output encoding {0}", outputEncoding);
         return new Charset[] {inputEncoding, outputEncoding};
