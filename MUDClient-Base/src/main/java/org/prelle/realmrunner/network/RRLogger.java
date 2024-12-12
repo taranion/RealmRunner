@@ -14,19 +14,8 @@ import java.util.ResourceBundle;
  */
 public class RRLogger implements Logger {
 	
-	public final static Path LOGFILE = MainConfig.CONFIG_DIR.resolve("logfile.txt");
+	public static Path LOGFILE;
 	private static PrintWriter LOGWRITER;
-	
-	static {
-		try {
-			Files.createDirectories(MainConfig.CONFIG_DIR);
-			LOGWRITER = new PrintWriter(new FileWriter(LOGFILE.toFile()));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.exit(1);
-		}
-	}
 	
 	private String name;
 	private Level minLevel;
@@ -35,6 +24,16 @@ public class RRLogger implements Logger {
 	public RRLogger(String name, Level minLevel) {
 		 this.name = name;
 		 this.minLevel = minLevel;
+		 if (LOGWRITER==null && MainConfig.CONFIG_DIR!=null) {
+			 try {
+				 Files.createDirectories(MainConfig.CONFIG_DIR);
+				 LOGFILE = MainConfig.CONFIG_DIR.resolve("logfile.txt");
+				 LOGWRITER = new PrintWriter(new FileWriter(LOGFILE.toFile()));
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+		 }
 	}
 
 	//-------------------------------------------------------------------

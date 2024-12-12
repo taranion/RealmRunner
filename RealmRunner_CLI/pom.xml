@@ -57,18 +57,18 @@
     		<version>2.2</version>
 		</dependency>
 		<!-- More WAV sound formats -->
-        <dependency>
+        <!--<dependency>
             <groupId>com.github.umjammer</groupId>
             <artifactId>vavi-sound</artifactId>
             <version>1.0.20</version>
-        </dependency>
+        </dependency>-->
 
         <!-- Graphic MUD code sharing -->
 
 		<dependency>
 			<groupId>com.graphicmud</groupId>
 			<artifactId>graphicmud-core</artifactId>
-			<version>0.0.1</version>
+			<version>0.0.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 		  	<groupId>com.graphicmud</groupId>
@@ -80,17 +80,91 @@
           <artifactId>mudansi</artifactId>
           <version>0.0.2-SNAPSHOT</version>
       </dependency>
-      </dependencies>
+    </dependencies>
 
     <repositories>
-        <repository>
+        <!--<repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
-        </repository>
+        </repository>-->
     </repositories>
 
 	<build>
-		<plugins>
+        <plugins>
+            <plugin>
+                <groupId>org.moditect</groupId>
+                <artifactId>moditect-maven-plugin</artifactId>
+                <version>1.0.0.Final</version>
+                <executions>
+                    <execution>
+                        <id>generate-module-info</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate-module-info</goal>
+                        </goals>
+                        <configuration>
+                            <modules>
+                                <module>
+                                    <artifact>
+                                        <groupId>org.bouncycastle</groupId>
+                                        <artifactId>bcprov-jdk15on</artifactId>
+                                        <version>1.59</version>
+                                    </artifact>
+                                    <moduleInfo>
+                                        <name>bcprov.jdk15on</name>
+                                        <exports>
+                                            *;
+                                        </exports>
+                                    </moduleInfo>
+                                </module>
+                                <module>
+                                    <artifact>
+                                        <groupId>org.bouncycastle</groupId>
+                                        <artifactId>bcpg-jdk15on</artifactId>
+                                        <version>1.59</version>
+                                    </artifact>
+                                    <moduleInfo>
+                                        <name>bcpg.jdk15on</name>
+                                        <exports>
+                                            *;
+                                        </exports>
+                                    </moduleInfo>
+                                </module>
+                                <module>
+                                    <artifact>
+                                        <groupId>javazoom</groupId>
+                                        <artifactId>jlayer</artifactId>
+                                        <version>1.0.1</version>
+                                    </artifact>
+                                    <moduleInfo>
+                                        <name>jlayer</name>
+                                        <exports>
+                                            *;
+                                        </exports>
+                                    </moduleInfo>
+                                </module>
+                                <module>
+                                    <artifact>
+                                        <groupId>net.java.dev.jna</groupId>
+                                        <artifactId>jna</artifactId>
+                                        <version>5.15.0</version>
+                                    </artifact>
+                                    <moduleInfo>
+                                        <name>com.sun.jna</name>
+                                        <exports>
+                                            *;
+                                        </exports>
+                                    </moduleInfo>
+                                </module>
+                            </modules>
+                            <jdepsExtraArgs>
+                                <arg>--upgrade-module-path=...</arg>
+                            </jdepsExtraArgs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
 			<plugin>
     			<groupId>org.apache.maven.plugins</groupId>
     			<artifactId>maven-assembly-plugin</artifactId>
@@ -136,25 +210,32 @@
                 </configuration>
             </plugin>
     
-    <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-<!--            <execution>
-                <id>copy-dependencies</id>
-                <phase>package</phase>
-                <goals>
-                    <goal>copy-dependencies</goal>
-                </goals>
-                <configuration>
-                    <includeScope>runtime</includeScope>
-                    <outputDirectory>target/jmods</outputDirectory>
-                </configuration>
-            </execution>
--->        </executions>
-    </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <!--<execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeScope>runtime</includeScope>
+                            <outputDirectory>target/jmods</outputDirectory>
+                        </configuration>
+                    </execution>-->
+                </executions>
+            </plugin>
 
-			
+		<!--<plugin>
+            <artifactId>maven-jlink-plugin</artifactId>
+            <version>3.2.0</version>
+            <extensions>true</extensions>
+            <configuration>
+                 configuration elements goes here 
+            </configuration>
+        </plugin>-->	
 			
 		<plugin>
             <groupId>org.panteleyev</groupId>
@@ -163,21 +244,21 @@
             <configuration>
                 <name>RealmRunner</name>
                 <appVersion>${project.version}</appVersion>
-                <vendor>Stefan Prelle</vendor>
+                <vendor>StefanPrelle</vendor>
                 <runtimeImage>${java.home}</runtimeImage>
-        <module>org.prelle.realmrunner_cli/${mainClassName}</module>
-        <modulePaths>
-        	<modulePath>target/jmods</modulePath>
-         </modulePaths>
-        <destination>target/dist</destination>
-        <javaOptions>
-            <option>--enable-preview</option>
-            <option>-Dfile.encoding=UTF-8</option>
-        </javaOptions>
-        <winConsole>true</winConsole>
-        <winDirChooser>true</winDirChooser>
-        <verbose>true</verbose>
-    </configuration>
+                <module>org.prelle.realmrunner_cli/${mainClassName}</module>
+                <modulePaths>
+        	       <modulePath>target/jmods</modulePath>
+                </modulePaths>
+                <destination>target/dist</destination>
+                <javaOptions>
+                    <option>-enable-preview</option>
+                    <option>-Dfile.encoding=UTF-8</option>
+                </javaOptions>
+                <winConsole>true</winConsole>
+                <winDirChooser>true</winDirChooser>
+                <verbose>false</verbose>
+            </configuration>
     </plugin>
 
             <plugin>
@@ -185,7 +266,6 @@
                 <artifactId>gluonfx-maven-plugin</artifactId>
                 <version>${client.plugin.version}</version>
                 <configuration>
-                    <!-- Uncomment to run on iOS: -->
                     <target>${gluonfx.target}</target>
                     <verbose>true</verbose>
                     <bundlesList>
@@ -194,32 +274,36 @@
                      </resourcesList>
                     <mainClass>${mainClassName}</mainClass>
                     <runtimeArgs>
-                    <!-- Added as command line params when on Android (but not on desktop) -->
+                     Added as command line params when on Android (but not on desktop) 
                         <arg>-Dproject.version=${project.version}</arg>
                     </runtimeArgs>
                     <nativeImageArgs>
-                        <!--arg>-H:DefaultLocale=en</arg-->
+                        <arg>-H:DefaultLocale=en</arg>
                         <arg>-H:IncludeLocales=en,de</arg>
                         <arg>-H:+UnlockExperimentalVMOptions</arg>
+                        <arg>-H:+ForeignAPISupport</arg>
+                        <arg>-H:+JNI</arg>
+                        <arg>-H:IncludeResources=com/sun/jna/linux-x86-64/libjnidispatch.so</arg>
+                        <arg>--initialize-at-build-time=org.prelle.realmrunner.network.RRLoggerFinder,org.prelle.realmrunner.network.RRLogger</arg>
                     </nativeImageArgs>
-                    <!--linkerArgs>
+                    <linkerArgs>
                     <arg>${java.home}/lib/static/linux-amd64/glibc/libmlib_image.a</arg>
-                    </linkerArgs-->
+                    </linkerArgs>
                     <attachList>
                     </attachList>
                     <releaseConfiguration>
                         <description>Terminal MUD client</description>
                         <vendor>Stefan Prelle</vendor>
                         <version>${project.version}</version>
-                        <!-- macOS -->
+                         macOS 
                         <macAppCategory>public.app-category.role-playing-games</macAppCategory>
                         <macAppStore>false</macAppStore>
                         <skipSigning>true</skipSigning>
-                        <!-- macOS / iOS -->
+                         macOS / iOS 
                         <bundleName>RealmRunner</bundleName>
                         <bundleVersion>${env.GITHUB_RUN_NUMBER}</bundleVersion>
 
-                        <!-- Android -->
+                         Android 
                         <appLabel>RealmRunner</appLabel>
                         <versionCode>${env.GITHUB_RUN_NUMBER}</versionCode>
                         <versionName>${project.version}</versionName>
@@ -229,7 +313,7 @@
 
 			
 			
-<!--			<plugin>
+			<!--<plugin>
         		<groupId>com.github.akman</groupId>
 		        <artifactId>jpackage-maven-plugin</artifactId>
 		        <version>0.1.5</version>
@@ -239,12 +323,25 @@
               			<artifactId>asm</artifactId>
               			<version>9.6</version>
             		</dependency>
-		        </dependencies>
+		         </dependencies>
             			<configuration>
               				<name>RealmRunner</name>
               				<appversion>0.2</appversion>
               				<vendor>Stefan Prelle</vendor>
               				<module>org.prelle.realmrunner_cli/${mainClassName}</module>
+              				
+              				 <modulepath>
+                <dependencysets>
+                  <dependencyset>
+                    <includeoutput>true</includeoutput>
+                    <excludeautomatic>true</excludeautomatic>
+                  </dependencyset>
+                </dependencysets>
+              </modulepath>
+              				<addmodules>
+              				  <addmodule>jlayer</addmodule>
+                            </addmodules>
+                            <runtimeImage>${java.home}</runtimeImage>
             			</configuration>
         		<executions>
           			<execution>
@@ -254,7 +351,7 @@
             			</goals>
           			</execution>
         		</executions>
-      		</plugin>
--->      </plugins>
+      		</plugin>-->
+      </plugins>
 	</build>
 </project>
