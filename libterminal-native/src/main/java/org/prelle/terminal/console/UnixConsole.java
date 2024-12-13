@@ -3,6 +3,7 @@ package org.prelle.terminal.console;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.System.Logger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -55,6 +56,11 @@ public class UnixConsole implements TerminalEmulator {
     private ANSIOutputStream out;
     private ANSIInputStream in;
 
+    public static void main(String[] args) throws Throwable {
+    	UnixConsole console = new UnixConsole();
+    	System.out.println("Previous ="+console.getFlag());
+    }
+
 	//-------------------------------------------------------------------
 	/**
 	 */
@@ -80,7 +86,12 @@ public class UnixConsole implements TerminalEmulator {
 	}
 
 	//-------------------------------------------------------------------
-	private boolean getFlag(int flag) {
+	public int getFlag() {
+		return  currentState.c_lflag;
+	}
+
+	//-------------------------------------------------------------------
+	private boolean hasFlag(int flag) {
 		return  (currentState.c_lflag & flag)!=0;
 	}
 
@@ -112,7 +123,7 @@ public class UnixConsole implements TerminalEmulator {
 	 */
 	@Override
 	public TerminalMode getMode() {
-		return getFlag(ICANON)?TerminalMode.LINE_MODE:TerminalMode.RAW;
+		return hasFlag(ICANON)?TerminalMode.LINE_MODE:TerminalMode.RAW;
 	}
 
 	//-------------------------------------------------------------------
@@ -138,7 +149,7 @@ public class UnixConsole implements TerminalEmulator {
 	 */
 	@Override
 	public boolean isLocalEchoActive() {
-		return getFlag(ECHO);
+		return hasFlag(ECHO);
 	}
 
 	//-------------------------------------------------------------------
