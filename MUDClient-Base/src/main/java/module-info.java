@@ -10,6 +10,4 @@ module org.prelle.mud.client.base {
 	requires org.yaml.snakeyaml;
 	requires lombok;
 	
-	provides java.lang.System.LoggerFinder with org.prelle.realmrunner.network.RRLoggerFinder;
-	
 }
