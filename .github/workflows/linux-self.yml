@@ -1,4 +1,4 @@
-name: Compile Linux Self
+name: Compile All
 on: [push]
 #on:
 #  push:
@@ -16,7 +16,7 @@ env:
   CXX: g++-11
 
 jobs:
-  compile:
+  linuxBinary:
     runs-on: ubuntu-latest
     steps:
     - name: checkout sources
@@ -61,4 +61,24 @@ jobs:
       with:
         name: realmrunner-cli-${{ env.RELEASE_VERSION }}-EXECUTABLE
         path: artifacts/realmrunner-cli
+
+  linuxInstall:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Compile CLI JRE
+      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml clean package jpackage:jpackage
+
+    - name: Results
+      run: cd RealmRunner_CLI ; find target
+
+    - name: Collect artifacts
+      run: |
+        mkdir artifacts 
+        cp "RealmRunner_CLI/target/dist/realmrunner_0.0.1-SNAPSHOT_amd64.deb" artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.deb
+        ls -l artifacts/
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: realmrunner-cli-${{ env.RELEASE_VERSION }}.deb
+        path: artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.deb
         
