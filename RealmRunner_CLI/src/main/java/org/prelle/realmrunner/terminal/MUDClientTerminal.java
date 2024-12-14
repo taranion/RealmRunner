@@ -9,6 +9,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.net.URI;
@@ -19,8 +20,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +47,6 @@ import org.prelle.ansi.control.AreaControls;
 import org.prelle.ansi.control.CursorControls;
 import org.prelle.ansi.control.DisplayControl;
 import org.prelle.ansi.control.ReportingControls;
-import org.prelle.mud4j.gmcp.GMCPHandler;
 import org.prelle.mud4j.gmcp.GMCPManager;
 import org.prelle.mud4j.gmcp.Char.CharPackage;
 import org.prelle.mud4j.gmcp.Char.Stats;
@@ -71,7 +69,6 @@ import org.prelle.mudansi.TerminalCapabilities;
 import org.prelle.mudansi.UIGridFormat;
 import org.prelle.mudansi.UIGridFormat.Area;
 import org.prelle.mudansi.UIGridFormat.AreaDefinition;
-import org.prelle.mudansi.UserInterfaceFormat;
 import org.prelle.realmrunner.network.AbstractConfig;
 import org.prelle.realmrunner.network.Config;
 import org.prelle.realmrunner.network.DataFileManager;
@@ -79,7 +76,6 @@ import org.prelle.realmrunner.network.LineBufferListener;
 import org.prelle.realmrunner.network.MUDSession;
 import org.prelle.realmrunner.network.MUDSessionGMCPListener;
 import org.prelle.realmrunner.network.MainConfig;
-import org.prelle.realmrunner.network.RRLogger;
 import org.prelle.realmrunner.network.ReadFromConsoleTask;
 import org.prelle.realmrunner.network.ReadFromMUDTask;
 import org.prelle.realmrunner.network.SessionConfig;
@@ -97,7 +93,9 @@ import org.prelle.telnet.option.TelnetWindowSize;
 import org.prelle.terminal.TerminalEmulator;
 import org.prelle.terminal.TerminalMode;
 import org.prelle.terminal.console.UnixConsole;
+import org.prelle.terminal.console.UnixConsoleFFM;
 import org.prelle.terminal.console.WindowsConsole;
+import org.prelle.terminal.console.WindowsConsoleFFM;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
@@ -106,6 +104,7 @@ import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 
+import com.graphicmud.GMLoggerFinder;
 import com.graphicmud.map.SymbolMap;
 import com.graphicmud.symbol.SymbolSet;
 import com.graphicmud.symbol.TileGraphicService;
@@ -181,11 +180,11 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 
 		if (Platform.isWindows()) {
 			logger.log(Level.INFO, "Create a windows console");
-			console = new WindowsConsole();
+			console = new WindowsConsoleFFM();
 			charset = console.getEncodings()[1];
 		} else {
 			logger.log(Level.INFO, "Create a unix console");
-			console = new UnixConsole();
+			console = new UnixConsoleFFM();
 			charset = console.getEncodings()[1];
 		}
 		logger.log(Level.DEBUG, "Console is {0} with charset {1}",console.getClass().getSimpleName(), charset);
@@ -280,13 +279,20 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 	private void setupLogging() {
 		String homeDir = System.getProperty("user.home", "/tmp");
 		CONFIG_DIR = Platform.isWindows()?
-				Paths.get(homeDir, ".realmrunner")
+				Paths.get(homeDir, "realmrunner")
 				:
 				Paths.get(homeDir, ".realmrunner");
 
-		System.out.println("LOGFILE: "+RRLogger.LOGFILE);
+//		System.out.println("LOGFILE: "+RRLogger.LOGFILE);
 		try {
 			Files.createDirectories(MainConfig.CONFIG_DIR);
+			Path LOGFILE = CONFIG_DIR.resolve("logfile.txt");
+			try {
+				GMLoggerFinder.LOGWRITER = new PrintWriter(new FileWriter(LOGFILE.toFile()));
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
 		} catch (IOException e) {e.printStackTrace();}
 		logger = System.getLogger("mud.client");
 	}
@@ -423,7 +429,7 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 				AreaControls.setLeftAndRightMargins(out, 1, 200);
 				DisplayControl.setLeftRightMarginMode(out, ModeState.RESET);
 				AreaControls.setTopAndBottomMargins(out, 1, 200);
-				out.write(new SelectGraphicRendition(Meaning.BLINKING_ON));
+				CursorControls.enableCursor(out, true);
 				AreaControls.clearScreen(out);
 				out.flush();
 			} catch (IOException e) {

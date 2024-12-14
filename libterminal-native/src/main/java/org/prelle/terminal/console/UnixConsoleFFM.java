@@ -87,29 +87,29 @@ public class UnixConsoleFFM implements TerminalEmulator {
       	termios = arena.allocate(TERM_STRUCT_SIZE); // termios-Strukturgröße (Plattformabhängig)
       	winsize = arena.allocate(winsizeLayout);
 
-            // Define functions
-        	tcgetattr = linker.downcallHandle(
-                libc.find("tcgetattr").orElseThrow(),
-                FunctionDescriptor.of(JAVA_INT, JAVA_INT, ADDRESS)
-            );
-            tcsetattr = linker.downcallHandle(
-                libc.find("tcsetattr").orElseThrow(),
+        // Define functions
+    	tcgetattr = linker.downcallHandle(
+            libc.find("tcgetattr").orElseThrow(),
+            FunctionDescriptor.of(JAVA_INT, JAVA_INT, ADDRESS)
+        );
+        tcsetattr = linker.downcallHandle(
+            libc.find("tcsetattr").orElseThrow(),
+            FunctionDescriptor.of(JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS)
+        );
+        ioctl = Linker.nativeLinker().downcallHandle(
+                libc.find("ioctl").orElseThrow(() -> new IllegalStateException("ioctl not found")),
                 FunctionDescriptor.of(JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS)
             );
-            ioctl = Linker.nativeLinker().downcallHandle(
-                    libc.find("ioctl").orElseThrow(() -> new IllegalStateException("ioctl not found")),
-                    FunctionDescriptor.of(JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS)
-                );
 
-            // Terminaleinstellungen abrufen
-            try {
-            	int result = (int) tcgetattr.invoke(STDIN_FILENO, termios);
-            	if (result != 0) {
-            		throw new IllegalStateException("tcgetattr failed - are you eventually running in an IDE?");
-            	}
-            } catch (Throwable e) {
-            	e.printStackTrace();
-            }
+        // Terminaleinstellungen abrufen
+        try {
+        	int result = (int) tcgetattr.invoke(STDIN_FILENO, termios);
+        	if (result != 0) {
+        		throw new IllegalStateException("tcgetattr failed - are you eventually running in an IDE?");
+        	}
+        } catch (Throwable e) {
+        	e.printStackTrace();
+        }
  		savedState = getLFlag();
  		logger.log(Level.INFO, "Saved state is {0}", savedState);
 

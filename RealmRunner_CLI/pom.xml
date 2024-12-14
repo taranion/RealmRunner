@@ -91,80 +91,6 @@
 
 	<build>
         <plugins>
-            <plugin>
-                <groupId>org.moditect</groupId>
-                <artifactId>moditect-maven-plugin</artifactId>
-                <version>1.0.0.Final</version>
-                <executions>
-                    <execution>
-                        <id>generate-module-info</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generate-module-info</goal>
-                        </goals>
-                        <configuration>
-                            <modules>
-                                <module>
-                                    <artifact>
-                                        <groupId>org.bouncycastle</groupId>
-                                        <artifactId>bcprov-jdk15on</artifactId>
-                                        <version>1.59</version>
-                                    </artifact>
-                                    <moduleInfo>
-                                        <name>bcprov.jdk15on</name>
-                                        <exports>
-                                            *;
-                                        </exports>
-                                    </moduleInfo>
-                                </module>
-                                <module>
-                                    <artifact>
-                                        <groupId>org.bouncycastle</groupId>
-                                        <artifactId>bcpg-jdk15on</artifactId>
-                                        <version>1.59</version>
-                                    </artifact>
-                                    <moduleInfo>
-                                        <name>bcpg.jdk15on</name>
-                                        <exports>
-                                            *;
-                                        </exports>
-                                    </moduleInfo>
-                                </module>
-                                <module>
-                                    <artifact>
-                                        <groupId>javazoom</groupId>
-                                        <artifactId>jlayer</artifactId>
-                                        <version>1.0.1</version>
-                                    </artifact>
-                                    <moduleInfo>
-                                        <name>jlayer</name>
-                                        <exports>
-                                            *;
-                                        </exports>
-                                    </moduleInfo>
-                                </module>
-                                <module>
-                                    <artifact>
-                                        <groupId>net.java.dev.jna</groupId>
-                                        <artifactId>jna</artifactId>
-                                        <version>5.15.0</version>
-                                    </artifact>
-                                    <moduleInfo>
-                                        <name>com.sun.jna</name>
-                                        <exports>
-                                            *;
-                                        </exports>
-                                    </moduleInfo>
-                                </module>
-                            </modules>
-                            <jdepsExtraArgs>
-                                <arg>--upgrade-module-path=...</arg>
-                            </jdepsExtraArgs>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
 			<plugin>
     			<groupId>org.apache.maven.plugins</groupId>
     			<artifactId>maven-assembly-plugin</artifactId>
@@ -278,17 +204,12 @@
                         <arg>-Dproject.version=${project.version}</arg>
                     </runtimeArgs>
                     <nativeImageArgs>
-                        <arg>-H:DefaultLocale=en</arg>
                         <arg>-H:IncludeLocales=en,de</arg>
                         <arg>-H:+UnlockExperimentalVMOptions</arg>
                         <arg>-H:+ForeignAPISupport</arg>
                         <arg>-H:+JNI</arg>
-                        <arg>-H:IncludeResources=com/sun/jna/linux-x86-64/libjnidispatch.so</arg>
-                        <arg>--initialize-at-build-time=org.prelle.realmrunner.network.RRLoggerFinder,org.prelle.realmrunner.network.RRLogger</arg>
+                        <arg>--initialize-at-build-time=com.graphicmud.GMLoggerFinder,com.graphicmud.GMLogger</arg>
                     </nativeImageArgs>
-                    <linkerArgs>
-                    <arg>${java.home}/lib/static/linux-amd64/glibc/libmlib_image.a</arg>
-                    </linkerArgs>
                     <attachList>
                     </attachList>
                     <releaseConfiguration>
