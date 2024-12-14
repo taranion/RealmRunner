@@ -38,6 +38,9 @@ jobs:
       run: |
         echo "RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
 
+    - name: Compile GraphicMUD
+      run: git submodule init ; git submodule update ; cd graphicmud ; mvn -B -s ../settings.xml clean install -Dgpg.skip -DskipTests
+
     - name: Compile dependencies
       run: mvn -U -B -s settings.xml clean install -Dgpg.skip
 
