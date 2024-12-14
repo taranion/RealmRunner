@@ -1,0 +1,3 @@
+[submodule "graphicmud"]
+	path = graphicmud
+	url = https://taranion@bitbucket.org/taranion/graphicmud.git
