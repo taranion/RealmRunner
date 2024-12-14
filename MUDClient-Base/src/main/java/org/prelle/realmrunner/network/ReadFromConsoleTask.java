@@ -64,6 +64,8 @@ public class ReadFromConsoleTask implements Runnable, LineModeListener {
 			try {
 				AParsedElement fragment = in.readFragment();
 				logger.log(Level.TRACE, "Typed {0}  forwardMode={1}, mustLocalEcho={2}, lineBuffering={3}", fragment, forwardMode, mustCreateLocalEcho, lineBufferingMode);
+				if (fragment==null)
+					return;
 
 				switch (fragment) {
 				case PrintableFragment print -> {
