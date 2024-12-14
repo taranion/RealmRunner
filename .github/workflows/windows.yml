@@ -1,4 +1,4 @@
-name: Compile JRE version
+name: Compile on Windows
 on: [push]
 #on:
 #  push:
@@ -17,7 +17,7 @@ env:
 
 jobs:
   compile:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
     - name: checkout sources
       uses: actions/checkout@v4
@@ -45,8 +45,20 @@ jobs:
       run: mvn -U -B -s settings.xml clean install -Dgpg.skip
 
     - name: Compile CLI JRE
-      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml clean package jpackage:jpackage
+      run: cd RealmRunner_CLI ; mvn -B -s ..\settings.xml clean package gluonfx:build; ls target  ; dir target\
 
-    - name: Results
-      run: cd RealmRunner_CLI ; find target
+    - name: Fat jar artifact
+      run: |
+        mkdir artifacts 
+        cp RealmRunner_CLI\target\realmrunner_cli-*with-dependencies.jar artifacts\realmrunner-cli-${{ env.RELEASE_VERSION }}.jar 
+        cp "RealmRunner_CLI\target\gluonfx/x86_64-linux/Realm Runner CLI" artifacts/realmrunner-cli
+        ls -l artifacts/
+    - uses: actions/upload-artifact@v4
+      with:
+        name: realmrunner-cli-${{ env.RELEASE_VERSION }}-JAR
+        path: artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.jar
+    - uses: actions/upload-artifact@v4
+      with:
+        name: realmrunner-cli-${{ env.RELEASE_VERSION }}-EXECUTABLE
+        path: artifacts/realmrunner-cli
         
