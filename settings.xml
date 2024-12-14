@@ -29,7 +29,7 @@
             <id>central.manual.testing</id>
             <name>Central Testing repository</name>
 <!--             <url>https://central.sonatype.com/api/v1/publisher/deployments/download</url> -->
-            <url>https://central.sonatype.com/api/v1/publisher/deployment/${env.DEPLOYMENT_ID}/download</url>
+            <url>https://central.sonatype.com/api/internal/publisher/deployment/${env.DEPLOYMENT_ID}/download</url>
              <releases>
                 <enabled>true</enabled>
             </releases>
