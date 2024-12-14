@@ -60,11 +60,6 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         name: realmrunner-cli-${{ env.RELEASE_VERSION }}-EXECUTABLE
-        path: artifacts/realmrunner-cli
-
-  linuxInstall:
-    runs-on: ubuntu-latest
-    steps:
     - name: Compile CLI JRE
       run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml clean package jpackage:jpackage
 
