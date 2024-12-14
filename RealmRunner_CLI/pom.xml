@@ -152,14 +152,22 @@
                 </executions>
             </plugin>
 
-		<!--<plugin>
+		<plugin>
             <artifactId>maven-jlink-plugin</artifactId>
             <version>3.2.0</version>
             <extensions>true</extensions>
             <configuration>
-                 configuration elements goes here 
+                <goal>jlink</goal>
+                <compress>2</compress>
+                <noHeaderFiles>true</noHeaderFiles>
+                <noManPages>true</noManPages>
+                <output>${project.build.directory}/jre</output>
+                <addModules>
+                <addModule>java.desktop</addModule>
+                <addModule>java.logging</addModule>
+            </addModules>
             </configuration>
-        </plugin>-->	
+        </plugin>	
 			
 		<plugin>
             <groupId>org.panteleyev</groupId>
