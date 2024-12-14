@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringTokenizer;
@@ -92,9 +93,7 @@ import org.prelle.telnet.mud.AardwolfMushclientProtocol.MUDMode;
 import org.prelle.telnet.option.TelnetWindowSize;
 import org.prelle.terminal.TerminalEmulator;
 import org.prelle.terminal.TerminalMode;
-import org.prelle.terminal.console.UnixConsole;
 import org.prelle.terminal.console.UnixConsoleFFM;
-import org.prelle.terminal.console.WindowsConsole;
 import org.prelle.terminal.console.WindowsConsoleFFM;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.TypeDescription;
@@ -109,7 +108,6 @@ import com.graphicmud.map.SymbolMap;
 import com.graphicmud.symbol.SymbolSet;
 import com.graphicmud.symbol.TileGraphicService;
 import com.graphicmud.symbol.swing.SwingTileGraphicLoader;
-import com.sun.jna.Platform;
 
 import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.Player;
@@ -120,9 +118,14 @@ import javazoom.jl.player.Player;
 public class MUDClientTerminal implements TelnetSocketListener, LineBufferListener,
 	AardwolfMushclientListener, MUDSessionGMCPListener  {
 
+	private enum OSType {
+	    Windows, MacOS, Linux, Other
+	  };
+	
 	private static Logger logger ;
 	private final static String AREA_ROOMDESC = "RoomDesc";
 
+	private OSType detectedOS;
 	private MainConfig mainConfig;
 	private Config activeConfig;
 	private MUDSession session;
@@ -178,14 +181,22 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 			world = "dynamic";
 		}
 
-		if (Platform.isWindows()) {
+		getOperatingSystemType();
+		if (detectedOS==OSType.Windows) {
 			logger.log(Level.INFO, "Create a windows console");
 			console = new WindowsConsoleFFM();
 			charset = console.getEncodings()[1];
-		} else {
+		} else if (detectedOS==OSType.Linux) {
 			logger.log(Level.INFO, "Create a unix console");
 			console = new UnixConsoleFFM();
 			charset = console.getEncodings()[1];
+		} else if (detectedOS==OSType.MacOS) {
+			logger.log(Level.INFO, "Create a unix console on Mac");
+			console = new UnixConsoleFFM();
+			charset = console.getEncodings()[1];
+		} else {
+			System.err.println("No supported OS type: "+System.getProperty("os.name"));
+			System.exit(1);
 		}
 		logger.log(Level.DEBUG, "Console is {0} with charset {1}",console.getClass().getSimpleName(), charset);
 		setupTimer();
@@ -276,9 +287,26 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 	}
 
 	//-------------------------------------------------------------------
+	private OSType getOperatingSystemType() {
+	    if (detectedOS == null) {
+	      String OS = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
+	      if ((OS.indexOf("mac") >= 0) || (OS.indexOf("darwin") >= 0)) {
+	        detectedOS = OSType.MacOS;
+	      } else if (OS.indexOf("win") >= 0) {
+	        detectedOS = OSType.Windows;
+	      } else if (OS.indexOf("nux") >= 0) {
+	        detectedOS = OSType.Linux;
+	      } else {
+	        detectedOS = OSType.Other;
+	      }
+	    }
+	    return detectedOS;
+	 }
+	
+	//-------------------------------------------------------------------
 	private void setupLogging() {
 		String homeDir = System.getProperty("user.home", "/tmp");
-		CONFIG_DIR = Platform.isWindows()?
+		CONFIG_DIR = (detectedOS==OSType.Windows) ?
 				Paths.get(homeDir, "realmrunner")
 				:
 				Paths.get(homeDir, ".realmrunner");

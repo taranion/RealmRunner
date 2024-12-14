@@ -1,7 +1,6 @@
 module org.prelle.realmrunner_cli {
 	exports org.prelle.realmrunner.terminal;
 
-	requires com.sun.jna;
 	requires java.desktop;
 	requires jlayer;
 	requires org.prelle.gmcp;
@@ -14,6 +13,7 @@ module org.prelle.realmrunner_cli {
 	requires org.prelle.mud.client.base;
 	requires graphicmud.core;
 	requires graphicmud.tiles.jfx;
+	requires org.graalvm.nativeimage;
 	
 	uses java.lang.System.LoggerFinder;
 }

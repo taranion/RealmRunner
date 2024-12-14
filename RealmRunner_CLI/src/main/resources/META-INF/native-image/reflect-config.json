@@ -3,18 +3,7 @@
   "type":"com.graphicmud.GMLoggerFinder"
 },
 {
-  "type":"com.graphicmud.GMLoggerFinder"
-},
-{
   "type":"com.sun.crypto.provider.AESCipher$General",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "type":"com.sun.crypto.provider.AESCipher$General",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "type":"com.sun.crypto.provider.ARCFOURCipher",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
@@ -26,19 +15,7 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "type":"com.sun.crypto.provider.ChaCha20Cipher$ChaCha20Poly1305",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
   "type":"com.sun.crypto.provider.DESCipher",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "type":"com.sun.crypto.provider.DESCipher",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "type":"com.sun.crypto.provider.DESedeCipher",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
@@ -50,14 +27,6 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "type":"com.sun.crypto.provider.DHParameters",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "type":"com.sun.crypto.provider.GaloisCounterMode$AESGCM",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
   "type":"com.sun.crypto.provider.GaloisCounterMode$AESGCM",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
@@ -66,140 +35,223 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "type":"com.sun.crypto.provider.TlsMasterSecretGenerator",
+  "type":"java.beans.PropertyVetoException"
+},
+{
+  "type":"java.lang.Class",
+  "methods":[{"name":"getRecordComponents","parameterTypes":[] },{"name":"isRecord","parameterTypes":[] }]
+},
+{
+  "type":"java.lang.Object",
+  "allDeclaredFields":true,
+  "queryAllPublicMethods":true
+},
+{
+  "type":"java.lang.ObjectBeanInfo"
+},
+{
+  "type":"java.lang.ObjectCustomizer"
+},
+{
+  "type":"java.lang.Thread",
+  "fields":[{"name":"threadLocalRandomProbe"}]
+},
+{
+  "type":"java.lang.reflect.RecordComponent",
+  "methods":[{"name":"getName","parameterTypes":[] },{"name":"getType","parameterTypes":[] }]
+},
+{
+  "type":"java.security.AlgorithmParametersSpi"
+},
+{
+  "type":"java.security.KeyStoreSpi"
+},
+{
+  "type":"java.sql.Date"
+},
+{
+  "type":"java.sql.Timestamp"
+},
+{
+  "type":"java.util.concurrent.atomic.AtomicBoolean",
+  "fields":[{"name":"value"}]
+},
+{
+  "type":"java.util.concurrent.atomic.AtomicReference",
+  "fields":[{"name":"value"}]
+},
+{
+  "type":"java.util.concurrent.atomic.Striped64",
+  "fields":[{"name":"base"},{"name":"cellsBusy"}]
+},
+{
+  "type":"org.prelle.ansi.commands.ChangeAttributesRectangularArea",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "type":"com.sun.jna.CallbackProxy",
-  "methods":[{"name":"callback","parameterTypes":["java.lang.Object[]"] }]
+  "type":"org.prelle.ansi.commands.CursorBackward",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "type":"com.sun.jna.CallbackProxy",
-  "methods":[{"name":"callback","parameterTypes":["java.lang.Object[]"] }]
+  "type":"org.prelle.ansi.commands.CursorBackwardTabulation",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "type":"java.beans.PropertyVetoException"
+  "type":"org.prelle.ansi.commands.CursorDown",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "type":"java.beans.PropertyVetoException"
+  "type":"org.prelle.ansi.commands.CursorForward",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "type":"java.lang.Object",
+  "type":"org.prelle.ansi.commands.CursorHorizontalAbsolute",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.CursorPosition",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.CursorPositionReport",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.CursorUp",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.CursorVerticalTabulation",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.DECCopyRectangularArea",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.DECPlaySound",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.DECSelectActiveStatusDisplay",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.DECSelectStatusDisplayType",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.DeviceAttributes",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.DeviceStatusReport",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.EraseCharacter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.EraseInArea",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.EraseInDisplay",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.EraseInLine",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.EraseRectangularArea",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.FillRectangularArea",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.FontSelection",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.GraphicCharacterCombination",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.GraphicSizeModification",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.GraphicSizeSelection",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.HorizontalAndVerticalPosition",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.HorizontalPositionAbsolute",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.HorizontalPositionBackward",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.HorizontalPositionForward",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.LeftRightMarginMode",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.MXPLine",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.PanDown",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.PanUp",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.ResetMode",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.SelectGraphicRendition",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.SetLeftAndRightMargin",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.SetMode",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.SetTopAndBottomMargin",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.ansi.commands.xterm.XTermWindowOperation",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "type":"org.prelle.mud4j.gmcp.Core.Hello",
   "allDeclaredFields":true,
-  "queryAllPublicMethods":true,
-  "methods":[{"name":"equals","parameterTypes":["java.lang.Object"] },{"name":"hashCode","parameterTypes":[] },{"name":"toString","parameterTypes":[] }]
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "type":"java.lang.Object",
-  "allDeclaredFields":true,
-  "queryAllPublicMethods":true,
-  "methods":[{"name":"equals","parameterTypes":["java.lang.Object"] },{"name":"hashCode","parameterTypes":[] },{"name":"toString","parameterTypes":[] }]
-},
-{
-  "type":"java.lang.ObjectBeanInfo"
-},
-{
-  "type":"java.lang.ObjectBeanInfo"
-},
-{
-  "type":"java.lang.ObjectCustomizer"
-},
-{
-  "type":"java.lang.ObjectCustomizer"
-},
-{
-  "type":"java.lang.Throwable",
-  "methods":[{"name":"addSuppressed","parameterTypes":["java.lang.Throwable"] }]
-},
-{
-  "type":"java.lang.Throwable",
-  "methods":[{"name":"addSuppressed","parameterTypes":["java.lang.Throwable"] }]
-},
-{
-  "type":"java.lang.invoke.MethodHandle",
-  "methods":[{"name":"bindTo","parameterTypes":["java.lang.Object"] },{"name":"invokeWithArguments","parameterTypes":["java.lang.Object[]"] }]
-},
-{
-  "type":"java.lang.invoke.MethodHandle",
-  "methods":[{"name":"bindTo","parameterTypes":["java.lang.Object"] },{"name":"invokeWithArguments","parameterTypes":["java.lang.Object[]"] }]
-},
-{
-  "type":"java.lang.invoke.MethodHandles",
-  "methods":[{"name":"lookup","parameterTypes":[] },{"name":"privateLookupIn","parameterTypes":["java.lang.Class","java.lang.invoke.MethodHandles$Lookup"] }]
-},
-{
-  "type":"java.lang.invoke.MethodHandles",
-  "methods":[{"name":"lookup","parameterTypes":[] },{"name":"privateLookupIn","parameterTypes":["java.lang.Class","java.lang.invoke.MethodHandles$Lookup"] }]
-},
-{
-  "type":"java.lang.invoke.MethodHandles$Lookup",
-  "methods":[{"name":"findSpecial","parameterTypes":["java.lang.Class","java.lang.String","java.lang.invoke.MethodType","java.lang.Class"] },{"name":"in","parameterTypes":["java.lang.Class"] },{"name":"unreflectSpecial","parameterTypes":["java.lang.reflect.Method","java.lang.Class"] }]
-},
-{
-  "type":"java.lang.invoke.MethodHandles$Lookup",
-  "methods":[{"name":"findSpecial","parameterTypes":["java.lang.Class","java.lang.String","java.lang.invoke.MethodType","java.lang.Class"] },{"name":"in","parameterTypes":["java.lang.Class"] },{"name":"unreflectSpecial","parameterTypes":["java.lang.reflect.Method","java.lang.Class"] }]
-},
-{
-  "type":"java.lang.invoke.MethodType",
-  "methods":[{"name":"methodType","parameterTypes":["java.lang.Class","java.lang.Class[]"] }]
-},
-{
-  "type":"java.lang.invoke.MethodType",
-  "methods":[{"name":"methodType","parameterTypes":["java.lang.Class","java.lang.Class[]"] }]
-},
-{
-  "type":"java.lang.reflect.Method",
-  "methods":[{"name":"isDefault","parameterTypes":[] },{"name":"isVarArgs","parameterTypes":[] }]
-},
-{
-  "type":"java.lang.reflect.Method",
-  "methods":[{"name":"isDefault","parameterTypes":[] },{"name":"isVarArgs","parameterTypes":[] }]
-},
-{
-  "type":"java.nio.Buffer"
-},
-{
-  "type":"java.nio.Buffer"
-},
-{
-  "type":"java.security.AlgorithmParametersSpi"
-},
-{
-  "type":"java.security.AlgorithmParametersSpi"
-},
-{
-  "type":"java.security.KeyStoreSpi"
-},
-{
-  "type":"java.security.KeyStoreSpi"
-},
-{
-  "type":"java.sql.Date"
-},
-{
-  "type":"java.sql.Date"
-},
-{
-  "type":"java.util.concurrent.ForkJoinTask",
-  "fields":[{"name":"aux"},{"name":"status"}]
-},
-{
-  "type":"java.util.concurrent.ForkJoinTask",
-  "fields":[{"name":"aux"},{"name":"status"}]
-},
-{
-  "type":"java.util.concurrent.atomic.AtomicReference",
-  "fields":[{"name":"value"}]
-},
-{
-  "type":"java.util.concurrent.atomic.AtomicReference",
-  "fields":[{"name":"value"}]
-},
-{
-  "type":"jdk.internal.misc.Unsafe"
-},
-{
-  "type":"jdk.internal.misc.Unsafe"
+  "type":"org.prelle.mud4j.gmcp.Core.SupportsSet",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "type":"org.prelle.realmrunner.network.AbstractConfig",
@@ -208,32 +260,10 @@
   "methods":[{"name":"setLocalEcho","parameterTypes":["java.lang.Boolean"] },{"name":"setMissingGAWorkaround","parameterTypes":["java.lang.Boolean"] },{"name":"setMusic","parameterTypes":["java.lang.Boolean"] },{"name":"setSendCRbeforeLF","parameterTypes":["java.lang.Boolean"] },{"name":"setServerLayoutControl","parameterTypes":["java.lang.Boolean"] },{"name":"setSound","parameterTypes":["java.lang.Boolean"] }]
 },
 {
-  "type":"org.prelle.realmrunner.network.AbstractConfig",
-  "allDeclaredFields":true,
-  "allDeclaredMethods":true,
-  "allPublicConstructors":true,
-  "queryAllPublicMethods":true,
-  "methods":[{"name":"<init>","parameterTypes":[] },{"name":"setLocalEcho","parameterTypes":["java.lang.Boolean"] },{"name":"setMissingGAWorkaround","parameterTypes":["java.lang.Boolean"] },{"name":"setMusic","parameterTypes":["java.lang.Boolean"] },{"name":"setSendCRbeforeLF","parameterTypes":["java.lang.Boolean"] },{"name":"setServerLayoutControl","parameterTypes":["java.lang.Boolean"] },{"name":"setSound","parameterTypes":["java.lang.Boolean"] }]
-},
-{
-  "type":"org.prelle.realmrunner.network.AbstractConfigBeanInfo"
-},
-{
   "type":"org.prelle.realmrunner.network.AbstractConfigBeanInfo"
 },
 {
   "type":"org.prelle.realmrunner.network.AbstractConfigCustomizer"
-},
-{
-  "type":"org.prelle.realmrunner.network.AbstractConfigCustomizer"
-},
-{
-  "type":"org.prelle.realmrunner.network.Config",
-  "allDeclaredFields":true,
-  "allDeclaredMethods":true,
-  "allPublicConstructors":true,
-  "queryAllPublicMethods":true,
-  "methods":[{"name":"<init>","parameterTypes":[] },{"name":"setLogin","parameterTypes":["java.lang.String"] },{"name":"setPassword","parameterTypes":["java.lang.String"] },{"name":"setPort","parameterTypes":["int"] },{"name":"setServer","parameterTypes":["java.lang.String"] },{"name":"setServerEncoding","parameterTypes":["java.lang.String"] }]
 },
 {
   "type":"org.prelle.realmrunner.network.Config",
@@ -245,12 +275,6 @@
   "type":"org.prelle.realmrunner.network.ConfigBeanInfo"
 },
 {
-  "type":"org.prelle.realmrunner.network.ConfigBeanInfo"
-},
-{
-  "type":"org.prelle.realmrunner.network.ConfigCustomizer"
-},
-{
   "type":"org.prelle.realmrunner.network.ConfigCustomizer"
 },
 {
@@ -260,45 +284,13 @@
   "methods":[{"name":"<init>","parameterTypes":[] },{"name":"setWorld","parameterTypes":["java.util.Map"] }]
 },
 {
-  "type":"org.prelle.realmrunner.network.MainConfig",
-  "allDeclaredFields":true,
-  "allDeclaredMethods":true,
-  "allPublicConstructors":true,
-  "queryAllPublicMethods":true,
-  "methods":[{"name":"<init>","parameterTypes":[] },{"name":"setWorld","parameterTypes":["java.util.Map"] }]
-},
-{
-  "type":"org.prelle.realmrunner.network.MainConfigBeanInfo"
-},
-{
   "type":"org.prelle.realmrunner.network.MainConfigBeanInfo"
 },
 {
   "type":"org.prelle.realmrunner.network.MainConfigCustomizer"
 },
 {
-  "type":"org.prelle.realmrunner.network.MainConfigCustomizer"
-},
-{
-  "type":"org.prelle.terminal.console.UnixConsole$Termios",
-  "allDeclaredFields":true,
-  "fields":[{"name":"OPTIONS"},{"name":"STRING_ENCODING"},{"name":"STRUCTURE_ALIGNMENT"},{"name":"TYPE_MAPPER"}]
-},
-{
-  "type":"org.prelle.terminal.console.UnixConsole$Termios",
-  "allDeclaredFields":true,
-  "fields":[{"name":"OPTIONS"},{"name":"STRING_ENCODING"},{"name":"STRUCTURE_ALIGNMENT"},{"name":"TYPE_MAPPER"}]
-},
-{
   "type":"sun.security.pkcs12.PKCS12KeyStore",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "type":"sun.security.pkcs12.PKCS12KeyStore",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "type":"sun.security.pkcs12.PKCS12KeyStore$DualFormatPKCS12",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
@@ -310,15 +302,11 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "type":"sun.security.provider.DSA$SHA224withDSA",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
   "type":"sun.security.provider.DSA$SHA256withDSA",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "type":"sun.security.provider.DSA$SHA256withDSA",
+  "type":"sun.security.provider.JavaKeyStore$JKS",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
@@ -326,19 +314,7 @@
   "methods":[{"name":"<init>","parameterTypes":["java.security.SecureRandomParameters"] }]
 },
 {
-  "type":"sun.security.provider.NativePRNG",
-  "methods":[{"name":"<init>","parameterTypes":["java.security.SecureRandomParameters"] }]
-},
-{
   "type":"sun.security.provider.SHA",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "type":"sun.security.provider.SHA",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "type":"sun.security.provider.SHA2$SHA224",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
@@ -350,19 +326,7 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "type":"sun.security.provider.SHA2$SHA256",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
   "type":"sun.security.provider.SHA5$SHA384",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "type":"sun.security.provider.SHA5$SHA384",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "type":"sun.security.provider.SHA5$SHA512",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
@@ -374,19 +338,7 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "type":"sun.security.provider.X509Factory",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
   "type":"sun.security.rsa.PSSParameters",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "type":"sun.security.rsa.PSSParameters",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "type":"sun.security.rsa.RSAKeyFactory$Legacy",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
@@ -398,19 +350,7 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "type":"sun.security.rsa.RSAPSSSignature",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
   "type":"sun.security.rsa.RSASignature$SHA224withRSA",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "type":"sun.security.rsa.RSASignature$SHA224withRSA",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "type":"sun.security.ssl.KeyManagerFactoryImpl$SunX509",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
@@ -422,27 +362,11 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "type":"sun.security.ssl.SSLContextImpl$DefaultSSLContext",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "type":"sun.security.ssl.TrustManagerFactoryImpl$PKIXFactory",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
   "type":"sun.security.ssl.TrustManagerFactoryImpl$PKIXFactory",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "type":"sun.security.x509.AuthorityInfoAccessExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "type":"sun.security.x509.AuthorityInfoAccessExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "type":"sun.security.x509.AuthorityKeyIdentifierExtension",
   "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
 },
 {
@@ -454,43 +378,11 @@
   "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
 },
 {
-  "type":"sun.security.x509.BasicConstraintsExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "type":"sun.security.x509.CRLDistributionPointsExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
   "type":"sun.security.x509.CRLDistributionPointsExtension",
   "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
 },
 {
   "type":"sun.security.x509.CertificatePoliciesExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "type":"sun.security.x509.CertificatePoliciesExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "type":"sun.security.x509.ExtendedKeyUsageExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "type":"sun.security.x509.ExtendedKeyUsageExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "type":"sun.security.x509.IssuerAlternativeNameExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "type":"sun.security.x509.IssuerAlternativeNameExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "type":"sun.security.x509.KeyUsageExtension",
   "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
 },
 {
@@ -502,19 +394,7 @@
   "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
 },
 {
-  "type":"sun.security.x509.NetscapeCertTypeExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
   "type":"sun.security.x509.PrivateKeyUsageExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "type":"sun.security.x509.PrivateKeyUsageExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "type":"sun.security.x509.SubjectAlternativeNameExtension",
   "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
 },
 {
@@ -524,19 +404,5 @@
 {
   "type":"sun.security.x509.SubjectKeyIdentifierExtension",
   "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "type":"sun.security.x509.SubjectKeyIdentifierExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "type":{
-    "proxy":["org.prelle.terminal.console.UnixConsole$CLibrary"]
-  }
-},
-{
-  "type":{
-    "proxy":["org.prelle.terminal.console.UnixConsole$CLibrary"]
-  }
 }
 ]

@@ -20,10 +20,10 @@
   			<artifactId>libterminal-api</artifactId>
             <version>${revision}</version>
 		</dependency>
-		<dependency>
+		<!--<dependency>
     		<groupId>net.java.dev.jna</groupId>
     		<artifactId>jna</artifactId>
     		<version>5.15.0</version>
-		</dependency>
+		</dependency>-->
 	</dependencies>
 </project>

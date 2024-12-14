@@ -80,6 +80,11 @@
           <artifactId>mudansi</artifactId>
           <version>0.0.2-SNAPSHOT</version>
       </dependency>
+      <dependency>
+            <groupId>org.graalvm.sdk</groupId>
+            <artifactId>nativeimage</artifactId>
+            <version>23.1.5</version>
+        </dependency>
     </dependencies>
 
     <repositories>
@@ -180,6 +185,7 @@
                 <javaOptions>
                     <option>-enable-preview</option>
                     <option>-Dfile.encoding=UTF-8</option>
+                    <option>--enable-native-access=ALL-UNNAMED</option>
                 </javaOptions>
                 <winConsole>true</winConsole>
                 <winDirChooser>true</winDirChooser>
@@ -193,22 +199,22 @@
                 <version>${client.plugin.version}</version>
                 <configuration>
                     <target>${gluonfx.target}</target>
+                    <mainClass>${mainClassName}</mainClass>
                     <verbose>true</verbose>
                     <bundlesList>
                     </bundlesList>
                     <resourcesList>
                      </resourcesList>
-                    <mainClass>${mainClassName}</mainClass>
                     <runtimeArgs>
-                     Added as command line params when on Android (but not on desktop) 
                         <arg>-Dproject.version=${project.version}</arg>
+                        <arg>--enable-native-access=ALL-UNNAMED</arg>
                     </runtimeArgs>
                     <nativeImageArgs>
                         <arg>-H:IncludeLocales=en,de</arg>
                         <arg>-H:+UnlockExperimentalVMOptions</arg>
                         <arg>-H:+ForeignAPISupport</arg>
-                        <arg>-H:+JNI</arg>
                         <arg>--initialize-at-build-time=com.graphicmud.GMLoggerFinder,com.graphicmud.GMLogger</arg>
+                        <arg>-H:Features=org.prelle.realmrunner.terminal.FFMFeature</arg>
                     </nativeImageArgs>
                     <attachList>
                     </attachList>
@@ -216,15 +222,15 @@
                         <description>Terminal MUD client</description>
                         <vendor>Stefan Prelle</vendor>
                         <version>${project.version}</version>
-                         macOS 
+                        <!-- macOS--> 
                         <macAppCategory>public.app-category.role-playing-games</macAppCategory>
                         <macAppStore>false</macAppStore>
                         <skipSigning>true</skipSigning>
-                         macOS / iOS 
+                        <!-- macOS / iOS--> 
                         <bundleName>RealmRunner</bundleName>
                         <bundleVersion>${env.GITHUB_RUN_NUMBER}</bundleVersion>
 
-                         Android 
+                        <!-- Android--> 
                         <appLabel>RealmRunner</appLabel>
                         <versionCode>${env.GITHUB_RUN_NUMBER}</versionCode>
                         <versionName>${project.version}</versionName>
@@ -275,4 +281,36 @@
       		</plugin>-->
       </plugins>
 	</build>
+	
+	<profiles>
+        <profile>
+            <id>native</id>
+            <build>
+      <plugins>
+        <plugin>
+          <groupId>org.graalvm.buildtools</groupId>
+          <artifactId>native-maven-plugin</artifactId>
+          <version>21.2.0</version>
+          <extensions>true</extensions>
+          <executions>
+            <execution>
+            <id>build-native</id>
+              <goals>
+                <goal>compile-no-fork</goal>
+              </goals>
+              <phase>package</phase>
+            </execution>
+            <execution>
+            <id>test-native</id>
+              <goals>
+                <goal>test</goal>
+              </goals>
+              <phase>test</phase>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+            </build>
+        </profile>
+ 	</profiles>
 </project>
