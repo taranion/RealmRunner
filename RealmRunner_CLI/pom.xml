@@ -43,9 +43,9 @@
           <version>${revision}</version>
 	  </dependency>
 		<dependency>
-    		<groupId>javazoom</groupId>
+    		<groupId>org.prelle</groupId>
     		<artifactId>jlayer</artifactId>
-    		<version>1.0.1</version>
+    		<version>1.0.4-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -83,10 +83,10 @@
     </dependencies>
 
     <repositories>
-        <!--<repository>
+        <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
-        </repository>-->
+        </repository>
     </repositories>
 
 	<build>
