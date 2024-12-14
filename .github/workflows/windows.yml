@@ -49,7 +49,7 @@ jobs:
       run: mvn -U -B -s settings.xml clean install
 
     - name: Compile GraphicMUD
-      run: git submodule init ; git submodule update ; cd graphicmud ; mvn -B -s ..\settings.xml clean install -DskipTests
+      run: git submodule init ; git submodule update ; cd graphicmud ; mvn -B -s ..\settings.xml clean install -D"gpg.skip" -DskipTests
 
     - name: Compile CLI JRE
       run: cd RealmRunner_CLI ; mvn -B -s ..\settings.xml clean package gluonfx:build; ls target  ; dir target\

@@ -59,18 +59,17 @@ jobs:
         path: artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.jar
     - uses: actions/upload-artifact@v4
       with:
-        name: realmrunner-cli-${{ env.RELEASE_VERSION }}-EXECUTABLE
+        name: realmrunner-cli-${{ env.RELEASE_VERSION }}-LINUX-EXECUTABLE
         path: artifacts/realmrunner-cli
         
     - name: Compile CLI JRE
-      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml clean package jpackage:jpackage
+      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml jpackage:jpackage
 
     - name: Results
       run: cd RealmRunner_CLI ; find target
 
     - name: Collect artifacts
       run: |
-        mkdir artifacts 
         cp "RealmRunner_CLI/target/dist/realmrunner_0.0.1-SNAPSHOT_amd64.deb" artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.deb
         ls -l artifacts/
 
