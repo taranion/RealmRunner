@@ -1,4 +1,4 @@
-name: Compile Linux Self
+name: Compile JRE version
 on: [push]
 #on:
 #  push:
@@ -42,5 +42,5 @@ jobs:
       run: mvn -U -B -s settings.xml clean install -Dgpg.skip
 
     - name: Compile CLI JRE
-      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml clean jpackage:jpackage; ls target  
+      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml clean package jpackage:jpackage; ls target  
         
