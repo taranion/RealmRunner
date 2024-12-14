@@ -1,4 +1,4 @@
-name: Compile Linux Self
+name: Matrix
 on: [push]
 #on:
 #  push:
@@ -28,8 +28,6 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     runs-on:  ${{ matrix.os }}
     steps:
-    - name: checkout sources
-      uses: actions/checkout@v4
     - name: show dir
       run: ls
         
