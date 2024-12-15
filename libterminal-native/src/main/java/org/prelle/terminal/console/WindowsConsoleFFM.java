@@ -113,8 +113,8 @@ public class WindowsConsoleFFM implements TerminalEmulator {
     private static final Linker linker = Linker.nativeLinker();
     private static final SymbolLookup kernel32 = SymbolLookup.libraryLookup("kernel32", Arena.global());
     // Standard-Handles
-    private static final int STD_INPUT_HANDLE = -10;
-    private static final int STD_OUTPUT_HANDLE = -11;
+    private static final long STD_INPUT_HANDLE = -10;
+    private static final long STD_OUTPUT_HANDLE = -11;
 
 	private int savedStateIn, savedStateOut;
     private ANSIOutputStream out;
