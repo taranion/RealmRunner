@@ -108,7 +108,7 @@ jobs:
       run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml jpackage:jpackage@win
     - name: Results
       continue-on-error: true
-      run: cd RealmRunner_CLI\target ; dir ; dir gluonfx 
+      run: cd RealmRunner_CLI\target ; dir ; dir gluonfx
 
     - name: Prepare
       continue-on-error: true
