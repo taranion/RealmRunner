@@ -123,7 +123,7 @@ public class WindowsConsoleFFM implements TerminalEmulator {
     private Arena arena;
     private MethodHandle GetStdHandle, GetConsoleMode, SetConsoleMode, GetConsoleScreenBufferInfo;
     private MethodHandle getConsoleCP, getConsoleOutputCP, setConsoleCP, setConsoleOutputCP;
-    private long stdInHandle, stdOutHandle;
+    private MemorySegment stdInHandle, stdOutHandle;
     private MemorySegment currentMode;
     private MemorySegment consoleInfo;
     private GroupLayout consoleScreenBufferInfoLayout;
@@ -137,7 +137,7 @@ public class WindowsConsoleFFM implements TerminalEmulator {
         // Define functions
     	GetStdHandle = linker.downcallHandle(
                 kernel32.find("GetStdHandle").orElseThrow(() -> new IllegalStateException("GetStdHandle not found")),
-                FunctionDescriptor.of(JAVA_LONG, JAVA_INT)
+                FunctionDescriptor.of(ADDRESS, JAVA_INT)
             );
 
     	GetConsoleMode = linker.downcallHandle(
@@ -191,8 +191,8 @@ public class WindowsConsoleFFM implements TerminalEmulator {
         in  = new ANSIInputStream(System.in);
         
       	try {
-			stdOutHandle = (long) GetStdHandle.invokeExact(STD_OUTPUT_HANDLE);
-			stdInHandle = (long) GetStdHandle.invokeExact(STD_INPUT_HANDLE);
+			stdOutHandle = (MemorySegment) GetStdHandle.invokeExact(STD_OUTPUT_HANDLE);
+			stdInHandle = (MemorySegment) GetStdHandle.invokeExact(STD_INPUT_HANDLE);
 		} catch (Throwable e) {
 			logger.log(Level.ERROR, "Error getting handles",e);
 			System.exit(1);
