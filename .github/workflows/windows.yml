@@ -67,15 +67,17 @@ jobs:
       run: cd RealmRunner_CLI\target ; dir ; dir dist ; dir gluonfx\x86_64-windows
 
     - name: Prepare
+      continue-on-error: true
       run: |
         cp RealmRunner_CLI\target\dist\* artifacts\
-        cp "RealmRunner_CLI\target\gluonfx\x86_64-windows\Realm Runner CLI"" artifacts\realmrunner
+        ls -l artifacts/
+        cp "RealmRunner_CLI\target\gluonfx\x86_64-windows\Realm Runner CLI" artifacts\realmrunner
         ls -l artifacts/
     - name: Interpreted MSI
       uses: actions/upload-artifact@v4
       with:
         name: realmrunner-cli-${{ env.RELEASE_VERSION }}.msi
-        path: artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}*msi
+        path: artifacts/RealmRunnerCLI-${{ env.RELEASE_VERSION }}*msi
     
     - name: Release
       uses: softprops/action-gh-release@v2

@@ -157,7 +157,7 @@
             <artifactId>jpackage-maven-plugin</artifactId>
             <version>1.6.5</version>
             <configuration>
-                <name>RealmRunner</name>
+                <name>RealmRunnerCLI</name>
                 <aboutUrl>http://graphicmud.com/</aboutUrl>
                 <appVersion>${project.version}</appVersion>
                 <copyright>2024 Stefan Prelle</copyright>
