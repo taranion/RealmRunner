@@ -62,7 +62,7 @@ jobs:
       run: |
         mkdir artifacts 
         cp RealmRunner_CLI/target/realmrunner-cli*with-dependencies.jar artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.jar
-        cp target/dist/* artifacts/
+        cp RealmRunner_CLI/target/dist/* artifacts/
         cp "RealmRunner_CLI/target/gluonfx/x86_64-linux/Realm Runner CLI" artifacts/realmrunner-cli
         ls -l artifacts/
     - name: FAT JAR
