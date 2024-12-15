@@ -113,8 +113,8 @@ public class WindowsConsoleFFM implements TerminalEmulator {
     private static final Linker linker = Linker.nativeLinker();
     private static final SymbolLookup kernel32 = SymbolLookup.libraryLookup("kernel32", Arena.global());
     // Standard-Handles
-    private static final long STD_INPUT_HANDLE = -10;
-    private static final long STD_OUTPUT_HANDLE = -11;
+    private static final int STD_INPUT_HANDLE = -10;
+    private static final int STD_OUTPUT_HANDLE = -11;
 
 	private int savedStateIn, savedStateOut;
     private ANSIOutputStream out;
@@ -123,7 +123,7 @@ public class WindowsConsoleFFM implements TerminalEmulator {
     private Arena arena;
     private MethodHandle GetStdHandle, GetConsoleMode, SetConsoleMode, GetConsoleScreenBufferInfo;
     private MethodHandle getConsoleCP, getConsoleOutputCP, setConsoleCP, setConsoleOutputCP;
-    private MemorySegment stdInHandle, stdOutHandle;
+    private long stdInHandle, stdOutHandle;
     private MemorySegment currentMode;
     private MemorySegment consoleInfo;
     private GroupLayout consoleScreenBufferInfoLayout;
@@ -137,7 +137,7 @@ public class WindowsConsoleFFM implements TerminalEmulator {
         // Define functions
     	GetStdHandle = linker.downcallHandle(
                 kernel32.find("GetStdHandle").orElseThrow(() -> new IllegalStateException("GetStdHandle not found")),
-                FunctionDescriptor.of(ADDRESS, JAVA_INT)
+                FunctionDescriptor.of(JAVA_LONG, JAVA_INT)
             );
 
     	GetConsoleMode = linker.downcallHandle(
@@ -191,8 +191,8 @@ public class WindowsConsoleFFM implements TerminalEmulator {
         in  = new ANSIInputStream(System.in);
         
       	try {
-			stdOutHandle = (MemorySegment) GetStdHandle.invokeExact(STD_OUTPUT_HANDLE);
-			stdInHandle = (MemorySegment) GetStdHandle.invokeExact(STD_INPUT_HANDLE);
+			stdOutHandle = (long) GetStdHandle.invokeExact(STD_OUTPUT_HANDLE);
+			stdInHandle = (long) GetStdHandle.invokeExact(STD_INPUT_HANDLE);
 		} catch (Throwable e) {
 			logger.log(Level.ERROR, "Error getting handles",e);
 			System.exit(1);
@@ -460,7 +460,7 @@ public class WindowsConsoleFFM implements TerminalEmulator {
 	@Override
 	public int[] getConsoleSize() throws IOException, InterruptedException {
 		try {
-			int result = (int) GetConsoleScreenBufferInfo.invokeExact(STD_OUTPUT_HANDLE, consoleInfo);
+			int result = (int) GetConsoleScreenBufferInfo.invokeExact(stdOutHandle, consoleInfo);
 			if (result == 0) {
 			    throw new IllegalStateException("GetConsoleScreenBufferInfo failed");
 			}
