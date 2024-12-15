@@ -83,4 +83,48 @@ jobs:
       uses: softprops/action-gh-release@v2
       if: startsWith(github.ref, 'refs/tags/')
       with:
-        files: artifacts/*    
+        files: artifacts/*
+         
+  compileWithoutGraal:
+    runs-on: windows-latest
+    steps:
+    - name: checkout sources
+      uses: actions/checkout@v4
+    - uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '21'
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v2
+    - name: Visual Studio shell
+      uses: egor-tensin/vs-shell@v2
+
+    - name: Get version (bash)
+      continue-on-error: true
+      shell: bash -l {0}
+      run: echo "RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
+
+    - name: Compile dependencies
+      run: mvn -U -B -s settings.xml clean install ; mkdir artifacts
+
+    - name: Compile GraphicMUD
+      run: git submodule init ; git submodule update ; cd graphicmud ; mvn -B -s ..\settings.xml clean install -D"gpg.skip" -DskipTests
+    - name: Compile fat jar
+      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml clean package
+    - name: Compile CLI Interpreted MSI
+      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml jpackage:jpackage@win
+    - name: Results
+      run: cd RealmRunner_CLI\target ; dir ; dir dist 
+
+    - name: Prepare
+      continue-on-error: true
+      run: |
+        cp RealmRunner_CLI\target\dist\* artifacts\
+        ls -l artifacts/
+    - name: Interpreted MSI
+      uses: actions/upload-artifact@v4
+      with:
+        name: realmrunner-cli-b-${{ env.RELEASE_VERSION }}.msi
+        path: artifacts/RealmRunnerCLI-${{ env.RELEASE_VERSION }}*msi
+      
+          
