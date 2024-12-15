@@ -10,6 +10,7 @@
   <artifactId>realmrunner_cli</artifactId>
   <name>Realm Runner CLI</name>
   <description>MUD client for a terminal emulator written in Java</description>
+  <packaging>jlink</packaging>
 
 	<properties>
 		<mainClassName>org.prelle.realmrunner.terminal.MUDClientTerminal</mainClassName>
@@ -138,7 +139,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
-                    <!--<execution>
+                    <execution>
                         <id>copy-dependencies</id>
                         <phase>package</phase>
                         <goals>
@@ -148,7 +149,7 @@
                             <includeScope>runtime</includeScope>
                             <outputDirectory>target/jmods</outputDirectory>
                         </configuration>
-                    </execution>-->
+                    </execution>
                 </executions>
             </plugin>
 
@@ -191,7 +192,7 @@
                 <name>RealmRunner</name>
                 <appVersion>${project.version}</appVersion>
                 <vendor>StefanPrelle</vendor>
-                <runtimeImage>target/realmrunner_cli-${project.version}-huh.zip</runtimeImage>
+                <runtimeImage>${project.build.directory}/image</runtimeImage>
                 <module>org.prelle.realmrunner_cli/${mainClassName}</module>
                 <modulePaths>
         	       <modulePath>target/jmods</modulePath>

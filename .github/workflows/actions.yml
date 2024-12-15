@@ -63,7 +63,7 @@ jobs:
         path: artifacts/realmrunner-cli
         
     - name: Compile CLI JRE
-      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml jpackage:jpackage
+      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml -f pom-jlink package jpackage:jpackage
 
     - name: Results
       run: cd RealmRunner_CLI ; find target
