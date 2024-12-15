@@ -44,14 +44,14 @@ jobs:
     - name: Compile dependencies
       run: mvn -U -B -s settings.xml clean install -Dgpg.skip
 
-    - name: Compile CLI Native
-      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml clean package gluonfx:build; ls target  ; ls -l target/gluonfx/x86_64-linux
+    - name: Compile CLI Native & JLink
+      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml clean package gluonfx:build 
 
     - name: Package CLI Native
-      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml gluonfx:package ; find target/gluonfx
+      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml gluonfx:package
       
     - name: Package JLink
-      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml -f pom-jlink.xml package jpackage:jpackage
+      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml jpackage:jpackage
 
     - name: Results
       run: cd RealmRunner_CLI ; find target
@@ -59,10 +59,8 @@ jobs:
     - name: Prepare
       run: |
         mkdir artifacts 
-        cp "RealmRunner_CLI/target/realmrunner-*with_dependencies.jar artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.jar
+        cp RealmRunner_CLI/target/realmrunner_cli*with_dependencies.jar artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.jar
         cp "RealmRunner_CLI/target/gluonfx/x86_64-linux/Realm Runner CLI" artifacts/realmrunner-cli
-        cp "RealmRunner_CLI/target/dist/realmrunner*.deb artifacts/
-        cp "RealmRunner_CLI/target/dist/realmrunner*.rpm artifacts/
         ls -l artifacts/
     - uses: actions/upload-artifact@v4
       with:
@@ -76,10 +74,10 @@ jobs:
       continue-on-error: true
       with:
         name: realmrunner-cli-${{ env.RELEASE_VERSION }}.deb
-        path: artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.deb
+        path: RealmRunner_CLI/target/dist/realmrunner*.deb
     - uses: actions/upload-artifact@v4
       continue-on-error: true
       with:
         name: realmrunner-cli-${{ env.RELEASE_VERSION }}.rpm
-        path: artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.rpm
+        path: RealmRunner_CLI/target/dist/realmrunner*.rpm
         

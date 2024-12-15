@@ -56,21 +56,24 @@ jobs:
         
     - name: Package CLI JLink
       continue-on-error: true
-      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml -f pom-jlink.xml package jpackage:jpackage ; dir target\ ; dir target\dist
+      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml package jpackage:jpackage ; dir target\ ; dir target\dist
 
     - name: Compile CLI Native
       continue-on-error: true
-      run: cd RealmRunner_CLI ; mvn -B -s ..\settings.xml gluonfx:build; dir target\
+      run: cd RealmRunner_CLI ; mvn -B -s ..\settings.xml gluonfx:build; ls target\
 
     - name: Package CLI Native
       continue-on-error: true
       run: cd RealmRunner_CLI ; mvn -B -s ..\settings.xml jpackage:jpackage; dir target\
 
+    - name: Results
+      run: cd RealmRunner_CLI\target ; dir
+
     - name: Fat jar artifact
       run: |
         mkdir artifacts 
         cp RealmRunner_CLI\target\realmrunner_cli-*with-dependencies.jar artifacts\realmrunner-cli-${{ env.RELEASE_VERSION }}.jar 
-        cp "RealmRunner_CLI\target/gluonfx/x86_64-windows/Realm Runner CLI" artifacts/realmrunner-cli
+        cp RealmRunner_CLI\target\dist\RealmRunner-${{ env.RELEASE_VERSION }}.exe artifacts/RealmRunner.exe
         ls -l artifacts/
     - uses: actions/upload-artifact@v4
       with:
@@ -79,5 +82,5 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         name: realmrunner-cli-${{ env.RELEASE_VERSION }}-EXECUTABLE
-        path: artifacts/realmrunner-cli
+        path: artifacts/RealmRunner.exe
         
