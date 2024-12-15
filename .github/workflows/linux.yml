@@ -52,11 +52,17 @@ jobs:
       
     - name: Package JLink
       run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml -f pom-jlink.xml package jpackage:jpackage
+
+    - name: Results
+      run: cd RealmRunner_CLI ; find target
       
     - name: Prepare
       run: |
         mkdir artifacts 
+        cp "RealmRunner_CLI/target/realmrunner.*with_dependencies.jar artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.jar
         cp "RealmRunner_CLI/target/gluonfx/x86_64-linux/Realm Runner CLI" artifacts/realmrunner-cli
+        cp "RealmRunner_CLI/target/dist/realmrunner*.deb artifacts/
+        cp "RealmRunner_CLI/target/dist/realmrunner*.rpm artifacts/
         ls -l artifacts/
     - uses: actions/upload-artifact@v4
       with:
@@ -66,20 +72,14 @@ jobs:
       with:
         name: realmrunner-cli-${{ env.RELEASE_VERSION }}-LINUX-EXECUTABLE
         path: artifacts/realmrunner-cli
-        
-    - name: Compile CLI JLink
-      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml -f pom-jlink.xml package jpackage:jpackage
-
-    - name: Results
-      run: cd RealmRunner_CLI ; find target
-
-    - name: Collect artifacts
-      run: |
-        cp "RealmRunner_CLI/target/dist/realmrunner_0.0.1-SNAPSHOT_amd64.deb" artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.deb
-        ls -l artifacts/
-
     - uses: actions/upload-artifact@v4
+      continue-on-error: true
       with:
         name: realmrunner-cli-${{ env.RELEASE_VERSION }}.deb
         path: artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.deb
+    - uses: actions/upload-artifact@v4
+      continue-on-error: true
+      with:
+        name: realmrunner-cli-${{ env.RELEASE_VERSION }}.rpm
+        path: artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.rpm
         

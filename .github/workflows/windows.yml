@@ -55,12 +55,15 @@ jobs:
       run: cd RealmRunner_CLI ; mvn -B -s ..\settings.xml clean package ; dir target\
         
     - name: Package CLI JLink
+      continue-on-error: true
       run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml -f pom-jlink.xml package jpackage:jpackage ; dir target\
 
     - name: Compile CLI Native
+      continue-on-error: true
       run: cd RealmRunner_CLI ; mvn -B -s ..\settings.xml gluonfx:build; dir target\
 
     - name: Package CLI Native
+      continue-on-error: true
       run: cd RealmRunner_CLI ; mvn -B -s ..\settings.xml jpackage:jpackage; dir target\
 
     - name: Fat jar artifact
