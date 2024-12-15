@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.prelle</groupId>
   <artifactId>mudclient-jfx</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.1</version>
   <name>MUDClient-JFX</name>
   <description>MUD client written in Java+JavaFX</description>
 

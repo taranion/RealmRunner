@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.prelle</groupId>
   <artifactId>realmrunner</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.1</version>
   <name>MUD Client</name>
   <packaging>pom</packaging>
 
@@ -11,7 +11,7 @@
 		<maven.deploy.skip>true</maven.deploy.skip>
 		<maven.install.skip>false</maven.install.skip>
 		<maven.compiler.release>23</maven.compiler.release>
-		<revision>0.0.1-SNAPSHOT</revision>
+		<revision>0.0.1</revision>
 	</properties>
 
 	<modules>
