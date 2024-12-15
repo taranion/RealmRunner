@@ -460,7 +460,7 @@ public class WindowsConsoleFFM implements TerminalEmulator {
 	@Override
 	public int[] getConsoleSize() throws IOException, InterruptedException {
 		try {
-			int result = (int) GetConsoleScreenBufferInfo.invokeExact(stdOutHandle, consoleInfo);
+			int result = (int) GetConsoleScreenBufferInfo.invokeExact(STD_OUTPUT_HANDLE, consoleInfo);
 			if (result == 0) {
 			    throw new IllegalStateException("GetConsoleScreenBufferInfo failed");
 			}
