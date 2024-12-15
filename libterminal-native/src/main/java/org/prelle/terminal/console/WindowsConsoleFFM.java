@@ -151,7 +151,7 @@ public class WindowsConsoleFFM implements TerminalEmulator {
         );
         GetConsoleScreenBufferInfo = Linker.nativeLinker().downcallHandle(
                 kernel32.find("GetConsoleScreenBufferInfo").orElseThrow(() -> new IllegalStateException("GetConsoleScreenBufferInfo not found")),
-                FunctionDescriptor.of(JAVA_INT, JAVA_LONG, ADDRESS)
+                FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS)
             );
         getConsoleCP = Linker.nativeLinker().downcallHandle(
                 kernel32.find("GetConsoleCP").orElseThrow(() -> new IllegalStateException("GetConsoleCP not found")),
