@@ -173,25 +173,17 @@ public class WindowsConsoleFFM implements TerminalEmulator {
        	currentMode = arena.allocate(JAVA_INT);
         // Definition der CONSOLE_SCREEN_BUFFER_INFO-Struktur
         consoleScreenBufferInfoLayout = MemoryLayout.structLayout(
-        		MemoryLayout.structLayout(   // dwSize
-        	            JAVA_SHORT.withName("X"), 
-        	            JAVA_SHORT.withName("Y")
-        	        ).withName("dwSize"),
-        	        MemoryLayout.structLayout(   // dwCursorPosition
-        	            JAVA_SHORT.withName("X"), 
-        	            JAVA_SHORT.withName("Y")
-        	        ).withName("dwCursorPosition"),
-        	        JAVA_SHORT.withName("wAttributes"),  // wAttributes
-        	        MemoryLayout.structLayout(   // srWindow
-        	            JAVA_SHORT.withName("Left"), 
-        	            JAVA_SHORT.withName("Top"),
-        	            JAVA_SHORT.withName("Right"), 
-        	            JAVA_SHORT.withName("Bottom")
-        	        ).withName("srWindow"),
-        	        MemoryLayout.structLayout(   // dwMaximumWindowSize
-        	            JAVA_SHORT.withName("X"), 
-        	            JAVA_SHORT.withName("Y")
-        	        ).withName("dwMaximumWindowSize")
+        		JAVA_SHORT.withName("dwSizeX"),
+        		JAVA_SHORT.withName("dwSizeY"),
+        		JAVA_SHORT.withName("dwCursorPositionX"),
+        		JAVA_SHORT.withName("dwCursorPositionY"),
+        		JAVA_SHORT.withName("wAttributes"),
+        		JAVA_SHORT.withName("srWindowLeft"),
+        		JAVA_SHORT.withName("srWindowTop"),
+        		JAVA_SHORT.withName("srWindowRight"),
+        		JAVA_SHORT.withName("srWindowBottom"),
+        		JAVA_SHORT.withName("dwMaximumWindowSizeX"),
+        		JAVA_SHORT.withName("dwMaximumWindowSizeY")
         );
         consoleInfo = arena.allocate(consoleScreenBufferInfoLayout);
 
@@ -472,19 +464,11 @@ public class WindowsConsoleFFM implements TerminalEmulator {
 			if (result == 0) {
 			    throw new IllegalStateException("GetConsoleScreenBufferInfo failed");
 			}
+			logger.log(Level.INFO, "Lese von {0} oder {1}", consoleScreenBufferInfoLayout.byteOffset(MemoryLayout.PathElement.groupElement("dwSizeX")), 0);
+			logger.log(Level.INFO, "Lese von {0} oder {1}", consoleScreenBufferInfoLayout.byteOffset(MemoryLayout.PathElement.groupElement("dwSizeY")), 2);
 			// Größe des Konsolenfensters auslesen
-			logger.log(Level.INFO, "Lese W von "+consoleScreenBufferInfoLayout.byteOffset(MemoryLayout.PathElement.groupElement("dwSize"), MemoryLayout.PathElement.groupElement("X")));
-			logger.log(Level.INFO, "Lese H von "+consoleScreenBufferInfoLayout.byteOffset(MemoryLayout.PathElement.groupElement("dwSize"), MemoryLayout.PathElement.groupElement("Y")));
-			int sizeX = consoleInfo.get(
-			        JAVA_SHORT, 
-			        consoleScreenBufferInfoLayout.byteOffset(MemoryLayout.PathElement.groupElement("dwSize"), MemoryLayout.PathElement.groupElement("X"))
-			    );
-			    int sizeY = consoleInfo.get(
-			        JAVA_SHORT, 
-			        consoleScreenBufferInfoLayout.byteOffset(MemoryLayout.PathElement.groupElement("dwSize"), MemoryLayout.PathElement.groupElement("Y"))
-			    );
-//			int sizeX = consoleInfo.get(JAVA_INT, 4);
-//			int sizeY = consoleInfo.get(JAVA_INT, 8);
+			int sizeX = consoleInfo.get(JAVA_SHORT, consoleScreenBufferInfoLayout.byteOffset(MemoryLayout.PathElement.groupElement("dwSizeX")));
+			int sizeY = consoleInfo.get(JAVA_SHORT, consoleScreenBufferInfoLayout.byteOffset(MemoryLayout.PathElement.groupElement("dwSizeY")));
 			short windowLeft = consoleInfo.get(JAVA_SHORT, consoleScreenBufferInfoLayout.byteOffset(MemoryLayout.PathElement.groupElement("srWindowLeft")));
 			short windowRight = consoleInfo.get(JAVA_SHORT, consoleScreenBufferInfoLayout.byteOffset(MemoryLayout.PathElement.groupElement("srWindowRight")));
 			short windowTop = consoleInfo.get(JAVA_SHORT, consoleScreenBufferInfoLayout.byteOffset(MemoryLayout.PathElement.groupElement("srWindowTop")));
