@@ -54,12 +54,12 @@ jobs:
       run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml jpackage:jpackage
 
     - name: Results
-      run: cd RealmRunner_CLI ; find target
+      run: cd RealmRunner_CLI/target ; ls -l ; ls -l dist ; ls -l gluonfx/x86_64-linux/
       
     - name: Prepare
       run: |
         mkdir artifacts 
-        cp RealmRunner_CLI/target/realmrunner_cli*with_dependencies.jar artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.jar
+        cp RealmRunner_CLI/target/realmrunner_cli*with-dependencies.jar artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.jar
         cp "RealmRunner_CLI/target/gluonfx/x86_64-linux/Realm Runner CLI" artifacts/realmrunner-cli
         ls -l artifacts/
     - uses: actions/upload-artifact@v4

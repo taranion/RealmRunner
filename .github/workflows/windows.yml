@@ -67,7 +67,7 @@ jobs:
       run: cd RealmRunner_CLI ; mvn -B -s ..\settings.xml jpackage:jpackage; dir target\
 
     - name: Results
-      run: cd RealmRunner_CLI\target ; dir
+      run: cd RealmRunner_CLI\target ; dir ; dir dist ; dir gluonfx
 
     - name: Fat jar artifact
       run: |
