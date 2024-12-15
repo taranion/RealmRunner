@@ -99,4 +99,6 @@ jobs:
         make_latest: true
         files: |
           artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.jar
-          artifacts/realmrunner-cli  
+          artifacts/realmrunner-cli
+          artifacts/*.rpm
+          artifacts/*.deb
