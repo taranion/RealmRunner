@@ -9,6 +9,7 @@
   	
   <artifactId>realmrunner_cli</artifactId>
   <name>Realm Runner CLI</name>
+        <version>0.0.1</version>
   <description>MUD client for a terminal emulator written in Java</description>
   <packaging>jlink</packaging>
 

@@ -56,7 +56,7 @@ jobs:
         
     - name: Package CLI JLink
       continue-on-error: true
-      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml -f pom-jlink.xml package jpackage:jpackage ; dir target\
+      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml -f pom-jlink.xml package jpackage:jpackage ; dir target\ ; dir target\dist
 
     - name: Compile CLI Native
       continue-on-error: true
