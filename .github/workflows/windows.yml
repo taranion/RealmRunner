@@ -52,7 +52,16 @@ jobs:
       run: git submodule init ; git submodule update ; cd graphicmud ; mvn -B -s ..\settings.xml clean install -D"gpg.skip" -DskipTests
 
     - name: Compile CLI JRE
-      run: cd RealmRunner_CLI ; mvn -B -s ..\settings.xml clean package gluonfx:build; ls target  ; dir target\
+      run: cd RealmRunner_CLI ; mvn -B -s ..\settings.xml clean package ; dir target\
+        
+    - name: Package CLI JLink
+      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml -f pom-jlink.xml package jpackage:jpackage ; dir target\
+
+    - name: Compile CLI Native
+      run: cd RealmRunner_CLI ; mvn -B -s ..\settings.xml gluonfx:build; dir target\
+
+    - name: Package CLI Native
+      run: cd RealmRunner_CLI ; mvn -B -s ..\settings.xml jpackage:jpackage; dir target\
 
     - name: Fat jar artifact
       run: |

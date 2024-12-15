@@ -47,11 +47,11 @@ jobs:
     - name: Compile CLI Native
       run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml clean package gluonfx:build; ls target  ; ls -l target/gluonfx/x86_64-linux
 
-    - name: Package Native
+    - name: Package CLI Native
       run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml gluonfx:package ; find target/gluonfx
       
     - name: Package JLink
-      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml jpackage:jpackage
+      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml -f pom-jlink.xml package jpackage:jpackage
       
     - name: Prepare
       run: |
