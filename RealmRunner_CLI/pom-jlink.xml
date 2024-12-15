@@ -208,53 +208,6 @@
                 <verbose>false</verbose>
             </configuration>
     </plugin>
-
-            <plugin>
-                <groupId>com.gluonhq</groupId>
-                <artifactId>gluonfx-maven-plugin</artifactId>
-                <version>${client.plugin.version}</version>
-                <configuration>
-                    <target>${gluonfx.target}</target>
-                    <mainClass>${mainClassName}</mainClass>
-                    <verbose>true</verbose>
-                    <bundlesList>
-                    </bundlesList>
-                    <resourcesList>
-                     </resourcesList>
-                    <runtimeArgs>
-                        <arg>-Dproject.version=${project.version}</arg>
-                        <arg>--enable-native-access=ALL-UNNAMED</arg>
-                    </runtimeArgs>
-                    <nativeImageArgs>
-                        <arg>-H:IncludeLocales=en,de</arg>
-                        <arg>-H:+UnlockExperimentalVMOptions</arg>
-                        <arg>-H:+ForeignAPISupport</arg>
-                        <arg>--initialize-at-build-time=com.graphicmud.GMLoggerFinder,com.graphicmud.GMLogger</arg>
-                        <arg>-H:Features=org.prelle.realmrunner.terminal.FFMFeature</arg>
-                    </nativeImageArgs>
-                    <attachList>
-                    </attachList>
-                    <releaseConfiguration>
-                        <description>Terminal MUD client</description>
-                        <vendor>Stefan Prelle</vendor>
-                        <version>${project.version}</version>
-                        <!-- macOS--> 
-                        <macAppCategory>public.app-category.role-playing-games</macAppCategory>
-                        <macAppStore>false</macAppStore>
-                        <skipSigning>true</skipSigning>
-                        <!-- macOS / iOS--> 
-                        <bundleName>RealmRunner</bundleName>
-                        <bundleVersion>${env.GITHUB_RUN_NUMBER}</bundleVersion>
-
-                        <!-- Android--> 
-                        <appLabel>RealmRunner</appLabel>
-                        <versionCode>${env.GITHUB_RUN_NUMBER}</versionCode>
-                        <versionName>${project.version}</versionName>
-                    </releaseConfiguration>
-                </configuration>
-            </plugin>
-
-			
 			
 			<!--<plugin>
         		<groupId>com.github.akman</groupId>

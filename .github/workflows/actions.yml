@@ -44,8 +44,8 @@ jobs:
     - name: Compile dependencies
       run: mvn -U -B -s settings.xml clean install -Dgpg.skip
 
-    - name: Compile CLI JRE
-      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml clean package gluonfx:build; ls target  ; ls -l target/gluonfx/x86_64-linux
+    - name: Compile CLI Native
+      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml -f pom-native.xml clean package gluonfx:build; ls target  ; ls -l target/gluonfx/x86_64-linux
 
     - name: Fat jar artifact
       run: |
@@ -62,8 +62,8 @@ jobs:
         name: realmrunner-cli-${{ env.RELEASE_VERSION }}-LINUX-EXECUTABLE
         path: artifacts/realmrunner-cli
         
-    - name: Compile CLI JRE
-      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml -f pom-jlink package jpackage:jpackage
+    - name: Compile CLI JLink
+      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml -f pom-jlink.xml package jpackage:jpackage
 
     - name: Results
       run: cd RealmRunner_CLI ; find target
