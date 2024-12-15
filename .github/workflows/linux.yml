@@ -80,4 +80,10 @@ jobs:
       with:
         name: realmrunner-cli-${{ env.RELEASE_VERSION }}.rpm
         path: RealmRunner_CLI/target/dist/realmrunner*.rpm
-        
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: |
+          artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.jar
+          artifacts/realmrunner-cli  
