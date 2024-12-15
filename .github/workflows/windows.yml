@@ -61,23 +61,22 @@ jobs:
 
     - name: Package CLI Native
       continue-on-error: true
-      run: cd RealmRunner_CLI ; mvn -B -s ..\settings.xml jpackage:jpackage@win; dir target\
+      run: cd RealmRunner_CLI ; mvn -B -s ..\settings.xml gluonfx:package; dir target\gluonfx\x86_64-windows
 
     - name: Results
       run: cd RealmRunner_CLI\target ; dir ; dir dist ; dir gluonfx\x86_64-windows
 
-    - name: Fat jar artifact
+    - name: Prepare
       run: |
-        cp RealmRunner_CLI\target\realmrunner_cli-*with-dependencies.jar artifacts\realmrunner-cli-${{ env.RELEASE_VERSION }}.jar 
+        cp RealmRunner_CLI\target\dist\* artifacts\
+        cp "RealmRunner_CLI\target\gluonfx\x86_64-windows\Realm Runner CLI"" artifacts\realmrunner
         ls -l artifacts/
-    - uses: actions/upload-artifact@v4
+    - name: Interpreted MSI
+      uses: actions/upload-artifact@v4
       with:
-        name: realmrunner-cli-${{ env.RELEASE_VERSION }}-JAR
-        path: artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.jar
-    - uses: actions/upload-artifact@v4
-      with:
-        name: realmrunner-cli-${{ env.RELEASE_VERSION }}-INSTALLER
-        path: artifacts/RealmRunnerCLI-${{ env.RELEASE_VERSION }}-INSTALLER.exe
+        name: realmrunner-cli-${{ env.RELEASE_VERSION }}.msi
+        path: artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}*msi
+    
     - name: Release
       uses: softprops/action-gh-release@v2
       if: startsWith(github.ref, 'refs/tags/')

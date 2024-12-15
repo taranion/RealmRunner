@@ -16,7 +16,7 @@ env:
   CXX: g++-11
 
 jobs:
-  linuxBinary:
+  linux:
     runs-on: ubuntu-latest
     steps:
     - name: checkout sources
@@ -65,20 +65,24 @@ jobs:
         cp target/dist/* artifacts/
         cp "RealmRunner_CLI/target/gluonfx/x86_64-linux/Realm Runner CLI" artifacts/realmrunner-cli
         ls -l artifacts/
-    - uses: actions/upload-artifact@v4
+    - name: FAT JAR
+      uses: actions/upload-artifact@v4
       with:
         name: realmrunner-cli-${{ env.RELEASE_VERSION }}-JAR
         path: artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.jar
-    - uses: actions/upload-artifact@v4
+    - name: Executable
+      uses: actions/upload-artifact@v4
       with:
         name: realmrunner-cli-${{ env.RELEASE_VERSION }}-LINUX-EXECUTABLE
         path: artifacts/realmrunner-cli
-    - uses: actions/upload-artifact@v4
+    - name: Interpreted DEB
+      uses: actions/upload-artifact@v4
       continue-on-error: true
       with:
         name: realmrunner-cli-${{ env.RELEASE_VERSION }}.deb
         path: RealmRunner_CLI/target/dist/realmrunner*.deb
-    - uses: actions/upload-artifact@v4
+    - name: Interpreted RPM
+      uses: actions/upload-artifact@v4
       continue-on-error: true
       with:
         name: realmrunner-cli-${{ env.RELEASE_VERSION }}.rpm
