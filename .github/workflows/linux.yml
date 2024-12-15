@@ -44,14 +44,16 @@ jobs:
     - name: Compile dependencies
       run: mvn -U -B -s settings.xml clean install -Dgpg.skip
 
-    - name: Compile CLI Native & JLink
-      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml clean package gluonfx:build 
-
+    - name: Compile fat jar
+      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml clean package
+    - name: Compile CLI Interpreted DEB
+      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml jpackage:jpackage@linuxDEB
+    - name: Compile CLI Interpreted DEB
+      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml jpackage:jpackage@linuxRPM
+    - name: Compile CLI Native
+      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml gluonfx:build 
     - name: Package CLI Native
       run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml gluonfx:package
-      
-    - name: Package JLink
-      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml jpackage:jpackage
 
     - name: Results
       run: cd RealmRunner_CLI/target ; ls -l ; ls -l dist ; ls -l gluonfx/x86_64-linux/
@@ -60,6 +62,7 @@ jobs:
       run: |
         mkdir artifacts 
         cp RealmRunner_CLI/target/realmrunner_cli*with-dependencies.jar artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.jar
+        cp target/dist/* artifacts/
         cp "RealmRunner_CLI/target/gluonfx/x86_64-linux/Realm Runner CLI" artifacts/realmrunner-cli
         ls -l artifacts/
     - uses: actions/upload-artifact@v4
@@ -83,6 +86,8 @@ jobs:
     - name: Release
       uses: softprops/action-gh-release@v2
       if: startsWith(github.ref, 'refs/tags/')
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
         files: |
           artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.jar

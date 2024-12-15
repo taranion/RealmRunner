@@ -7,10 +7,9 @@
   		<version>0.0.1</version>
   	</parent>
   	
-  <artifactId>realmrunner_cli</artifactId>
+  <artifactId>realmrunner-cli</artifactId>
   <name>Realm Runner CLI</name>
   <description>MUD client for a terminal emulator written in Java</description>
-  <packaging>jlink</packaging>
 
     <properties>
 		<mainClassName>org.prelle.realmrunner.terminal.MUDClientTerminal</mainClassName>
@@ -154,66 +153,58 @@
             </plugin>
 
 		<plugin>
-            <artifactId>maven-jlink-plugin</artifactId>
-            <version>3.2.0</version>
-            <extensions>true</extensions>
-            <executions>
-                <execution>
-                    <phase>package</phase>
-                    <goals>
-                        <goal>jlink</goal>
-                    </goals>
-                </execution>
-            </executions>
-            <configuration>
-                <goal>jlink</goal>
-                <noHeaderFiles>true</noHeaderFiles>
-                <noManPages>true</noManPages>
-                <classifier>huh</classifier>
-            </configuration>
-        </plugin>	
-			
-		<plugin>
-            <artifactId>maven-antrun-plugin</artifactId>
-            <version>1.8</version>
-            <executions>
-                <execution>
-                    <phase>package</phase>
-                    <configuration>
-                    <tasks>
-                        <echo message="unzipping file" />
-                        <unzip src="${project.build.directory}/realmrunner_cli-${project.version}-huh.zip" dest="target/image" />
-                    </tasks>
-                    </configuration>
-                    <goals>
-                        <goal>run</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
-
-		<plugin>
             <groupId>org.panteleyev</groupId>
             <artifactId>jpackage-maven-plugin</artifactId>
             <version>1.6.5</version>
             <configuration>
                 <name>RealmRunner</name>
+                <aboutUrl>http://graphicmud.com/</aboutUrl>
                 <appVersion>${project.version}</appVersion>
-                <vendor>StefanPrelle</vendor>
-                <runtimeImage>${project.build.directory}/image</runtimeImage>
+                <copyright>2024 Stefan Prelle</copyright>
+                <description>Terminal MUD client</description>
+                <destination>target/dist</destination>
+                <vendor>Stefan Prelle</vendor>
+                <!--<runtimeImage>${project.build.directory}/image</runtimeImage>-->
                 <module>org.prelle.realmrunner_cli/${mainClassName}</module>
                 <modulePaths>
         	       <modulePath>target/jmods</modulePath>
                 </modulePaths>
-                <destination>target/dist</destination>
                 <javaOptions>
-                    <option>--enable-native-access=ALL-UNNAMED</option>
+                    <option>--enable-native-access=ALL-UNNAMED,org.prelle.libterminal.console</option>
                 </javaOptions>
-                <winConsole>true</winConsole>
-                <winDirChooser>true</winDirChooser>
                 <verbose>false</verbose>
             </configuration>
-    </plugin>
+            <executions>
+                <execution>
+                    <id>linuxDEB</id>
+                    <configuration>
+                        <type>DEB</type>
+                        <linuxAppCategory>Network</linuxAppCategory>
+                        <linuxMenuGroup>GraphicMUD</linuxMenuGroup>
+                        <linuxPackageName>realmrunner-cli</linuxPackageName>
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>linuxRPM</id>
+                    <configuration>
+                        <type>RPM</type>
+                        <linuxAppCategory>Network</linuxAppCategory>
+                        <linuxMenuGroup>GraphicMUD</linuxMenuGroup>
+                        <linuxPackageName>realmrunner-cli</linuxPackageName>
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>win</id>
+                    <configuration>
+                        <type>MSI</type>
+                        <winConsole>true</winConsole>
+                        <winDirChooser>true</winDirChooser>
+                        <winMenu>true</winMenu>
+                        <winPerUserInstall>true</winPerUserInstall>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
 
             <plugin>
                 <groupId>com.gluonhq</groupId>
@@ -229,7 +220,7 @@
                      </resourcesList>
                     <runtimeArgs>
                         <arg>-Dproject.version=${project.version}</arg>
-                        <arg>--enable-native-access=ALL-UNNAMED</arg>
+                        <arg>--enable-native-access=ALL-UNNAMED,org.prelle.libterminal.console</arg>
                     </runtimeArgs>
                     <nativeImageArgs>
                         <arg>-H:IncludeLocales=en,de</arg>

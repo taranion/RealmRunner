@@ -51,20 +51,17 @@ jobs:
     - name: Compile GraphicMUD
       run: git submodule init ; git submodule update ; cd graphicmud ; mvn -B -s ..\settings.xml clean install -D"gpg.skip" -DskipTests
 
-    - name: Compile CLI JRE
-      run: cd RealmRunner_CLI ; mvn -B -s ..\settings.xml clean package ; dir target\
-        
-    - name: Package CLI JLink
-      continue-on-error: true
-      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml package jpackage:jpackage ; dir target\dist; cp target\dist\RealmRunner*.exe ..\artifacts\RealmRunnerCLI-${{ env.RELEASE_VERSION }}-INSTALLER.exe
-
+    - name: Compile fat jar
+      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml clean package
+    - name: Compile CLI Interpreted MSI
+      run: cd RealmRunner_CLI ; mvn -B -s ../settings.xml jpackage:jpackage@win
     - name: Compile CLI Native
       continue-on-error: true
       run: cd RealmRunner_CLI ; mvn -B -s ..\settings.xml gluonfx:build; ls target\
 
     - name: Package CLI Native
       continue-on-error: true
-      run: cd RealmRunner_CLI ; mvn -B -s ..\settings.xml jpackage:jpackage; dir target\
+      run: cd RealmRunner_CLI ; mvn -B -s ..\settings.xml jpackage:jpackage@win; dir target\
 
     - name: Results
       run: cd RealmRunner_CLI\target ; dir ; dir dist ; dir gluonfx\x86_64-windows
@@ -72,7 +69,6 @@ jobs:
     - name: Fat jar artifact
       run: |
         cp RealmRunner_CLI\target\realmrunner_cli-*with-dependencies.jar artifacts\realmrunner-cli-${{ env.RELEASE_VERSION }}.jar 
-        cp RealmRunner_CLI\target\dist\RealmRunner-${{ env.RELEASE_VERSION }}.exe artifacts/RealmRunner.exe
         ls -l artifacts/
     - uses: actions/upload-artifact@v4
       with:
@@ -80,8 +76,8 @@ jobs:
         path: artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.jar
     - uses: actions/upload-artifact@v4
       with:
-        name: realmrunner-cli-${{ env.RELEASE_VERSION }}-EXECUTABLE
-        path: artifacts/RealmRunner.exe
+        name: realmrunner-cli-${{ env.RELEASE_VERSION }}-INSTALLER
+        path: artifacts/RealmRunnerCLI-${{ env.RELEASE_VERSION }}-INSTALLER.exe
     - name: Release
       uses: softprops/action-gh-release@v2
       if: startsWith(github.ref, 'refs/tags/')
