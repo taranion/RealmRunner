@@ -93,6 +93,10 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
+        body_path: CHANGELOG.txt
+        prerelease: true
+        generate_release_notes: true
+        make_latest: true
         files: |
           artifacts/realmrunner-cli-${{ env.RELEASE_VERSION }}.jar
           artifacts/realmrunner-cli  

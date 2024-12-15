@@ -2,7 +2,6 @@ package org.prelle.terminal.console;
 
 import static java.lang.foreign.ValueLayout.ADDRESS;
 import static java.lang.foreign.ValueLayout.JAVA_INT;
-import static java.lang.foreign.ValueLayout.JAVA_LONG;
 import static java.lang.foreign.ValueLayout.JAVA_SHORT;
 
 import java.io.IOException;
@@ -211,8 +210,8 @@ public class WindowsConsoleFFM implements TerminalEmulator {
 
         Thread restoreHook = new Thread( () -> {
         	logger.log(Level.INFO, "Resetting cooked mode and local echo");
-        	setMode(TerminalMode.LINE_MODE);
-        	setLocalEchoActive(true);
+        	setOutputMode(savedStateOut);
+        	setInputMode(savedStateIn);
         });
         Runtime.getRuntime().addShutdownHook(restoreHook);
 	}
@@ -464,20 +463,16 @@ public class WindowsConsoleFFM implements TerminalEmulator {
 			if (result == 0) {
 			    throw new IllegalStateException("GetConsoleScreenBufferInfo failed");
 			}
-			logger.log(Level.INFO, "Lese von {0} oder {1}", consoleScreenBufferInfoLayout.byteOffset(MemoryLayout.PathElement.groupElement("dwSizeX")), 0);
-			logger.log(Level.INFO, "Lese von {0} oder {1}", consoleScreenBufferInfoLayout.byteOffset(MemoryLayout.PathElement.groupElement("dwSizeY")), 2);
 			// Größe des Konsolenfensters auslesen
 			int sizeX = consoleInfo.get(JAVA_SHORT, consoleScreenBufferInfoLayout.byteOffset(MemoryLayout.PathElement.groupElement("dwSizeX")));
 			int sizeY = consoleInfo.get(JAVA_SHORT, consoleScreenBufferInfoLayout.byteOffset(MemoryLayout.PathElement.groupElement("dwSizeY")));
-			short windowLeft = consoleInfo.get(JAVA_SHORT, consoleScreenBufferInfoLayout.byteOffset(MemoryLayout.PathElement.groupElement("srWindowLeft")));
-			short windowRight = consoleInfo.get(JAVA_SHORT, consoleScreenBufferInfoLayout.byteOffset(MemoryLayout.PathElement.groupElement("srWindowRight")));
-			short windowTop = consoleInfo.get(JAVA_SHORT, consoleScreenBufferInfoLayout.byteOffset(MemoryLayout.PathElement.groupElement("srWindowTop")));
-			short windowBottom = consoleInfo.get(JAVA_SHORT, consoleScreenBufferInfoLayout.byteOffset(MemoryLayout.PathElement.groupElement("srWindowBottom")));
+//			short windowLeft = consoleInfo.get(JAVA_SHORT, consoleScreenBufferInfoLayout.byteOffset(MemoryLayout.PathElement.groupElement("srWindowLeft")));
+//			short windowRight = consoleInfo.get(JAVA_SHORT, consoleScreenBufferInfoLayout.byteOffset(MemoryLayout.PathElement.groupElement("srWindowRight")));
+//			short windowTop = consoleInfo.get(JAVA_SHORT, consoleScreenBufferInfoLayout.byteOffset(MemoryLayout.PathElement.groupElement("srWindowTop")));
+//			short windowBottom = consoleInfo.get(JAVA_SHORT, consoleScreenBufferInfoLayout.byteOffset(MemoryLayout.PathElement.groupElement("srWindowBottom")));
 
-			int width = windowRight - windowLeft + 1;
-			int height = windowBottom - windowTop + 1;
-			logger.log(Level.INFO, "Console size 1: {0}x{1}", sizeX, sizeY);
-			logger.log(Level.INFO, "Console size 2: {0}x{1}", width, height);
+//			int width = windowRight - windowLeft + 1;
+//			int height = windowBottom - windowTop + 1;
 			return new int[] {sizeX,sizeY};
 		} catch (Throwable e) {
         	logger.log(Level.ERROR, "Error invoking native function",e);
