@@ -15,6 +15,7 @@ import org.prelle.mud4j.gmcp.Char.Vitals;
 import org.prelle.mud4j.gmcp.CharSkills.CharSkillsPackage;
 import org.prelle.mud4j.gmcp.Client.ClientMediaPackage;
 import org.prelle.mud4j.gmcp.Client.ClientMediaPlay;
+import org.prelle.mud4j.gmcp.Client.ClientMediaStop;
 import org.prelle.mud4j.gmcp.Room.GMCPRoomInfo;
 import org.prelle.mud4j.gmcp.beip.BeipTilemapData;
 import org.prelle.mud4j.gmcp.beip.BeipTilemapInfo;
@@ -171,6 +172,7 @@ public class MUDSession implements TelnetSocketListener, TelnetOptionListener, G
 		case BeipTilemapInfo info -> gmcpListener.gmcpBeipTilemapInfo(info);
 		case BeipTilemapData data -> gmcpListener.gmcpBeipTilemapUpdate(data);
 		case ClientMediaPlay play -> gmcpListener.gmcpReceivedClientMedia(play);
+		case ClientMediaStop stop -> gmcpListener.gmcpReceivedClientMedia(stop);
 		case GMCPRoomInfo room -> gmcpListener.gmcpReceivedRoomInfo(room);
 		case Stats stats -> gmcpListener.gmcpReceivedStats(stats);
 		case Vitals vitals -> gmcpListener.gmcpReceivedVitals(vitals);

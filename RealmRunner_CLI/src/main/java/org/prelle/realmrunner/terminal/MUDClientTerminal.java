@@ -54,6 +54,7 @@ import org.prelle.mud4j.gmcp.Char.Stats;
 import org.prelle.mud4j.gmcp.Char.Vitals;
 import org.prelle.mud4j.gmcp.Client.ClientMediaPackage;
 import org.prelle.mud4j.gmcp.Client.ClientMediaPlay;
+import org.prelle.mud4j.gmcp.Client.ClientMediaStop;
 import org.prelle.mud4j.gmcp.Client.ClientPackage;
 import org.prelle.mud4j.gmcp.Core.CorePackage;
 import org.prelle.mud4j.gmcp.Room.GMCPRoomInfo;
@@ -140,6 +141,9 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 	private Timer timer;
 	private TimerTask updateNAWSTask;
 	private int terminalWidth, terminalHeight;
+	
+	private Player player;
+	private Thread playerThread;
 
 	private Map<String, BeipTilemapDef> mapsByID = new HashMap<>();
 	private Map<String, SymbolSet> setsByID = new HashMap<>();
@@ -643,9 +647,12 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 		try {
 			Path filePath = DataFileManager.downloadFileTo(play.name, uri);
 			logger.log(Level.INFO, "Filepath = "+filePath);
+			if (player!=null && !player.isComplete()) {
+				player.close();
+			}
 			if (filePath!=null) {
-				Player player = new Player(new FileInputStream(filePath.toFile()));
-				Thread thread = new Thread( () -> {
+				player = new Player(new FileInputStream(filePath.toFile()));
+				playerThread = new Thread( () -> {
 					try {
 						player.play();
 					} catch (JavaLayerException e) {
@@ -653,11 +660,24 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 						e.printStackTrace();
 					}
 				});
-				thread.start();
+				playerThread.start();
 			}
 		} catch (Exception e) {
 			logger.log(Level.ERROR, "Failed downloading from "+uri+"\n"+e);
 		}
+	}
+
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.mud4j.gmcp.Client.GMCPClientMediaListener#gmcpReceivedClientMedia(org.prelle.mud4j.gmcp.Client.ClientMediaPlay)
+	 */
+	@Override
+	public void gmcpReceivedClientMedia(ClientMediaStop stop) {
+		logger.log(Level.INFO, "Stop {0} with key {1}",stop.name, stop.key);
+		if (player!=null && !player.isComplete()) {
+			player.close();
+		}
+		
 	}
 
 	//-------------------------------------------------------------------
@@ -1043,12 +1063,15 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 	private AParsedElement filterFragmentFromMUD(AParsedElement frag) {
 		if (Boolean.TRUE==mainConfig.getServerLayoutControl())
 			return frag;
+		AreaDefinition scroll = format.getArea(UIGridFormat.ID_SCROLL);
+		// If in transparent mode, don't do anything
+		if (scroll==null) 
+			return frag;
 		
 		if (frag instanceof EraseInDisplay) {
 			logger.log(Level.WARNING, "Replace EraseInDisplay with clearing area");
-			AreaDefinition area = format.getArea(UIGridFormat.ID_SCROLL);
 			try {
-				format.clear(area);
+				format.clear(scroll);
 			} catch (Exception e) {
 				logger.log(Level.ERROR, "IOException clearing area",e);
 			}
@@ -1059,7 +1082,6 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 			return null;
 		}
 		if (frag instanceof CursorPosition) {
-			AreaDefinition scroll = format.getArea(UIGridFormat.ID_SCROLL);
 			CursorPosition cup = (CursorPosition)frag;
 			CursorPosition newCup = new CursorPosition(cup.getColumn() + scroll.getX(), cup.getLine() + scroll.getY());
 			logger.log(Level.WARNING, "Replace CursorPosition {0} with {1}", cup, newCup);
