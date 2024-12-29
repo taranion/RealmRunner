@@ -1277,7 +1277,8 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 			Path dataDir = DataFileManager.getCurrentDataDir().resolve(world);
 			Files.createDirectories(dataDir);
 			activeConfig.setDataDir(dataDir.toString());
-			graphic = new SwingTileGraphicLoader(DataFileManager.getCurrentDataDir().resolve("tilesets"));
+			graphic = new SwingTileGraphicLoader();
+			graphic.setSymbolDir(DataFileManager.getCurrentDataDir().resolve("tilesets"));
 			logger.log(Level.INFO, "Starting the session to {0} with dir {1}", activeConfig.getServer(), dataDir);
 			setupSession(config, activeConfig);
 		} catch (Exception e) {
