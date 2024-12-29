@@ -68,17 +68,17 @@
 		<dependency>
 			<groupId>com.graphicmud</groupId>
 			<artifactId>graphicmud-core</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
+			<version>0.0.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 		  	<groupId>com.graphicmud</groupId>
   			<artifactId>tile-service-swing</artifactId>
-  			<version>0.0.2</version>
+  			<version>0.0.3-SNAPSHOT</version>
 		</dependency>
       <dependency>
           <groupId>com.graphicmud</groupId>
           <artifactId>mudansi</artifactId>
-          <version>0.0.2</version>
+          <version>0.0.3-SNAPSHOT</version>
       </dependency>
       <dependency>
             <groupId>org.graalvm.sdk</groupId>
