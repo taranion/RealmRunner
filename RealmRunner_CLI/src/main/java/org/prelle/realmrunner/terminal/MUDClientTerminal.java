@@ -593,6 +593,9 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 	private void sendNAWS() {
 		if (session==null || session.getSocket()==null) return;
 		AreaDefinition def = format.getArea(UIGridFormat.ID_SCROLL);
+		if (def==null) {
+			def = new AreaDefinition(0, 0, terminalWidth, terminalHeight);
+		}
 		logger.log(Level.DEBUG, "Real size is {0}x{1}, but tell server the size is {2}x{3}", terminalWidth, terminalHeight, def.getW(), def.getH());
 		try {
 			TelnetWindowSize.sendUpdate(session.getSocket(), def.getW(), def.getH());
