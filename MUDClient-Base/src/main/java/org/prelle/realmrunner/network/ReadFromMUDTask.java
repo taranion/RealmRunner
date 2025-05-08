@@ -33,7 +33,6 @@ public class ReadFromMUDTask implements Runnable, TelnetSocketListener {
 	private ANSIOutputStream forwardTo;
 	private AbstractConfig config;
 	private Charset encoding;
-	private boolean inMXPMode;
 	private boolean inMSPMode;
 	private StringBuffer lineBuffer = new StringBuffer();
 	private StringBuffer mxpBuffer = new StringBuffer();
@@ -58,9 +57,10 @@ public class ReadFromMUDTask implements Runnable, TelnetSocketListener {
 	public void run() {
 		try {
 			TelnetInputStream in = (TelnetInputStream)mud.getInputStream();
-			ANSIInputStream ain = new ANSIInputStream(in);
+			in.setSendGoAheadAsANSISepator(true);
+			ANSIInputStream ain = new MXPInputStream(in);
 			ain.setEncoding(encoding);
-			ain.setCollectPrintable(false);
+			ain.setCollectPrintable(true);
 			ain.setLoggingListener( (type,text) -> {
 				if (!"PRINTABLE".equals(type)) {
 					if (text.startsWith("C0(CR") || text.startsWith("C0(LF")) return;
@@ -70,6 +70,7 @@ public class ReadFromMUDTask implements Runnable, TelnetSocketListener {
 			});
 			while (true) {
 				AParsedElement frag = ain.readFragment();
+				//logger.log(Level.WARNING, "process "+frag+" collect="+ain.isCollectPrintable());
 				if (frag==null) {
 					logger.log(Level.WARNING, "Connection to MUD lost");
 					AreaControls.clearScreen(forwardTo);
@@ -78,16 +79,12 @@ public class ReadFromMUDTask implements Runnable, TelnetSocketListener {
 					System.exit(0);
 					return;
 				}
-				logger.log(Level.TRACE, "MUD: {0}={1}  forward={2}", frag.getName(), frag.toString(), forwardTo);
+				logger.log(Level.INFO, "MUD: {0}={1}  forward={2}", frag.getName(), frag.toString(), forwardTo);
 
 				switch (frag) {
 				case C0Fragment c0 -> {
 					// If we have been in MXP mode so far, leave it now
-					if (inMXPMode) {
-						inMXPMode=false;
-						receivedMXP(mxpBuffer.toString());
-						mxpBuffer.delete(0, mxpBuffer.length());
-					} else if (c0.getCode()==C0Code.CR) {
+					if (c0.getCode()==C0Code.CR) {
 						// Line terminated
 						String line = lineBuffer.toString();
 						lineBuffer.delete(0, lineBuffer.length());
@@ -99,23 +96,9 @@ public class ReadFromMUDTask implements Runnable, TelnetSocketListener {
 						}
 					}
 				}
-				case MXPLine mxp -> {
-					if (inMXPMode) {
-						logger.log(Level.WARNING, "TODO: MXP: "+mxpBuffer);
-					} else
-						logger.log(Level.WARNING, "MXP has been announced");
-					inMXPMode=true;
-					mxpBuffer.delete(0, mxpBuffer.length());
-					continue;
-				}
 				case PrintableFragment print -> {
 					String text = print.getText();
-					// If we are in MXP mode, everything is added to the MXP
-					// buffer (until end of line)
-					if (inMXPMode) {
-						mxpBuffer.append(text);
-						continue;
-					}
+					logger.log(Level.WARNING, "RCV "+text);
 					if (inMSPMode && ")".equals(text)) {
 						// MSP command ending
 						lineBuffer.append(")");
@@ -143,6 +126,12 @@ public class ReadFromMUDTask implements Runnable, TelnetSocketListener {
 					if (inMSPMode)
 						continue;
 
+				}
+				case MXPStartTag mxp when mxp.getName().equalsIgnoreCase("br") -> {
+					// Line break
+					if (forwardTo!=null) {
+						forwardTo.write("\r\n");
+					}
 				}
 				default -> {}
 				}
@@ -192,11 +181,11 @@ public class ReadFromMUDTask implements Runnable, TelnetSocketListener {
 			switch (command.getCode()) {
 			case GA:
 			case EOR:
-				if (inMXPMode) {
-					logger.log(Level.WARNING, "Leave MXP due to EOR");
-					inMXPMode=false;
-					logger.log(Level.WARNING, "TODO: MXP: "+mxpBuffer);
-				}
+//				if (inMXPMode) {
+//					logger.log(Level.WARNING, "Leave MXP due to EOR");
+//					inMXPMode=false;
+//					logger.log(Level.WARNING, "TODO: MXP: "+mxpBuffer);
+//				}
 				if (forwardTo!=null) {
 					forwardTo.flush();
 				}

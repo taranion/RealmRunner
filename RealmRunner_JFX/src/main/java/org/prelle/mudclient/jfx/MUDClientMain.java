@@ -12,9 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.prelle.fxterminal.TerminalView;
-import org.prelle.mud.symbol.DefaultSymbolManager;
-import org.prelle.mud.symbol.SymbolManager;
-import org.prelle.mud.symbol.jfx.JavaFXTileGraphicLoader;
 import org.prelle.realmrunner.network.Config;
 import org.prelle.realmrunner.network.DataFileManager;
 import org.prelle.realmrunner.network.MainConfig;
@@ -27,6 +24,9 @@ import org.yaml.snakeyaml.introspector.Property;
 import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
+
+import com.graphicmud.symbol.DefaultSymbolManager;
+import com.graphicmud.symbol.SymbolManager;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -82,8 +82,7 @@ public class MUDClientMain extends Application {
 		history = new ArrayList<MUDClientMain.HistoryEntry>();
 		symbols = new DefaultSymbolManager(
 				Paths.get("/home/prelle/git/MUD2024/Example MUD","src/main/resources/static/symbols"),
-//				new SwingTileGraphicLoader(Paths.get("/home/prelle/git/MUD2024/Example MUD","src/main/resources/static/symbols")));
-				new JavaFXTileGraphicLoader(Paths.get("/home/prelle/git/MUD2024/Example MUD","src/main/resources/static/symbols")));
+				new com.graphicmud.symbol.jfx.JavaFXTileGraphicLoader());
 		try {
 			readConfig();
 			DataFileManager.configure(mainConfig);
@@ -124,7 +123,7 @@ public class MUDClientMain extends Application {
         });
 		textLayout = new VBox(10, scroll, terminal, tfInput);
 
-		mapView   = new MapView(symbols.getTileGraphicService(), symbols.getSymbolSet(2));
+		mapView   = new MapView(symbols.getTileGraphicService(), symbols.getSymbolSet("terrain"));
 
 		mapLayout = new VBox(10, mapView);
 		mapLayout.setPrefWidth(352);

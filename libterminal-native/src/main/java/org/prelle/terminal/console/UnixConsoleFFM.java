@@ -105,7 +105,8 @@ public class UnixConsoleFFM implements TerminalEmulator {
         try {
         	int result = (int) tcgetattr.invoke(STDIN_FILENO, termios);
         	if (result != 0) {
-        		throw new IllegalStateException("tcgetattr failed - are you eventually running in an IDE?");
+        		System.err.println("tcgetattr failed - are you eventually running in an IDE?");
+//        		throw new IllegalStateException("tcgetattr failed - are you eventually running in an IDE?");
         	}
         } catch (Throwable e) {
         	e.printStackTrace();
@@ -134,7 +135,7 @@ public class UnixConsoleFFM implements TerminalEmulator {
         } catch (Throwable e) {
         	logger.log(Level.ERROR, "Error invoking native function",e);
         }
- 		logger.log(Level.INFO, "Current L-Flag is {0}", String.format("%08x",termios.get(JAVA_INT, LFLAG_OFFSET)));
+ 		logger.log(Level.TRACE, "Current L-Flag is {0}", String.format("%08x",termios.get(JAVA_INT, LFLAG_OFFSET)));
         return termios.get(JAVA_INT, LFLAG_OFFSET);
 	}
 

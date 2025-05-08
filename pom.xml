@@ -39,12 +39,12 @@
         <dependency>
             <groupId>org.prelle</groupId>
             <artifactId>telnet</artifactId>
-            <version>0.1.1-SNAPSHOT</version>
+            <version>0.1.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.prelle</groupId>
             <artifactId>gmcp4j</artifactId>
-            <version>0.1.1-SNAPSHOT</version>
+            <version>[0.2.0,)</version>
         </dependency>
 	   </dependencies>
 	</dependencyManagement>

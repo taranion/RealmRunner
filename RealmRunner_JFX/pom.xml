@@ -1,8 +1,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.prelle</groupId>
-  <artifactId>mudclient-jfx</artifactId>
-  <version>0.0.1</version>
+  <artifactId>realmrunner-jfx</artifactId>
+  <version>0.0.3-SNAPSHOT</version>
   <name>MUDClient-JFX</name>
   <description>MUD client written in Java+JavaFX</description>
 
@@ -27,6 +27,18 @@
     		<url>https://github.com/javaterminal/terminalfx/raw/master/releases</url>
     	</repository>
 	</repositories>
+	
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.graphicmud</groupId>
+                <artifactId>graphicmud-parent</artifactId>
+                <version>0.0.3-SNAPSHOT</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
 	<dependencies>
 	  <dependency>
@@ -39,15 +51,13 @@
           <artifactId>mudclient-base</artifactId>
           <version>0.0.1-SNAPSHOT</version>
       </dependency>
+      <dependency>
+          <groupId>com.graphicmud</groupId>
+          <artifactId>graphicmud-core</artifactId>
+      </dependency>
 	  <dependency>
-		  <groupId>org.prelle</groupId>
-		  <artifactId>tile-library</artifactId>
-		  <version>0.0.1-SNAPSHOT</version>
-	  </dependency>
-	  <dependency>
-		  	<groupId>org.prelle</groupId>
+		  	<groupId>com.graphicmud</groupId>
   			<artifactId>tile-service-jfx</artifactId>
-  			<version>0.0.1-SNAPSHOT</version>
 	  </dependency>
 	  <dependency>
 		  <groupId>org.prelle</groupId>

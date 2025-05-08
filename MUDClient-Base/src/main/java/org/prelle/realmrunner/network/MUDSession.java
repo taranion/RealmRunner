@@ -3,6 +3,7 @@ package org.prelle.realmrunner.network;
 import java.io.IOException;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -55,13 +56,13 @@ public class MUDSession implements TelnetSocketListener, TelnetOptionListener, G
 	private MUDSessionGMCPListener gmcpListener;
 
 	//-------------------------------------------------------------------
-	public MUDSession(SessionConfig session, TelnetSocketListener callback, int[] naws) throws IOException {
+	public MUDSession(SessionConfig session, TelnetSocketListener callback, int[] naws, Charset charset) throws IOException {
 		logger.log(Level.INFO, "ENTER: MUDSession.<init>");
 		TelnetOptionRegistry.register(TelnetOption.MUSHCLIENT.getCode(), new AardwolfMushclientProtocol());
 
 		GMCPManager.registerPackage(new ClientMediaPackage());
-		GMCPManager.registerPackage(new CharPackage());
-		GMCPManager.registerPackage(new CharSkillsPackage());
+//		GMCPManager.registerPackage(new CharPackage());
+//		GMCPManager.registerPackage(new CharSkillsPackage());
 
 		// Detect terminal type
 		String term = System.getenv("TERM");
@@ -90,6 +91,7 @@ public class MUDSession implements TelnetSocketListener, TelnetOptionListener, G
 				.support(TelnetOption.MXP.getCode(), ControlCode.DO)
 				.support(TelnetOption.GMCP.getCode(), ControlCode.DO)
 				.support(TelnetOption.MUSHCLIENT.getCode(), ControlCode.DO)
+				.support(TelnetOption.CHARSET.getCode(), ControlCode.DO, charset)
 //				.support(new MUDClientCompression1(), Role.REJECT_OUTRIGHT)
 //				.support(new MUDClientCompression2(), Role.REJECT_OUTRIGHT)
 //				.support(new ZenithMUDProtocol(), Role.REJECT_OUTRIGHT)
@@ -157,7 +159,7 @@ public class MUDSession implements TelnetSocketListener, TelnetOptionListener, G
 	 */
 	@Override
 	public void telnetReceiveGMCP(RawGMCPMessage gmcp) {
-		logger.log(Level.WARNING, "GMCP RCV "+gmcp.getNamespace()+"  "+gmcp.getMessage());
+		logger.log(Level.DEBUG, "GMCP RCV "+gmcp.getNamespace()+"  "+gmcp.getMessage());
 		Object mess = GMCPManager.decode(gmcp.getNamespace(), gmcp.getMessage());
 		if (mess==null) {
 			logger.log(Level.WARNING, "No parsing support for {0} {1}", gmcp.getNamespace(), gmcp.getMessage());

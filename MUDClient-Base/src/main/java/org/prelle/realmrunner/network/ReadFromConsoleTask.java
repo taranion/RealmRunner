@@ -63,7 +63,7 @@ public class ReadFromConsoleTask implements Runnable, LineModeListener {
 		while (true) {
 			try {
 				AParsedElement fragment = in.readFragment();
-				logger.log(Level.TRACE, "Typed {0}  forwardMode={1}, mustLocalEcho={2}, lineBuffering={3}", fragment, forwardMode, mustCreateLocalEcho, lineBufferingMode);
+				logger.log(Level.DEBUG, "Typed {0}  forwardMode={1}, mustLocalEcho={2}, lineBuffering={3}", fragment, forwardMode, mustCreateLocalEcho, lineBufferingMode);
 				if (fragment==null)
 					return;
 
@@ -80,7 +80,7 @@ public class ReadFromConsoleTask implements Runnable, LineModeListener {
 					case C0Code.LF:
 					case C0Code.CR:
 						if (lineBufferingMode && !lineBuffer.isEmpty()) {
-							logger.log(Level.INFO, "ENTER");
+							logger.log(Level.INFO, "ENTER  (buffer={0})", lineBuffer);
 							console.getOutputStream().write("\r\n");
 							String toSend = lineBufferListener.processCommandTyped(lineBuffer.toString());
 							if (toSend!=null && forwardTo!=null) {

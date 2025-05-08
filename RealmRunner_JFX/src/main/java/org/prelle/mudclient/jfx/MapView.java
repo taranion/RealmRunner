@@ -5,12 +5,9 @@ import java.io.IOException;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 
-import org.prelle.mud.map.SymbolMap;
-import org.prelle.mud.map.ViewportMap;
-import org.prelle.mud.symbol.Symbol;
-import org.prelle.mud.symbol.SymbolSet;
-import org.prelle.mud.symbol.TileGraphicService;
-import org.prelle.mud.symbol.jfx.JavaFXTileGraphicLoader;
+import com.graphicmud.map.SymbolMap;
+import com.graphicmud.symbol.SymbolSet;
+import com.graphicmud.symbol.TileGraphicService;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -52,7 +49,10 @@ public class MapView extends Canvas {
 	public void setData(int[][] data) {
 		System.out.println("Called MapView.setData");
 
-		byte[] imgBytes = service.renderMap(new SymbolMap(data,symbolSet), symbolSet);
+		SymbolMap toRender = new SymbolMap(16, 11, null);
+		//new SymbolMap(data,symbolSet)
+		
+		byte[] imgBytes = service.renderMap(toRender);
 		logger.log(Level.INFO,"Read {0} bytes ",imgBytes.length);
 		ByteArrayInputStream bins = new ByteArrayInputStream(imgBytes);
 		Image img = new Image(bins);
