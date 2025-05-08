@@ -31,41 +31,23 @@ import jakarta.annotation.security.PermitAll;
 @PermitAll
 @AnonymousAllowed
 public class PlayView extends Composite<VerticalLayout> {
+	
+	private WebTerminal xterm;
+	private MessageInput messageInput;
 
+    //-------------------------------------------------------------------
     public PlayView() {
-    	XTerm xterm = new XTerm();
+    	initComponents();
     	xterm.writeln("Hello world.\n\n");
     	xterm.setCursorBlink(true);
     	xterm.setCursorStyle(CursorStyle.UNDERLINE);
     	    	
-    	xterm.setSizeFull();
-    	xterm.setCopySelection(true);
-        xterm.setUseSystemClipboard(UseSystemClipboard.READWRITE);
-        xterm.setPasteWithMiddleClick(true);
-        xterm.setPasteWithRightClick(true);
-
-    	xterm.addLineListener(ev->{
-    	    String line = ev.getLine();
-    	    System.out.println(line);
-    	});	
-    			
-    	xterm.focus();
-    	    	
-    	xterm.fit();
-    	getContent().add(xterm);
-    	getContent().getStyle().set("flex-grow", "10");
     	 
         HorizontalLayout layoutRow = new HorizontalLayout();
         VerticalLayout layoutColumn2 = new VerticalLayout();
         VerticalLayout layoutColumn3 = new VerticalLayout();
         VerticalLayout layoutColumn4 = new VerticalLayout();
         HorizontalLayout layoutRow2 = new HorizontalLayout();
-        MessageInput messageInput = new MessageInput();
-        messageInput.addSubmitListener(event -> {
-        	System.out.println("PlayView: "+event);
-        	xterm.writeln(event.getValue());
-        });
-        getContent().setWidth("100%");
         //getContent().getStyle().set("flex-grow", "1");
         layoutRow.addClassName(Gap.MEDIUM);
         layoutRow.setWidth("100%");
@@ -77,13 +59,15 @@ public class PlayView extends Composite<VerticalLayout> {
         layoutRow2.addClassName(Gap.MEDIUM);
         layoutRow2.setWidth("100%");
         layoutRow2.setHeight("min-content");
-        messageInput.getStyle().set("flex-grow", "1");
         getContent().add(layoutRow);
         layoutRow.add(layoutColumn2);
         layoutRow.add(layoutColumn3);
         layoutRow.add(layoutColumn4);
         getContent().add(layoutRow2);
         layoutRow2.add(messageInput);
+        
+        initLayout();
+        initInteractivity();
         
         AudioPlayer player=new AudioPlayer();
         player.getElement().setAttribute("autoplay",true);
@@ -102,7 +86,34 @@ public class PlayView extends Composite<VerticalLayout> {
 //        player.setSource("https://file-examples.com/storage/fef2c10964681ca2d97e203/2017/11/file_example_MP3_700KB.mp3");
         getContent().add(player);
     }
-    
+
+    //-------------------------------------------------------------------
+    private void initComponents() {
+    	xterm = new WebTerminal();
+    	messageInput = new MessageInput();
+    }
+
+    //-------------------------------------------------------------------
+    private void initLayout() {
+    	xterm.setSizeFull();
+    	xterm.focus();
+    	xterm.fit();
+    	getContent().add(xterm);
+    	getContent().getStyle().set("flex-grow", "10");
+        messageInput.getStyle().set("flex-grow", "1");
+        getContent().setWidth("100%");
+   }
+
+    //-------------------------------------------------------------------
+    private void initInteractivity() {
+        messageInput.addSubmitListener(event -> {
+        	System.out.println("PlayView: "+event);
+        	xterm.writeln(event.getValue());
+        });
+    }
+   
+
+    //-------------------------------------------------------------------
     public static byte[] getBytesFromFileMP3(String filename) {
     	Path file = Paths.get(filename);
     	try {

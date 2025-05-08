@@ -3,10 +3,16 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.prelle</groupId>
+        <artifactId>realmrunner</artifactId>
+        <version>0.0.1</version>
+    </parent>
+    
     <!-- Project from https://start.vaadin.com/project/d383afb4-19a3-4287-9e86-3f4d571f25e8 -->
-    <groupId>com.graphicmud</groupId>
-    <artifactId>webclient</artifactId>
-    <name>webclient</name>
+    <artifactId>realmrunner-web</artifactId>
+    <name>RealmRunner Web</name>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
@@ -14,13 +20,6 @@
         <java.version>23</java.version>
         <vaadin.version>24.7.3</vaadin.version>
     </properties>
-
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.5</version>
-        
-    </parent>
 
     <repositories>
         <repository>
@@ -34,6 +33,13 @@
 
     <dependencyManagement>
         <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-parent</artifactId>
+            <version>3.4.5</version>
+                <type>pom</type>
+                <scope>import</scope>
+        </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-bom</artifactId>
@@ -101,6 +107,24 @@
    			<artifactId>xterm-console</artifactId>
    			<version>3.1.0</version>
 		</dependency>
+      <dependency>
+          <groupId>org.prelle</groupId>
+          <artifactId>telnet</artifactId>
+      </dependency>
+      <dependency>
+          <groupId>org.prelle</groupId>
+          <artifactId>mudclient-base</artifactId>
+          <version>${revision}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.prelle</groupId>
+          <artifactId>libansi</artifactId>
+      </dependency>
+      <dependency>
+          <groupId>org.prelle</groupId>
+          <artifactId>libterminal-api</artifactId>
+          <version>${revision}</version>
+      </dependency>
     </dependencies>
 
     <build>
