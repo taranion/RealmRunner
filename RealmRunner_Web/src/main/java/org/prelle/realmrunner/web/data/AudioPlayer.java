@@ -8,7 +8,7 @@ import com.vaadin.flow.server.AbstractStreamResource;
 public class AudioPlayer  extends Component {
 
     public AudioPlayer(){
-        getElement().setAttribute("controls",false);
+        getElement().setAttribute("controls",true);
         getElement().setAttribute("autoplay",true);
 
     }

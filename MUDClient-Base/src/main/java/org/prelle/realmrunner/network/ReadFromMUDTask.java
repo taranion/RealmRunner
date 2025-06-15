@@ -1,5 +1,6 @@
 package org.prelle.realmrunner.network;
 
+import java.io.IOException;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.net.SocketException;
@@ -45,6 +46,12 @@ public class ReadFromMUDTask implements Runnable, TelnetSocketListener {
 		this.forwardTo = forwardTo;
 		this.config    = config;
 		this.encoding  = defaultEncoding;
+		try {
+			forwardTo.write("ReadFromMUDTask.<init>\n");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		mud.addSocketListener(this);
 	}
@@ -145,6 +152,7 @@ public class ReadFromMUDTask implements Runnable, TelnetSocketListener {
 						} else
 							logger.log(Level.WARNING, "Throw away "+frag);
 					} else {
+						System.out.println("RFMTask: "+frag+" to "+forwardTo);
 						forwardTo.write(frag);
 //						if (config.isMissingGAWorkaround()) {
 							forwardTo.flush(); // Usually we would flush upon receiving GA

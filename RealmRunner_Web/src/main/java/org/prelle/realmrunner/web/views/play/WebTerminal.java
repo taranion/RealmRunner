@@ -1,6 +1,8 @@
 package org.prelle.realmrunner.web.views.play;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PipedOutputStream;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.nio.charset.Charset;
@@ -11,6 +13,7 @@ import org.prelle.terminal.TerminalEmulator;
 import org.prelle.terminal.TerminalMode;
 
 import com.flowingcode.vaadin.addons.xterm.XTerm;
+import com.vaadin.flow.component.UI;
 
 /**
  * 
@@ -18,6 +21,11 @@ import com.flowingcode.vaadin.addons.xterm.XTerm;
 public class WebTerminal extends XTerm implements TerminalEmulator {
 	
 	private final static Logger logger = System.getLogger("terminal.web");
+	
+	private XTermOutputStream xout;
+	private ANSIOutputStream out;
+	
+	private Thread readThread;
 
 	//-------------------------------------------------------------------
 	/**
@@ -30,7 +38,14 @@ public class WebTerminal extends XTerm implements TerminalEmulator {
         setPasteWithMiddleClick(true);
         setPasteWithRightClick(true);
         
+        initComponents();
         initInteractivity();
+	}
+
+	//-------------------------------------------------------------------
+	private void initComponents() {
+    	xout = new XTermOutputStream(this);
+    	out = new ANSIOutputStream(xout);
 	}
 
 	//-------------------------------------------------------------------
@@ -48,8 +63,7 @@ public class WebTerminal extends XTerm implements TerminalEmulator {
 	 */
 	@Override
 	public TerminalMode getMode() {
-		// TODO Auto-generated method stub
-		return null;
+		return TerminalMode.LINE_MODE;
 	}
 
 	//-------------------------------------------------------------------
@@ -59,7 +73,7 @@ public class WebTerminal extends XTerm implements TerminalEmulator {
 	@Override
 	public TerminalEmulator setMode(TerminalMode mode) {
 		// TODO Auto-generated method stub
-		return null;
+		return this;
 	}
 
 	//-------------------------------------------------------------------
@@ -79,7 +93,7 @@ public class WebTerminal extends XTerm implements TerminalEmulator {
 	@Override
 	public TerminalEmulator setLocalEchoActive(boolean value) {
 		// TODO Auto-generated method stub
-		return null;
+		return this;
 	}
 
 	//-------------------------------------------------------------------
@@ -88,8 +102,7 @@ public class WebTerminal extends XTerm implements TerminalEmulator {
 	 */
 	@Override
 	public ANSIOutputStream getOutputStream() {
-		// TODO Auto-generated method stub
-		return null;
+		return out;
 	}
 
 	//-------------------------------------------------------------------
@@ -99,7 +112,7 @@ public class WebTerminal extends XTerm implements TerminalEmulator {
 	@Override
 	public ANSIInputStream getInputStream() {
 		// TODO Auto-generated method stub
-		return null;
+		return new ANSIInputStream(System.in);
 	}
 
 	//-------------------------------------------------------------------
@@ -109,7 +122,7 @@ public class WebTerminal extends XTerm implements TerminalEmulator {
 	@Override
 	public int[] getConsoleSize() throws IOException, InterruptedException {
 		// TODO Auto-generated method stub
-		return null;
+		return new int[] {80,40};
 	}
 
 	//-------------------------------------------------------------------
@@ -120,6 +133,11 @@ public class WebTerminal extends XTerm implements TerminalEmulator {
 	public Charset[] getEncodings() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	//-------------------------------------------------------------------
+	public void setUI(UI ui) {
+		xout.setUI(ui);
 	}
 
 }

@@ -14,6 +14,7 @@
     	<Logger name="jdk" level="warn"/>
     	<Logger name="javafx" level="info"/>
     	<Logger name="network" level="TRACE"/>
+        <Logger name="org.prelle.ansi" level="INFO"/>
     	<Logger name="terminal" level="DEBUG"/>
     	<Logger name="telnet.lvl3" level="INFO"/>
 	</Loggers>

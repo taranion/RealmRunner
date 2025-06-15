@@ -49,7 +49,7 @@ public class Color256Test extends Application {
 		model.setView(terminal);
 		terminal.setForce9x16(false);
 //		terminal.setFont(Font.font("Monospace", 12));
-//		terminal.setFont(Font.loadFont(ClassLoader.getSystemResourceAsStream("AcPlus_IBM_VGA_9x16-2x.ttf"), 12));
+//		terminal.impl_setFont(Font.loadFont(ClassLoader.getSystemResourceAsStream("AcPlus_IBM_VGA_9x16-2x.ttf"), 12));
 		Scene scene = new Scene(terminal,800,800);
 		primaryStage.setScene(scene);
 		primaryStage.show();

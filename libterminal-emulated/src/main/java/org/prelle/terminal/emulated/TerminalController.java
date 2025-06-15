@@ -249,7 +249,7 @@ public abstract class TerminalController implements ITerminalViewListener {
 	//-------------------------------------------------------------------
 	private void newline() {
 		if (caretX>0) {
-//			nextLine();
+			nextLine();
 			caretX=0;
 		}
 	}

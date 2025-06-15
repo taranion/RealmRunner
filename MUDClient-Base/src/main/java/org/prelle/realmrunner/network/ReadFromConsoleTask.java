@@ -44,6 +44,8 @@ public class ReadFromConsoleTask implements Runnable, LineModeListener {
 
 	//-------------------------------------------------------------------
 	public ReadFromConsoleTask(TerminalEmulator console, AbstractConfig config, LineBufferListener listener) throws IOException {
+		if (console==null)
+			throw new NullPointerException("TE may not be null");
 		this.console = console;
 		this.config  = config;
 		this.lineBufferListener = listener;
@@ -63,18 +65,20 @@ public class ReadFromConsoleTask implements Runnable, LineModeListener {
 		while (true) {
 			try {
 				AParsedElement fragment = in.readFragment();
-				logger.log(Level.DEBUG, "Typed {0}  forwardMode={1}, mustLocalEcho={2}, lineBuffering={3}", fragment, forwardMode, mustCreateLocalEcho, lineBufferingMode);
+				logger.log(Level.WARNING, "Typed {0}  forwardMode={1}, mustLocalEcho={2}, lineBuffering={3}", fragment, forwardMode, mustCreateLocalEcho, lineBufferingMode);
 				if (fragment==null)
 					return;
 
 				switch (fragment) {
 				case PrintableFragment print -> {
 					if (lineBufferingMode) {
-						logger.log(Level.DEBUG, "Add to linebuffer: "+print.getText());
+						logger.log(Level.WARNING, "Add to linebuffer: "+print.getText());
 						lineBuffer.append(print.getText());
 						lineBufferListener.lineBufferChanged(lineBuffer.toString(), lineBuffer.length());
 						continue;
-					}}
+					}
+					console.getOutputStream().write(print);
+					}
 				case C0Fragment c0 -> {
 					switch (c0.getCode()) {
 					case C0Code.LF:
