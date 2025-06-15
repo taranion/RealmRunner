@@ -49,14 +49,15 @@ public class XTermOutputStream extends OutputStream {
 	 */
 	public synchronized void write(byte[] values) throws IOException {
 		String str = new String(values);
-		if (ui!=null) {
-			System.err.println("Wrote2a: "+str+" in UI "+ui);
-			ui.access( () -> {
-				term.write(str);
-			});
-		} else if (VaadinSession.getCurrent()!=null) {
+		if (VaadinSession.getCurrent()!=null) {
 			System.err.println("Wrote2b: "+str+" in session "+VaadinSession.getCurrent());
 			term.write(str);
+		} else if (ui!=null) {
+			System.err.println("Wrote2a: "+str+" without session but in UI "+ui);
+			ui.access( () -> {
+				term.write(str);
+				System.exit(0);
+			});
 		} else {
 			System.err.println("Wrote2c: "+str+" without UI or session");
 			term.write(str);

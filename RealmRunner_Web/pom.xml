@@ -29,6 +29,12 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
+        <repository>
+            <id>xterm-snapshots</id>
+            <url>http://maven.flowingcode.com/snapshots</url>
+            <snapshots><enabled>true</enabled></snapshots>
+            <releases><enabled>false</enabled></releases>
+        </repository>
     </repositories>
 
     <dependencyManagement>
@@ -105,7 +111,7 @@
         <dependency>
    			<groupId>com.flowingcode.addons</groupId>
    			<artifactId>xterm-console</artifactId>
-   			<version>3.1.0</version>
+   			<version>3.2.0-SNAPSHOT</version>
 		</dependency>
       <dependency>
           <groupId>org.prelle</groupId>

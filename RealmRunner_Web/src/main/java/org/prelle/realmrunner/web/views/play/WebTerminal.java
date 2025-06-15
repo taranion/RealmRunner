@@ -13,7 +13,10 @@ import org.prelle.terminal.TerminalEmulator;
 import org.prelle.terminal.TerminalMode;
 
 import com.flowingcode.vaadin.addons.xterm.XTerm;
+import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.dom.DomEventListener;
 
 /**
  * 
@@ -53,8 +56,9 @@ public class WebTerminal extends XTerm implements TerminalEmulator {
     	addLineListener(ev->{
     	    String line = ev.getLine();
     	    logger.log(Level.INFO, "Input from xterm: "+line);
+//    	    System.exit(1);
     	});	
-		
+		this.addCustomKeyListener( (de) -> logger.log(Level.INFO, "ARROW_UP"), Key.ARROW_UP);
 	}
 
 	//-------------------------------------------------------------------

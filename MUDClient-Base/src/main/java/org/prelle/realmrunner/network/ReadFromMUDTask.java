@@ -152,7 +152,6 @@ public class ReadFromMUDTask implements Runnable, TelnetSocketListener {
 						} else
 							logger.log(Level.WARNING, "Throw away "+frag);
 					} else {
-						System.out.println("RFMTask: "+frag+" to "+forwardTo);
 						forwardTo.write(frag);
 //						if (config.isMissingGAWorkaround()) {
 							forwardTo.flush(); // Usually we would flush upon receiving GA

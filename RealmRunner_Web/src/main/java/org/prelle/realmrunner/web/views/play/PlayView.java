@@ -29,6 +29,8 @@ import org.vaadin.lineawesome.LineAwesomeIconUrl;
 import com.flowingcode.vaadin.addons.xterm.ITerminalOptions.CursorStyle;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -46,6 +48,10 @@ import jakarta.annotation.security.PermitAll;
 @Menu(order = 1, icon = LineAwesomeIconUrl.PENCIL_RULER_SOLID)
 @PermitAll
 @AnonymousAllowed
+@NpmPackage(value = "@xterm/addon-web-links", version = "0.11.0")
+@JsModule("./fc-xterm/xterm-weblinks-addon.ts")
+//@NpmPackage(value = "@xterm/addon-image", version = "0.8.0")
+//@JsModule("./fc-xterm/xterm-weblinks-addon.ts")
 public class PlayView extends Composite<VerticalLayout> implements TelnetSocketListener, LineBufferListener {
 	
 	private final static Logger logger = System.getLogger("client.web");
@@ -139,7 +145,7 @@ public class PlayView extends Composite<VerticalLayout> implements TelnetSocketL
     	xterm.focus();
     	xterm.fit();
     	getContent().add(xterm);
-    	getContent().getStyle().set("flex-grow", "10");
+    	getContent().getStyle().set("flex-grow", "20");
         messageInput.getStyle().set("flex-grow", "1");
         getContent().setWidth("100%");
    }
