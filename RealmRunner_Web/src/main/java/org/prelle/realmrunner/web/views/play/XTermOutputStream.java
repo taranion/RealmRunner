@@ -29,15 +29,15 @@ public class XTermOutputStream extends OutputStream {
 	public synchronized void write(int value) throws IOException {
 		String str = new String(new byte[] {(byte) value});
 		if (ui!=null) {
-			System.err.println("Wrote1a: "+value+" in UI "+ui);
+//			System.err.println("Wrote1a: "+value+" in UI "+ui);
 			ui.access( () -> {
 				term.write(str);
 			});
 		} else if (VaadinSession.getCurrent()!=null) {
-			System.err.println("Wrote1b: "+value+" in session "+VaadinSession.getCurrent());
+//			System.err.println("Wrote1b: "+value+" in session "+VaadinSession.getCurrent());
 			term.write(str);
 		} else {
-			System.err.println("Wrote1c: "+value+" without UI or session");
+//			System.err.println("Wrote1c: "+value+" without UI or session");
 			term.write(str);
 		}
 	}
@@ -49,15 +49,17 @@ public class XTermOutputStream extends OutputStream {
 	public synchronized void write(byte[] values) throws IOException {
 		String str = new String(values);
 		if (VaadinSession.getCurrent()!=null) {
-			System.err.println("Wrote2b: "+str+" in session "+VaadinSession.getCurrent());
+//			System.err.println("Wrote2b: "+str+" in session "+VaadinSession.getCurrent());
 			term.write(str);
+			term.focus();
 		} else if (ui!=null) {
-			System.err.println("Wrote2a: "+str+" without session but in UI "+ui);
+//			System.err.println("Wrote2a: "+str+" without session but in UI "+ui);
 			ui.access( () -> {
 				term.write(str);
+				term.focus();
 			});
 		} else {
-			System.err.println("Wrote2c: "+str+" without UI or session");
+//			System.err.println("Wrote2c: "+str+" without UI or session");
 			term.write(str);
 		}
 	}

@@ -6,6 +6,7 @@ import java.lang.System.Logger.Level;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import org.prelle.ansi.ANSIInputStream;
@@ -62,6 +63,7 @@ public class ReadFromConsoleTask implements Runnable, LineModeListener {
 	@Override
 	public void run() {
 		ANSIInputStream in = console.getInputStream();
+		Objects.requireNonNull(in);
 		while (true) {
 			try {
 				AParsedElement fragment = in.readFragment();

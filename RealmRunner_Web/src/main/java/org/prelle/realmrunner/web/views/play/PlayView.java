@@ -1,6 +1,7 @@
 package org.prelle.realmrunner.web.views.play;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -12,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.prelle.ansi.commands.iterm.SendITermImage;
 import org.prelle.realmrunner.network.Config;
 import org.prelle.realmrunner.network.LineBufferListener;
 import org.prelle.realmrunner.network.MUDSession;
@@ -65,9 +67,27 @@ public class PlayView extends Composite<VerticalLayout> implements TelnetSocketL
     	initComponents();
     	xterm.writeln("Hello world.");
     	try {
-			byte[] sixel = (new FileInputStream("/home/prelle/lady-of-shalott.six").readAllBytes());
-			xterm.writeln(new String(sixel));
-		} catch (IOException e) {
+//			byte[] sixel = (new FileInputStream("/home/prelle/lady-of-shalott.six").readAllBytes());
+//			xterm.writeln(new String(sixel));
+
+			byte[] data = (new FileInputStream("/home/prelle/git/RealmRunner/Hybrid.png").readAllBytes());
+			SendITermImage iterm = new SendITermImage();
+			iterm.setSize(data.length);
+			iterm.setFileName("Hybrid.png");
+			iterm.setWidth(1116);
+			iterm.setHeight(446);
+			iterm.setImgData(data);
+			try {
+	        		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	        		iterm.encode(baos, true);
+	        		xterm.write(new String(baos.toByteArray()));
+	        		xterm.write("\r\n");
+	            	xterm.writeln("Hallo welt.");
+			} catch (Exception e) {
+				logger.log(Level.ERROR, "Failed sending image",e);
+			}
+
+    	} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -77,9 +97,13 @@ public class PlayView extends Composite<VerticalLayout> implements TelnetSocketL
    	 
         HorizontalLayout layoutRow = new HorizontalLayout();
         VerticalLayout layoutColumn2 = new VerticalLayout();
+        layoutColumn2.add("LC2");
         VerticalLayout layoutColumn3 = new VerticalLayout();
+        layoutColumn3.add("LC3");
         VerticalLayout layoutColumn4 = new VerticalLayout();
+        layoutColumn4.add("LC4");
         HorizontalLayout layoutRow2 = new HorizontalLayout();
+        layoutRow2.add("LR2");
         //getContent().getStyle().set("flex-grow", "1");
         layoutRow.addClassName(Gap.MEDIUM);
         layoutRow.setWidth("100%");
@@ -115,15 +139,12 @@ public class PlayView extends Composite<VerticalLayout> implements TelnetSocketL
            .setContentType("audio/mpeg")
            ; // For MP3
         player.setSource(stream);
-        player.setSource("https://file-examples.com/storage/fef2c10964681ca2d97e203/2017/11/file_example_MP3_700KB.mp3");
+//        player.setSource("https://file-examples.com/storage/fef2c10964681ca2d97e203/2017/11/file_example_MP3_700KB.mp3");
         getContent().add(player);
         
-        
-        
-        
 		SessionConfigBuilder builder = SessionConfig.builder();
-//		builder.server("eden-test.rpgframework.de").port(4000);	
-		builder.server("dragonfiremud.com").port(1999);	
+		builder.server("eden-test.rpgframework.de").port(4000);	
+//		builder.server("dragonfiremud.com").port(1999);	
 //		builder.server("rom.mud.de").port(400);	
 		SessionConfig config = builder.build();
 		
@@ -131,14 +152,12 @@ public class PlayView extends Composite<VerticalLayout> implements TelnetSocketL
 		
 		TerminalEmulator console = xterm;
 
-//		try {
-////			ReadFromConsoleTask readFromConsole = new ReadFromConsoleTask(console, activeConfig, (LineBufferListener)this);
-////			readFromConsole.setForwardMode(false);
-//			setupSession(config, activeConfig);
-//		} catch (IOException | InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		try {
+			setupSession(config, activeConfig);
+		} catch (IOException | InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
   }
 
     //-------------------------------------------------------------------
@@ -153,11 +172,11 @@ public class PlayView extends Composite<VerticalLayout> implements TelnetSocketL
     private void initLayout() {
     	xterm.setSizeFull();
     	xterm.focus();
-    	xterm.fit();
+//    	xterm.fit();
     	getContent().add(xterm);
-    	getContent().getStyle().set("flex-grow", "20");
+    	xterm.getStyle().set("flex-grow", "20");
         messageInput.getStyle().set("flex-grow", "1");
-        getContent().setWidth("100%");
+        xterm.setHeight("800px");
    }
 
     //-------------------------------------------------------------------
@@ -165,6 +184,12 @@ public class PlayView extends Composite<VerticalLayout> implements TelnetSocketL
         messageInput.addSubmitListener(event -> {
         	System.out.println("PlayView: "+event);
         	xterm.writeln(event.getValue());
+        	try {
+				session.getStreamToMUD().write(event.getValue()+"\r\n");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         });
     }
    
@@ -213,6 +238,13 @@ public class PlayView extends Composite<VerticalLayout> implements TelnetSocketL
 		Thread readThread = new Thread(readTask,"ReadFromMUDTask");
 		readThread.start();
 
+		ReadFromConsoleTask readFromConsole = new ReadFromConsoleTask(console, activeConfig, (LineBufferListener)this);
+		readFromConsole.setForwardMode(true);
+		readFromConsole.setForwardTo(session.getSocket());
+		Thread readFromTerminal = new Thread(readFromConsole, "ReadFromConsole");
+		readFromTerminal.start();
+
+		
 		if (config.getLogin()!=null) {
 			session.getStreamToMUD().write( (config.getLogin()+"\r\n").getBytes(StandardCharsets.UTF_8));
 			if (config.getPasswd()!=null) {
@@ -237,7 +269,7 @@ public class PlayView extends Composite<VerticalLayout> implements TelnetSocketL
 	@Override
 	public String processCommandTyped(String typed) {
 		logger.log(Level.WARNING, "processCommand: "+typed);
-		return null;
+		return typed;
 	}
 
 }

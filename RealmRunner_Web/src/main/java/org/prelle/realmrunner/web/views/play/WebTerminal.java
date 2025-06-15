@@ -26,7 +26,9 @@ public class WebTerminal extends XTerm implements TerminalEmulator {
 	private final static Logger logger = System.getLogger("terminal.web");
 	
 	private XTermOutputStream xout;
+	private XTermInputStream xin;
 	private ANSIOutputStream out;
+	private ANSIInputStream in;
 	
 	private Thread readThread;
 
@@ -50,6 +52,9 @@ public class WebTerminal extends XTerm implements TerminalEmulator {
 	private void initComponents() {
     	xout = new XTermOutputStream(this);
     	out = new ANSIOutputStream(xout);
+    	
+    	xin  = new XTermInputStream(this);
+    	in   = new ANSIInputStream(xin);
 	}
 
 	//-------------------------------------------------------------------
@@ -116,8 +121,10 @@ public class WebTerminal extends XTerm implements TerminalEmulator {
 	 */
 	@Override
 	public ANSIInputStream getInputStream() {
-		// TODO Auto-generated method stub
-		return new ANSIInputStream(System.in);
+		if (in==null) 
+			throw new NullPointerException("HURG");
+		return in;
+		//return new ANSIInputStream(System.in);
 	}
 
 	//-------------------------------------------------------------------
