@@ -1,6 +1,8 @@
 package org.prelle.realmrunner.web.views.play;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
@@ -48,10 +50,6 @@ import jakarta.annotation.security.PermitAll;
 @Menu(order = 1, icon = LineAwesomeIconUrl.PENCIL_RULER_SOLID)
 @PermitAll
 @AnonymousAllowed
-@NpmPackage(value = "@xterm/addon-web-links", version = "0.11.0")
-@JsModule("./fc-xterm/xterm-weblinks-addon.ts")
-//@NpmPackage(value = "@xterm/addon-image", version = "0.8.0")
-//@JsModule("./fc-xterm/xterm-weblinks-addon.ts")
 public class PlayView extends Composite<VerticalLayout> implements TelnetSocketListener, LineBufferListener {
 	
 	private final static Logger logger = System.getLogger("client.web");
@@ -62,12 +60,21 @@ public class PlayView extends Composite<VerticalLayout> implements TelnetSocketL
 	private MUDSession session;
 
     //-------------------------------------------------------------------
-    public PlayView() {
+    @SuppressWarnings("resource")
+	public PlayView() {
     	initComponents();
     	xterm.writeln("Hello world.");
+    	try {
+			byte[] sixel = (new FileInputStream("/home/prelle/lady-of-shalott.six").readAllBytes());
+			xterm.writeln(new String(sixel));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	xterm.writeln("\u001B]8;;http://example.com\u001B\\This is a link\u001B]8;;\u001B\\\n");
     	xterm.setCursorBlink(true);
     	xterm.setCursorStyle(CursorStyle.UNDERLINE);
-    	 
+   	 
         HorizontalLayout layoutRow = new HorizontalLayout();
         VerticalLayout layoutColumn2 = new VerticalLayout();
         VerticalLayout layoutColumn3 = new VerticalLayout();
@@ -115,7 +122,8 @@ public class PlayView extends Composite<VerticalLayout> implements TelnetSocketL
         
         
 		SessionConfigBuilder builder = SessionConfig.builder();
-		builder.server("eden-test.rpgframework.de").port(4000);	
+//		builder.server("eden-test.rpgframework.de").port(4000);	
+		builder.server("dragonfiremud.com").port(1999);	
 //		builder.server("rom.mud.de").port(400);	
 		SessionConfig config = builder.build();
 		
@@ -123,19 +131,21 @@ public class PlayView extends Composite<VerticalLayout> implements TelnetSocketL
 		
 		TerminalEmulator console = xterm;
 
-		try {
-//			ReadFromConsoleTask readFromConsole = new ReadFromConsoleTask(console, activeConfig, (LineBufferListener)this);
-//			readFromConsole.setForwardMode(false);
-			setupSession(config, activeConfig);
-		} catch (IOException | InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-   }
+//		try {
+////			ReadFromConsoleTask readFromConsole = new ReadFromConsoleTask(console, activeConfig, (LineBufferListener)this);
+////			readFromConsole.setForwardMode(false);
+//			setupSession(config, activeConfig);
+//		} catch (IOException | InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+  }
 
     //-------------------------------------------------------------------
     private void initComponents() {
     	xterm = new WebTerminal();
+    	ImageAddOn add = new ImageAddOn(xterm);
+    	WebLinkAddon links = new WebLinkAddon(xterm);
     	messageInput = new MessageInput();
     }
 

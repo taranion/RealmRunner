@@ -2,8 +2,10 @@ import { ImageAddon, IImageAddonOptions } from '@xterm/addon-image';
 import { XTermElement } from './xterm-element';
 
 (function () { 
+    console.debug("_____________HELLO____________________\r\n");
   (window as any).Vaadin.Flow.fcXtermConnector = (window as any).Vaadin.Flow.fcXtermConnector || {};
-  (window as any).Vaadin.Flow.fcXtermConnector.load_weblinks = (name:string, node: XTermElement) => {
+  (window as any).Vaadin.Flow.fcXtermConnector.load_images = (name:string, node: XTermElement) => {
+    console.debug("_____________WORLD____________________\r\n");
     // customize as needed (showing addon defaults)
     const customSettings: IImageAddonOptions = {
       enableSizeReports: true,    // whether to enable CSI t reports (see below)
@@ -18,8 +20,9 @@ import { XTermElement } from './xterm-element';
       iipSizeLimit: 20000000      // size limit of a single IIP sequence
     }
 
-    const addon = new ImageAddon();
+    const addon = new ImageAddon(customSettings);
     node.terminal.loadAddon(addon);
     node.addons[name]=addon;
+    console.debug("_____________Add on loaded\r\n");
   };
 })();

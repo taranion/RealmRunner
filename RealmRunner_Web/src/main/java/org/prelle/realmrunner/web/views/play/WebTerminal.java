@@ -40,6 +40,7 @@ public class WebTerminal extends XTerm implements TerminalEmulator {
         setUseSystemClipboard(UseSystemClipboard.READWRITE);
         setPasteWithMiddleClick(true);
         setPasteWithRightClick(true);
+        setHeightFull();
         
         initComponents();
         initInteractivity();

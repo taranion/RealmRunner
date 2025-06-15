@@ -28,7 +28,6 @@ public class XTermOutputStream extends OutputStream {
 	 */
 	public synchronized void write(int value) throws IOException {
 		String str = new String(new byte[] {(byte) value});
-//		String str = "\u001B"+(char)(value-64);
 		if (ui!=null) {
 			System.err.println("Wrote1a: "+value+" in UI "+ui);
 			ui.access( () -> {
@@ -56,7 +55,6 @@ public class XTermOutputStream extends OutputStream {
 			System.err.println("Wrote2a: "+str+" without session but in UI "+ui);
 			ui.access( () -> {
 				term.write(str);
-				System.exit(0);
 			});
 		} else {
 			System.err.println("Wrote2c: "+str+" without UI or session");

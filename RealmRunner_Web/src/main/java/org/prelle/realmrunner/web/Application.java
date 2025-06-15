@@ -13,7 +13,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  *
  */
 @SpringBootApplication
-@Theme(value = "webclient")
+//@Theme(value = "webclient")
 public class Application implements AppShellConfigurator {
 
     public static void main(String[] args) {
