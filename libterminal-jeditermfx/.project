@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>LibTerminal Native</name>
+	<name>LibTerminal-JediTermFX</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -22,7 +22,7 @@
 	</natures>
 	<filteredResources>
 		<filter>
-			<id>1765364723620</id>
+			<id>1765364723618</id>
 			<name></name>
 			<type>30</type>
 			<matcher>

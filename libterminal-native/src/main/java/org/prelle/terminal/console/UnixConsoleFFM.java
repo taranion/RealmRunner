@@ -29,12 +29,12 @@ import org.prelle.terminal.TerminalMode;
  *
  */
 public class UnixConsoleFFM implements TerminalEmulator {
-	
+
 	private final static Logger logger = System.getLogger("terminal.unix");
 
     private static final Linker linker = Linker.nativeLinker();
     private static final SymbolLookup libc = linker.defaultLookup();
-	
+
 	static enum LocalFlag {
 		ISIG(0x0000001),
 		/* Enable canonical mode */
@@ -45,7 +45,7 @@ public class UnixConsoleFFM implements TerminalEmulator {
 		ECHOE(0x0000020),
 		ECHOK(0x0000040),
 		;
-		
+
 		private int value;
 		LocalFlag(int value) { this.value=value;}
 	}
@@ -53,36 +53,36 @@ public class UnixConsoleFFM implements TerminalEmulator {
     // Offsets für die termios-Struktur (variiert je nach Plattform)
     private static final int TERM_STRUCT_SIZE = 48; // Beispielwert, überprüfen Sie Ihre Plattform
     private static final int LFLAG_OFFSET = 12;
-    
+
     private static final int STDIN_FILENO = 0;
-	
+
 	private int savedState;
 	private MemorySegment termios, winsize;
     private ANSIOutputStream out;
     private ANSIInputStream in;
-    
+
     private Arena arena;
     private MethodHandle tcgetattr, tcsetattr, ioctl;
-    
+
     private GroupLayout winsizeLayout = MemoryLayout.structLayout(
             JAVA_SHORT.withName("ws_row"),    // Zeilen
             JAVA_SHORT.withName("ws_col"),    // Spalten
             JAVA_SHORT.withName("ws_xpixel"), // Breite in Pixel
             JAVA_SHORT.withName("ws_ypixel")  // Höhe in Pixel
         );
-    
+
 	//-------------------------------------------------------------------
     public static void main(String[] args) {
     	new UnixConsoleFFM();
     }
-    
+
 
 	//-------------------------------------------------------------------
 	/**
 	 */
 	public UnixConsoleFFM() {
         arena = Arena.ofShared();
-        
+
         // Speicher für termios-Struktur
       	termios = arena.allocate(TERM_STRUCT_SIZE); // termios-Strukturgröße (Plattformabhängig)
       	winsize = arena.allocate(winsizeLayout);
@@ -242,7 +242,7 @@ public class UnixConsoleFFM implements TerminalEmulator {
 	 * @see org.prelle.terminal.TerminalEmulator#getConsoleSize()
 	 */
 	@Override
-	public int[] getConsoleSize() throws IOException, InterruptedException {
+	public int[] getConsoleSize() throws IOException {
 		int TIOCGWINSZ = 0x5413;
 
         try {
@@ -312,7 +312,7 @@ public class UnixConsoleFFM implements TerminalEmulator {
 	public ANSIInputStream getInputStream() {
 		return in;
 	}
-	
+
 	//-------------------------------------------------------------------
 	/**
 	 * @see org.prelle.terminal.TerminalEmulator#getEncodings()
