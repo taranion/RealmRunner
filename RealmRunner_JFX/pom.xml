@@ -8,13 +8,13 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<javafx.version>22.0.2</javafx.version>
+		<javafx.version>25.0.1</javafx.version>
 		<maven.deploy.skip>false</maven.deploy.skip>
 		<maven.install.skip>false</maven.install.skip>
 		<javafx.plugin.version>0.0.8</javafx.plugin.version>
 		<client.plugin.version>1.0.21</client.plugin.version>
-		<maven.compiler.target>22</maven.compiler.target>
-		<maven.compiler.source>22</maven.compiler.source>
+		<maven.compiler.target>25</maven.compiler.target>
+		<maven.compiler.source>25</maven.compiler.source>
 	</properties>
 
 	<repositories>
@@ -27,13 +27,13 @@
     		<url>https://github.com/javaterminal/terminalfx/raw/master/releases</url>
     	</repository>
 	</repositories>
-	
+
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>com.graphicmud</groupId>
                 <artifactId>graphicmud-parent</artifactId>
-                <version>0.0.3-SNAPSHOT</version>
+                <version>0.3.0-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -44,12 +44,12 @@
 	  <dependency>
 		  <groupId>org.prelle</groupId>
 		  <artifactId>telnet</artifactId>
-		  <version>0.0.1-SNAPSHOT</version>
+		  <version>0.1.7</version>
 	  </dependency>
       <dependency>
           <groupId>org.prelle</groupId>
           <artifactId>mudclient-base</artifactId>
-          <version>0.0.1-SNAPSHOT</version>
+          <version>0.0.1</version>
       </dependency>
       <dependency>
           <groupId>com.graphicmud</groupId>
@@ -59,10 +59,15 @@
 		  	<groupId>com.graphicmud</groupId>
   			<artifactId>tile-service-jfx</artifactId>
 	  </dependency>
+      <dependency>
+         <groupId>org.prelle</groupId>
+          <artifactId>libterminal-ghosttyfx</artifactId>
+          <version>0.0.1</version>
+      </dependency>
 	  <dependency>
 		  <groupId>org.prelle</groupId>
 		  <artifactId>libterminal-jfx</artifactId>
-		  <version>0.0.1-SNAPSHOT</version>
+		  <version>0.0.1</version>
 	  </dependency>
 		<dependency>
 			<groupId>org.openjfx</groupId>
@@ -87,7 +92,7 @@
         <dependency>
             <groupId>org.prelle</groupId>
             <artifactId>javafx-extensions</artifactId>
-            <version>5.1.0-SNAPSHOT</version>
+            <version>6.0.0-SNAPSHOT</version>
         </dependency>
 		<dependency>
     		<groupId>com.github.PavelKastornyy.ansi4j</groupId>

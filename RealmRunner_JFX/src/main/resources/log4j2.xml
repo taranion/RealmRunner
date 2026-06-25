@@ -19,7 +19,7 @@
     	<Logger name="telnet.lvl1.out" level="WARN"/>
      	<Logger name="org.prelle.ansi" level="INFO"/>
         <Logger name="mud.map" level="INFO"/>
-    	<Logger name="mud.network" level="INFO"/>
+    	<Logger name="mud.network" level="DEBUG"/>
         <Logger name="mud.splittermond" level="INFO"/>
     	<Logger name="mud.symbol" level="INFO"/>
     	<Logger name="mud.world" level="INFO"/>
