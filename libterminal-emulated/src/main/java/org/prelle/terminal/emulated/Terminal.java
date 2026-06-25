@@ -1,8 +1,10 @@
 package org.prelle.terminal.emulated;
 
-import java.lang.System.Logger;
-import java.lang.System.Logger.Level;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.prelle.ansi.commands.DECSetMode.DECMode;
+import org.prelle.ansi.commands.SetMode.ANSIMode;
 import org.prelle.terminal.emulated.delete.ITerminalView;
 import org.prelle.terminal.emulated.delete.ITerminalViewListener;
 import org.prelle.terminal.emulated.delete.PassiveController;
@@ -18,7 +20,7 @@ public class Terminal {
 		FIXED_80x25,
 		FIXED_132x24,
 	}
-
+	
 
 	private TerminalModel model;
 	private ITerminalView view;

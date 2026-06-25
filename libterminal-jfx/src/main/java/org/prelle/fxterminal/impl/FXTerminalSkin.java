@@ -1,21 +1,20 @@
 package org.prelle.fxterminal.impl;
 
+import static org.prelle.fxterminal.impl.Properties.CLEAR;
+import static org.prelle.fxterminal.impl.Properties.RECREATE;
+
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 
 import org.prelle.fxterminal.TerminalView;
+import org.prelle.terminal.emulated.TerminalModel;
 import org.prelle.terminal.emulated.delete.CharInfo;
 import org.prelle.terminal.emulated.delete.Style;
 import org.prelle.terminal.emulated.delete.Style.RGB;
-import org.prelle.terminal.emulated.TerminalModel;
 
-import static org.prelle.fxterminal.impl.Properties.RECREATE;
-import static org.prelle.fxterminal.impl.Properties.CLEAR;
-
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.collections.MapChangeListener;
-import javafx.collections.MapChangeListener.Change;
 import javafx.geometry.VPos;
 import javafx.scene.control.SkinBase;
 import javafx.scene.paint.Color;
@@ -95,6 +94,11 @@ public class FXTerminalSkin extends SkinBase<TerminalView> implements TerminalGr
 			logger.log(Level.INFO, "Calculate font as {0}x{1}",fontWidth, fontHeight);
 
 		}
+
+		// Obtain Java font metrics
+		BufferedImage img = new BufferedImage(100, 100, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g2d = img.createGraphics();
+		g2d.getFontMetrics();
 	}
 
 	//-------------------------------------------------------------------
@@ -164,10 +168,14 @@ public class FXTerminalSkin extends SkinBase<TerminalView> implements TerminalGr
 			canvas.getGraphicsContext2D().setFont(getSkinnable().getFont());
 			canvas.getGraphicsContext2D().setTextBaseline(VPos.BOTTOM);
 			double baseLine = realY+fontHeight;//+fontHeight-metrics.descent+1.3;
-//			logger.log(Level.INFO, "drawText {0} at {1}x{2}  baseline={3}",text, realX, baseLine, canvas.getGraphicsContext2D().getTextBaseline());
+			//double baseLine = realY + metrics.lineHeight;
+//			logger.log(Level.INFO, "drawText {0} at {4}x{5} => {1}x{2}  baseline={3}",text, realX, baseLine, canvas.getGraphicsContext2D().getTextBaseline(), x,y);
 			canvas.getGraphicsContext2D().fillText(text, realX, baseLine);
 		}
 
+//		if (x==79) {
+//			System.out.println("Trace from here");
+//		}
 //		canvas.getGraphicsContext2D().setFill(Color.LIGHTGRAY);
 //		canvas.getGraphicsContext2D().fillText("g", realX, baseLine);
 	}

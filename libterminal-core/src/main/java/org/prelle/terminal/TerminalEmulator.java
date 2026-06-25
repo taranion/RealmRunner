@@ -28,7 +28,7 @@ public interface TerminalEmulator {
 	public ANSIInputStream getInputStream();
 
 	//-------------------------------------------------------------------
-	public int[] getConsoleSize() throws IOException, InterruptedException;
+	public int[] getConsoleSize() throws IOException;
 
 	//-------------------------------------------------------------------
 	/**

@@ -5,4 +5,5 @@ module org.prelle.fxterminal {
 	requires javafx.controls;
 	requires transitive javafx.graphics;
 	requires org.prelle.libterminal.emulated;
+	requires java.desktop;
 }

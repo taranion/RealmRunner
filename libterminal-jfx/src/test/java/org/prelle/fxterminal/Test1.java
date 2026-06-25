@@ -67,9 +67,9 @@ public class Test1 extends Application {
 				.buildPassive();
 		TerminalView terminal = new TerminalView(model);
 		model.setView(terminal);
-		terminal.setForce9x16(true);
-//		terminal.setFont(Font.font("Monospace", 12));
-		terminal.impl_setFont(Font.loadFont(ClassLoader.getSystemResourceAsStream("AcPlus_IBM_VGA_9x16-2x.ttf"), 12));
+		terminal.setForce9x16(false);
+		terminal.impl_setFont(Font.font("Monospace", 12));
+//		terminal.impl_setFont(Font.loadFont(ClassLoader.getSystemResourceAsStream("AcPlus_IBM_VGA_9x16-2x.ttf"), 12));
 //		terminal.impl_setFont(Font.loadFont(new FileInputStream("/usr/share/fonts/google-noto-vf/NotoSansMono[wght].ttf"), 16));
 		Scene scene = new Scene(terminal,800,800);
 		primaryStage.setScene(scene);
@@ -85,10 +85,10 @@ public class Test1 extends Application {
 //		terminal.getOutputStream().flush();
 		model.write(screen);
 		//model.write("\u2584");
-//		model.write("[0m");
-//		model.write("12345678901234567890123456789012345678901234567890123456789012345678901234567890\n");
-//		model.write("         1         2         3         4         5         6         7         8\n");
-//		model.write("Hallo Welt\nWie geht es Dir?");
+		model.write("[0m");
+		model.write("12345678901234567890123456789012345678901234567890123456789012345678901234567890\n");
+		model.write("         1         2         3         4         5         6         7         8\n");
+		model.write("Hallo Welt\nWie geht es Dir?");
 
 //		((FXTerminalSkin)terminal.getSkin()).drawGrid();
 	}

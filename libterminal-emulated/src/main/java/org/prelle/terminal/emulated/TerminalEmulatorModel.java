@@ -12,8 +12,8 @@ import org.prelle.terminal.TerminalMode;
  *
  */
 public class TerminalEmulatorModel implements TerminalEmulator {
-	
-	
+
+
 
 	//-------------------------------------------------------------------
 	/**
@@ -59,7 +59,7 @@ public class TerminalEmulatorModel implements TerminalEmulator {
 	}
 
 	@Override
-	public int[] getConsoleSize() throws IOException, InterruptedException {
+	public int[] getConsoleSize() throws IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}

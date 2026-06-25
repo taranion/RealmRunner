@@ -1,31 +1,34 @@
 package org.prelle.realmrunner.network;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.prelle.ansi.ANSIOutputStream;
+import org.prelle.ansi.DeviceAttributes.OperatingLevel;
+import org.prelle.ansi.commands.SetConformanceLevel;
 import org.prelle.mud4j.gmcp.GMCPManager;
-import org.prelle.mud4j.gmcp.Char.CharPackage;
 import org.prelle.mud4j.gmcp.Char.Stats;
 import org.prelle.mud4j.gmcp.Char.Vitals;
-import org.prelle.mud4j.gmcp.CharSkills.CharSkillsPackage;
 import org.prelle.mud4j.gmcp.Client.ClientMediaPackage;
 import org.prelle.mud4j.gmcp.Client.ClientMediaPlay;
 import org.prelle.mud4j.gmcp.Client.ClientMediaStop;
 import org.prelle.mud4j.gmcp.Room.GMCPRoomInfo;
 import org.prelle.mud4j.gmcp.beip.BeipTilemapData;
 import org.prelle.mud4j.gmcp.beip.BeipTilemapInfo;
+import org.prelle.mudansi.CapabilityDetector;
+import org.prelle.mudansi.TerminalCapabilities;
 import org.prelle.telnet.TelnetConstants.ControlCode;
 import org.prelle.telnet.TelnetInputStream;
 import org.prelle.telnet.TelnetOption;
 import org.prelle.telnet.TelnetOptionListener;
 import org.prelle.telnet.TelnetOptionRegistry;
-import org.prelle.telnet.TelnetOutputStream;
 import org.prelle.telnet.TelnetSocket;
 import org.prelle.telnet.TelnetSocket.State;
 import org.prelle.telnet.TelnetSocketListener;
@@ -34,6 +37,8 @@ import org.prelle.telnet.mud.GenericMUDCommunicationProtocol.GMCPReceiver;
 import org.prelle.telnet.mud.GenericMUDCommunicationProtocol.RawGMCPMessage;
 import org.prelle.telnet.mud.MUDTerminalTypeData;
 import org.prelle.telnet.option.TelnetWindowSize;
+import org.prelle.terminal.TerminalEmulator;
+import org.prelle.terminal.TerminalMode;
 
 import lombok.Getter;
 
@@ -44,6 +49,38 @@ import lombok.Getter;
 public class MUDSession implements TelnetSocketListener, TelnetOptionListener, GMCPReceiver {
 
 	private final static Logger logger = System.getLogger("mud.client");
+
+	public static class Builder {
+
+		private TerminalEmulator terminal;
+		private Config clientConfig;
+		private SessionConfig sessionData;
+		private TelnetSocketListener telnetListener;
+		private Charset charset;
+
+		public Builder(TerminalEmulator terminal) {
+			this.terminal = terminal;
+		}
+		public MUDSession build() throws Exception {
+			ReadFromConsoleTask readFromConsole = new ReadFromConsoleTask(terminal, clientConfig, (LineBufferListener)null);
+
+			Thread readFromTerminal = new Thread(readFromConsole, "FromConsole");
+			readFromTerminal.start();
+
+			terminal.getOutputStream().write(new SetConformanceLevel(OperatingLevel.LEVEL4_VT520, true));
+			readFromConsole.setForwardMode(false);
+
+			MUDSession session = new MUDSession(sessionData, telnetListener, terminal.getConsoleSize(), charset);
+			return session;
+		}
+		//-------------------------------------------------------------------
+		public Builder setCharset(Charset value) { this.charset = value; return this; }
+	}
+
+	private TerminalEmulator console;
+	private Charset charset;
+	private ReadFromConsoleTask readFromConsole;
+	private TerminalCapabilities capabilities;
 
 	private TelnetSocket socket;
 	private ANSIOutputStream streamToMUD;
@@ -56,6 +93,58 @@ public class MUDSession implements TelnetSocketListener, TelnetOptionListener, G
 	private MUDSessionGMCPListener gmcpListener;
 
 	//-------------------------------------------------------------------
+	public static Builder builder(TerminalEmulator terminal) {
+		return new Builder(terminal);
+	}
+
+	//-------------------------------------------------------------------
+	public MUDSession(TerminalEmulator terminal, TelnetSocketListener callback, int[] naws, Charset charset) throws IOException {
+		logger.log(Level.INFO, "ENTER: MUDSession.<init>");
+		this.console = terminal;
+		console.setLocalEchoActive(false);
+		console.setMode(TerminalMode.RAW);
+
+		console.getOutputStream().write(new SetConformanceLevel(OperatingLevel.LEVEL4_VT520, true));
+		readFromConsole.setForwardMode(false);
+		this.capabilities = new TerminalCapabilities();
+		learnTerminal(readFromConsole);
+	}
+
+	//-------------------------------------------------------------------
+	private void learnTerminal(ReadFromConsoleTask readTask) {
+		logger.log(Level.DEBUG, "ENTER: learnTerminal");
+		Charset[] encodings = console.getEncodings();
+		logger.log(Level.INFO, "Encoding: Input={0}  Output={1}", encodings[0], encodings[1]);
+		this.charset = encodings[1];
+
+
+		ANSIOutputStream out = console.getOutputStream();
+		CapabilityDetector detector = new CapabilityDetector(out);
+		readTask.setWhenNotForwarding( frag -> {
+			try {
+				detector.process(frag);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
+		try {
+			int[] size = console.getConsoleSize();
+			capabilities = detector.performCheck(size[0], size[1]);
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			capabilities.report(new ANSIOutputStream(baos));
+			logger.log(Level.INFO, baos.toString(StandardCharsets.UTF_8));
+			capabilities.report(new ANSIOutputStream(System.out));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		logger.log(Level.DEBUG, "LEAVE: learnTerminal");
+
+	}
+
+	//-------------------------------------------------------------------
+	@Deprecated
 	public MUDSession(SessionConfig session, TelnetSocketListener callback, int[] naws, Charset charset) throws IOException {
 		logger.log(Level.INFO, "ENTER: MUDSession.<init>");
 		TelnetOptionRegistry.register(TelnetOption.MUSHCLIENT.getCode(), new AardwolfMushclientProtocol());

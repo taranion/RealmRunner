@@ -124,7 +124,7 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 	private enum OSType {
 	    Windows, MacOS, Linux, Other
 	  };
-	
+
 	private static Logger logger ;
 	private final static String AREA_ROOMDESC = "RoomDesc";
 
@@ -144,7 +144,7 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 	private TimerTask updateNAWSTask;
 	private int terminalWidth, terminalHeight;
 	private ANSIOutputConfig terminalConfig;
-	
+
 	private Player player;
 	private Thread playerThread;
 
@@ -272,7 +272,7 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 		GMCPManager.registerPackage(new CorePackage());
 		GMCPManager.registerPackage(new CharPackage());
 		GMCPManager.registerPackage(new BeipTilemapPackage());
-		
+
 		try {
 
 			SessionConfigBuilder builder = SessionConfig.builder();
@@ -313,7 +313,7 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 	    }
 	    return detectedOS;
 	 }
-	
+
 	//-------------------------------------------------------------------
 	private void setupLogging() {
 		String homeDir = System.getProperty("user.home", "/tmp");
@@ -429,8 +429,8 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 		Charset[] encodings = console.getEncodings();
 		logger.log(Level.INFO, "Encoding: Input={0}  Output={1}", encodings[0], encodings[1]);
 		this.charset = encodings[1];
-		
-		
+
+
 		ANSIOutputStream out = console.getOutputStream();
 		CapabilityDetector detector = new CapabilityDetector(out);
 		readTask.setWhenNotForwarding( frag -> {
@@ -457,7 +457,7 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 
 	//-------------------------------------------------------------------
 	private void installShutdown() {
-		
+
 		// What to do on shutdown
 		Thread onShutdown = new Thread(() -> {
 			logger.log(Level.WARNING, "Shutting down");
@@ -493,7 +493,7 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 		session.getSocket().setOptionListener(TelnetOption.MSP, sound);
 		session.setGmcpListener(this);
 		readFromConsole.setForwardTo(session.getSocket());
-		
+
 		Charset useCharset = charset;
 		if (activeConfig.getServerEncoding()!=null)
 			useCharset = Charset.forName(activeConfig.getServerEncoding());
@@ -516,7 +516,7 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 			}
 		}
 	}
-	
+
 	//-------------------------------------------------------------------
 	private void setupTimer() {
 		updateNAWSTask = new TimerTask() {
@@ -585,7 +585,7 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 //			AreaControls.setLeftAndRightMargins(out, 13, terminalWidth);
 ////			AreaControls.setTopAndBottomMargins(out, 13, terminalWidth);
 //			CursorControls.setCursorPosition(out, 13, 13);
-			
+
 			Path configFile = CONFIG_DIR.resolve("config.yml");
 			out.write("Reading your configuration from "+configFile.toRealPath()+"\r\n");
 			capabilities.report(out);
@@ -605,7 +605,7 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 	//-------------------------------------------------------------------
 	private void sendNAWS() {
 		if (session==null || session.getSocket()==null) return;
-		
+
 		AreaDefinition def = format.getArea(UIGridFormat.ID_SCROLL);
 		if (def==null) {
 			ANSIOutputConfig config = ANSIOutputConfig.builder()
@@ -706,7 +706,7 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 		if (player!=null && !player.isComplete()) {
 			player.close();
 		}
-		
+
 	}
 
 	//-------------------------------------------------------------------
@@ -973,7 +973,7 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 		int mapHeight=11;
 		int mapWidth=11;
 		int columns=terminalWidth;
-		
+
 
 		try {
 			CursorControls.savePositionDEC(out);
@@ -1060,7 +1060,7 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 	 */
 	@Override
 	public void lineBufferChanged(String content, int cursorPosition) {
-		logger.log(Level.DEBUG, "lineBufferChanged({0}, {1})  localEcho={2}, transparent={3}", content, cursorPosition, console.isLocalEchoActive(), 
+		logger.log(Level.DEBUG, "lineBufferChanged({0}, {1})  localEcho={2}, transparent={3}", content, cursorPosition, console.isLocalEchoActive(),
 				activeConfig!=null?activeConfig.getServerLayoutControl():"?");
 		if (activeConfig!=null && activeConfig.getServerLayoutControl()!=null && activeConfig.getServerLayoutControl())
 			return;
@@ -1098,9 +1098,9 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 			return frag;
 		AreaDefinition scroll = format.getArea(UIGridFormat.ID_SCROLL);
 		// If in transparent mode, don't do anything
-		if (scroll==null) 
+		if (scroll==null)
 			return frag;
-		
+
 		if (frag instanceof EraseInDisplay) {
 			logger.log(Level.WARNING, "Replace EraseInDisplay with clearing area");
 			try {
@@ -1344,7 +1344,7 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 			pout.flush();
 		}
 
-		
+
 	}
 
 	//-------------------------------------------------------------------

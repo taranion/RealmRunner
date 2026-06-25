@@ -5,9 +5,10 @@ module org.prelle.mud.client.base {
 	requires java.net.http;
 	requires org.prelle.gmcp;
 	requires transitive org.prelle.libansi;
-	requires org.prelle.libterminal;
+	requires transitive org.prelle.libterminal;
 	requires org.prelle.telnet;
 	requires org.yaml.snakeyaml;
 	requires lombok;
-	
+	requires org.prelle.mudansi;
+
 }

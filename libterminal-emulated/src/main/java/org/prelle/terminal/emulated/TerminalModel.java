@@ -3,8 +3,12 @@ package org.prelle.terminal.emulated;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.prelle.ansi.commands.DECSetMode.DECMode;
+import org.prelle.ansi.commands.SetMode.ANSIMode;
 import org.prelle.terminal.emulated.delete.CharInfo;
 import org.prelle.terminal.emulated.delete.ITerminalView;
 import org.prelle.terminal.emulated.delete.Style;
@@ -28,6 +32,8 @@ public class TerminalModel {
 	}
 
 	private ITerminalView view;
+	private Map<ANSIMode,Boolean> ansiModes = new HashMap<>();
+	private Map<DECMode,Boolean> decModes  = new HashMap<>();
 	private List<Line> lines = new ArrayList<>();
 	private int width=80, height=50;
 
@@ -35,6 +41,16 @@ public class TerminalModel {
 	public TerminalModel() {
 		lines = new ArrayList<>();
 		for (int i=0; i<height; i++) lines.add(new Line(width));
+	}
+
+	//-------------------------------------------------------------------
+	public boolean isSet(ANSIMode mode) {
+		return ansiModes.getOrDefault(mode, false);
+	}
+
+	//-------------------------------------------------------------------
+	public boolean isSet(DECMode mode) {
+		return decModes.getOrDefault(mode, false);
 	}
 
 	//-------------------------------------------------------------------

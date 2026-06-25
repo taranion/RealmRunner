@@ -10,7 +10,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.deploy.skip>true</maven.deploy.skip>
 		<maven.install.skip>false</maven.install.skip>
-		<maven.compiler.release>23</maven.compiler.release>
+		<maven.compiler.release>25</maven.compiler.release>
 		<revision>0.0.1</revision>
 	</properties>
 
@@ -18,6 +18,7 @@
 	   <module>libterminal-core</module>
 	   <module>libterminal-emulated</module>
 	   <module>libterminal-native</module>
+	   <module>libterminal-jeditermfx</module>
 <!--       <module>libterminal-jfx</module>
 -->		<module>MUDClient-Base</module>
 		<!--module>RealmRunner_CLI</module-->
@@ -29,22 +30,22 @@
 		  <dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.18.38</version>
+			<version>1.18.46</version>
 		  </dependency>
           <dependency>
             <groupId>org.prelle</groupId>
             <artifactId>libansi</artifactId>
-            <version>0.2.1</version>
+            <version>0.2.3</version>
           </dependency>
         <dependency>
             <groupId>org.prelle</groupId>
             <artifactId>telnet</artifactId>
-            <version>0.1.2</version>
+            <version>0.1.7</version>
         </dependency>
         <dependency>
             <groupId>org.prelle</groupId>
             <artifactId>gmcp4j</artifactId>
-            <version>[0.2.0,)</version>
+            <version>[0.3.3,)</version>
         </dependency>
 	   </dependencies>
 	</dependencyManagement>
@@ -53,13 +54,13 @@
 		<plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.13.0</version>
+        <version>3.14.1</version>
         <configuration>
 			<annotationProcessorPaths>
 				<path>
 					<groupId>org.projectlombok</groupId>
 					<artifactId>lombok</artifactId>
-					<version>1.18.36</version>
+					<version>1.18.42</version>
 				</path>
 			</annotationProcessorPaths>
         </configuration>

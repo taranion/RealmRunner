@@ -11,6 +11,8 @@ import org.prelle.ansi.AParsedElement;
 import org.prelle.ansi.C0Fragment;
 import org.prelle.ansi.ControlSequenceFragment;
 import org.prelle.ansi.PrintableFragment;
+import org.prelle.ansi.commands.DECSetMode.DECMode;
+import org.prelle.ansi.commands.SetMode.ANSIMode;
 import org.prelle.terminal.emulated.delete.ColorPalette;
 import org.prelle.terminal.emulated.delete.Emulation;
 import org.prelle.terminal.emulated.delete.ITerminalView;
@@ -221,6 +223,14 @@ public abstract class TerminalController implements ITerminalViewListener {
 	//-------------------------------------------------------------------
 	private void drawCharacters(String text) {
 		for (int i=0; i<text.length(); i++) {
+			if (caretX>=model.getWidth()) {
+				if (model.isSet(DECMode.WRAP_AROUND_MODE)) {
+					logger.log(Level.WARNING, "Wrap");
+					newline();
+				} else {
+					caretX=model.getWidth()-1;
+				}
+			}
 			char c = text.charAt(i);
 			try {
 				model.setGlyphAt(c+"", caretX, caretY, style);
@@ -229,10 +239,6 @@ public abstract class TerminalController implements ITerminalViewListener {
 			//graphic.drawText(caretX, caretY, String.valueOf(c), style);
 			caretX++;
 
-			if (caretX>=model.getWidth()) {
-				logger.log(Level.TRACE, "Wrap");
-				newline();
-			}
 		}
 	}
 
@@ -241,7 +247,7 @@ public abstract class TerminalController implements ITerminalViewListener {
 //		logger.log(Level.DEBUG, "nextline while in {0}",caretY);
 		caretY++;
 		if (caretY>model.getHeight()) {
-			logger.log(Level.WARNING, "ToDo: Scrolling {0}",caretY);
+//			logger.log(Level.WARNING, "ToDo: Scrolling {0}",caretY);
 			model.addLine();
 		}
 	}

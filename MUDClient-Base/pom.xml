@@ -33,5 +33,10 @@
     		<artifactId>snakeyaml</artifactId>
     		<version>2.4</version>
 		</dependency>
+        <dependency>
+            <groupId>com.graphicmud</groupId>
+            <artifactId>mudansi</artifactId>
+            <version>0.3.0</version>
+        </dependency>
 	</dependencies>
 </project>
