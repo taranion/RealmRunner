@@ -23,12 +23,12 @@ public class SwitchableOutputStream extends OutputStream {
 	 */
 	public void setSink(OutputStream sink) {
 		this.sink = sink;
-		System.getLogger("ghostty").log(System.Logger.Level.INFO, "SwitchableOutputStream.setSink({0})", sink);
+		System.getLogger("ghostty").log(System.Logger.Level.INFO, "Write to {0}", sink);
 	}
 
 	@Override
 	public void write(int b) throws IOException {
-		System.getLogger("ghostty").log(System.Logger.Level.INFO, String.valueOf((char)b));
+//		System.getLogger("ghostty").log(System.Logger.Level.INFO, String.valueOf((char)b)+" to "+sink);
 		if (sink!=null) sink.write(b);
 	}
 

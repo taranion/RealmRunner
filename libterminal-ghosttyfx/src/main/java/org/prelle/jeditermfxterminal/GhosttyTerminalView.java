@@ -30,7 +30,6 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	private SwitchableOutputStream outPipe;
 
 	private TerminalView widget;
-	private RemoteGhosttyTerminal terminal;
     private ANSIOutputStream out;
     private ANSIInputStream in;
 
@@ -38,11 +37,10 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	public GhosttyTerminalView() {
 		inPipe = new SwitchableInputStream();
 		outPipe = new SwitchableOutputStream();
-		terminal = new RemoteGhosttyTerminal(inPipe, outPipe);
 
 		widget = new TerminalView( (columns,rows) -> {
 			logger.log(Level.DEBUG, "TerminalView<init> create terminal with {0}x{1}", columns, rows);
-			return terminal;
+			return this;
 		});
 
 		out = new ANSIOutputStream(outPipe);
@@ -185,6 +183,10 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 		return inPipe;
 	}
 
+	//-------------------------------------------------------------------
+	/**
+	 * @see io.github.vlaaad.ghosttyfx.Terminal#input()
+	 */
 	@Override
 	public OutputStream input() throws Exception {
 		return outPipe;

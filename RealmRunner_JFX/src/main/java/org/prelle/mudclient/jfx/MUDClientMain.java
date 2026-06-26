@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PipedWriter;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
+import java.net.InetAddress;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -20,13 +21,18 @@ import org.prelle.ansi.commands.DeviceAttributes;
 import org.prelle.ansi.commands.DeviceAttributes.Variant;
 import org.prelle.fxterminal.TerminalView;
 import org.prelle.jeditermfxterminal.GhosttyTerminalView;
+import org.prelle.jeditermfxterminal.SwitchableInputStream;
+import org.prelle.jeditermfxterminal.SwitchableOutputStream;
 import org.prelle.realmrunner.network.Config;
 import org.prelle.realmrunner.network.DataFileManager;
+import org.prelle.realmrunner.network.InputStreamThread;
+import org.prelle.realmrunner.network.MUDConnection;
 import org.prelle.realmrunner.network.MUDSession;
 import org.prelle.realmrunner.network.MainConfig;
 import org.prelle.realmrunner.network.ReadFromConsoleTask;
 import org.prelle.realmrunner.network.ReadFromMUDTask;
 import org.prelle.realmrunner.network.SessionConfig;
+import org.prelle.realmrunner.network.TCPMUDConnection;
 import org.prelle.telnet.TelnetOption;
 import org.prelle.telnet.mud.AardwolfMushclientProtocol.AardwolfMushclientListener;
 import org.prelle.terminal.emulated.Terminal;
@@ -155,16 +161,32 @@ public class MUDClientMain extends Application {
 		stage.setWidth(1000);
 		stage.show();
 
-		Stage dialogStage = new Stage();
-		ConnectionDialog choices = new ConnectionDialog(mainConfig);
-		Scene dialogScene = new Scene(choices);
-		dialogStage.setScene(dialogScene);
-		dialogStage.showAndWait();
+//		Stage dialogStage = new Stage();
+//		ConnectionDialog choices = new ConnectionDialog(mainConfig);
+//		Scene dialogScene = new Scene(choices);
+//		dialogStage.setScene(dialogScene);
+//		dialogStage.showAndWait();
+//
+//		Config connectWith = choices.getSelected();
+//		logger.log(Level.DEBUG, "Connect to {0}", connectWith);
+//		if (connectWith!=null) {
+//			connectWith(connectWith);
+//		}
+		
+		Config connectWith = mainConfig.getWorld().get("eden");
+		connectWith(connectWith);
+		
+	}
 
-		Config connectWith = choices.getSelected();
-		logger.log(Level.DEBUG, "Connect to {0}", connectWith);
-		if (connectWith!=null) {
-			connectWith(connectWith);
+	//-------------------------------------------------------------------
+	public void connect(MUDConnection connection) {
+		logger.log(Level.INFO, "Connecting to MUD {0}", connection);
+		try {
+//			((SwitchableOutputStream)console.input()).setSink(connection.getStreamToMUD());
+			((SwitchableInputStream)console.output()).setSource(connection.getStreamFromMUD());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -239,60 +261,67 @@ public class MUDClientMain extends Application {
 	//			session = SessionManager.createSession("mg.mud.de", 4711);
 				session = SessionManager.createSession(connectWith.getServer(), connectWith.getPort());
 	//			session = SessionManager.createSession("localhost", 4000);
-				session.connect(new SessionListener() {
+				InetAddress host = InetAddress.getByName("eden-test.rpgframework.de");
+				MUDConnection con = new TCPMUDConnection(host, 4000, session);
+				connect(con);
+				
+//				Thread readFromMUD = new Thread(new InputStreamThread(con.getStreamFromMUD(), console.getOutputStream()));
+//				readFromMUD.start();
 
-					@Override
-					public void textReceived(String msg) {
-						System.out.println("-----\n"+msg);
-						terminal.getTerminal().write(msg);
-						try {
-							console.getOutputStream().write(msg);
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+//				session.connect(new SessionListener() {
+//
+//					@Override
+//					public void textReceived(String msg) {
+//						System.out.println("-----\n"+msg);
+//						terminal.getTerminal().write(msg);
 //						try {
-////							terminalWriter.write(msg);
-////							ttyConnector.write(msg);
+//							console.getOutputStream().write(msg);
 //						} catch (IOException e) {
 //							// TODO Auto-generated catch block
 //							e.printStackTrace();
 //						}
-//				        Platform.runLater( () -> {
-//				        	Node pane = FlowBuilder.configure()
-//				        			.fontFamily("Monospaced Regular")
-//				        			.fontSize(12)
-//				        			.darkMode(false)
-//				        		.message(msg)
-//				        		.build();
-//				        	HistoryEntry entry = new HistoryEntry(msg, pane);
-//				        	history.add(entry);
-//				        	historyPane.getChildren().add(pane);
-//				        	if (historyPane.getChildren().size()>20) {
-//				        		historyPane.getChildren().remove(0);
-//				        		history.remove(0);
-//				        	}
-//				        	//scroll.setVvalue(1.0);
-//				        	});
-					}
-
-					@Override
-					public void connectionLost(Session session) {
-						System.exit(0);
-					}
-
-					@Override
-					public void mapReceived(org.prelle.telnet.mud.MUDTilemapProtocol.TileMapData data) {
-						// TODO Auto-generated method stub
-						mapView.setData(data.getRawData());
-					}
-				});
+////						try {
+//////							terminalWriter.write(msg);
+//////							ttyConnector.write(msg);
+////						} catch (IOException e) {
+////							// TODO Auto-generated catch block
+////							e.printStackTrace();
+////						}
+////				        Platform.runLater( () -> {
+////				        	Node pane = FlowBuilder.configure()
+////				        			.fontFamily("Monospaced Regular")
+////				        			.fontSize(12)
+////				        			.darkMode(false)
+////				        		.message(msg)
+////				        		.build();
+////				        	HistoryEntry entry = new HistoryEntry(msg, pane);
+////				        	history.add(entry);
+////				        	historyPane.getChildren().add(pane);
+////				        	if (historyPane.getChildren().size()>20) {
+////				        		historyPane.getChildren().remove(0);
+////				        		history.remove(0);
+////				        	}
+////				        	//scroll.setVvalue(1.0);
+////				        	});
+//					}
+//
+//					@Override
+//					public void connectionLost(Session session) {
+//						System.exit(0);
+//					}
+//
+//					@Override
+//					public void mapReceived(org.prelle.telnet.mud.MUDTilemapProtocol.TileMapData data) {
+//						// TODO Auto-generated method stub
+//						mapView.setData(data.getRawData());
+//					}
+//				});
 
 //				ReadFromConsoleTask readFromConsole = startReadingFromTerminal(connectWith);
 //				MUDSession session = startReadingFromMUD(null, connectWith);
-				MUDSession session = MUDSession.builder(console)
-						.setCharset(StandardCharsets.UTF_8)
-						.build();
+//				MUDSession session = MUDSession.builder(console)
+//						.setCharset(StandardCharsets.UTF_8)
+//						.build();
 				//session.co
 
 			} catch (Exception e) {
