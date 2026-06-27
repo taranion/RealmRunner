@@ -6,21 +6,17 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
-import org.prelle.telnet.TelnetInputStream;
-import org.prelle.telnet.TelnetOutputStream;
-import org.prelle.telnet.TelnetSocket;
-import org.prelle.telnet.TelnetSocketListener;
+import lombok.Getter;
 
 /**
  * 
  */
 public class TCPMUDConnection implements MUDConnection {
 	
-	private InetAddress host;
-	private int port;
-	private TelnetSocketListener listener;
+	@Getter private InetAddress host;
+	@Getter private int port;
 	
-	private TelnetSocket socket;
+	private Socket socket;
 	private InputStream in;
 	private OutputStream out;
 
@@ -28,13 +24,11 @@ public class TCPMUDConnection implements MUDConnection {
 	/**
 	 * @throws IOException 
 	 */
-	public TCPMUDConnection(InetAddress host, int port, TelnetSocketListener listener) throws IOException{
+	public TCPMUDConnection(InetAddress host, int port) throws IOException{
 		this.host = host;
 		this.port = port;
-		this.listener = listener;
 		
-		socket = new TelnetSocket(host.getHostAddress(), port);
-		socket.addSocketListener(listener);
+		socket = new Socket(host.getHostAddress(), port);
 		in =  socket.getInputStream();
 		out = socket.getOutputStream();
 	}

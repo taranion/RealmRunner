@@ -180,6 +180,7 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 
 	@Override
 	public InputStream output() throws Exception {
+		System.err.println("GhosttyTerminalView.output() called");
 		return inPipe;
 	}
 
@@ -189,6 +190,7 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	 */
 	@Override
 	public OutputStream input() throws Exception {
+		System.err.println("GhosttyTerminalView.input() called");
 		return outPipe;
 	}
 

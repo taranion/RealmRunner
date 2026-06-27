@@ -34,6 +34,7 @@ public class SwitchableInputStream extends InputStream {
 	 */
 	@Override
 	public int read() throws IOException {
+		logger.log(Logger.Level.INFO, "ENTER: read()");
 		while (source==null || source.available()==0) {
 			synchronized (this) {
 				try {
@@ -62,24 +63,33 @@ public class SwitchableInputStream extends InputStream {
 	 */
 	@Override
 	public int read(byte[] buf) throws IOException {
-		while (source==null || source.available()==0) {
-			synchronized (this) {
-				try {
-					wait(50);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+		logger.log(Logger.Level.ERROR, "ENTER: read(byte[])");
+		try {
+			while (source==null || source.available()==0) {
+				logger.log(Logger.Level.INFO, "ENTER: read(byte[]) avail="+((source!=null)?source.available():null));
+				synchronized (this) {
+					try {
+						wait(50);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
+			if (source==null) {
+				System.err.println("SwitchableInputStream: source is null");
+				System.exit(1);
+				return -1;
+			}
+			int c = source.read(buf);
+			logger.log(Logger.Level.INFO, "read : {0}", new String(buf, 0, c));
+			return c;
+		} catch (Exception e) {
+			logger.log(Logger.Level.ERROR, "Exception in read(byte[]) : {0}", e);
+			throw e;
+		} finally {
+			logger.log(Logger.Level.INFO, "LEAVE: read(byte[]) ");
 		}
-		if (source==null) {
-			System.err.println("SwitchableInputStream: source is null");
-			System.exit(1);
-			return -1;
-		}
-		int c = source.read(buf);
-		logger.log(Logger.Level.INFO, "read : {0}", new String(buf, 0, c));
-		return c;
 	}
 	
 }

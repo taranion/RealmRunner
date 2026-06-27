@@ -10,5 +10,6 @@ module org.prelle.mud.client.base {
 	requires org.yaml.snakeyaml;
 	requires lombok;
 	requires org.prelle.mudansi;
+	requires jakarta.websocket.client;
 
 }
