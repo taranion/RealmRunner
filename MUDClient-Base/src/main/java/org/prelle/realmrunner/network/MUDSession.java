@@ -26,16 +26,16 @@ import org.prelle.mudansi.CapabilityDetector;
 import org.prelle.mudansi.TerminalCapabilities;
 import org.prelle.telnet.TelnetConstants.ControlCode;
 import org.prelle.telnet.TelnetInputStream;
-import org.prelle.telnet.TelnetOption;
+import org.prelle.telnet.TelnetListener;
 import org.prelle.telnet.TelnetOptionListener;
-import org.prelle.telnet.TelnetOptionRegistry;
 import org.prelle.telnet.TelnetSocket;
-import org.prelle.telnet.TelnetSocket.State;
-import org.prelle.telnet.TelnetSocketListener;
+import org.prelle.telnet.TelnetSubnegotiationHandler;
+import org.prelle.telnet.WellKnownTelnetOptions;
 import org.prelle.telnet.mud.AardwolfMushclientProtocol;
 import org.prelle.telnet.mud.GenericMUDCommunicationProtocol.GMCPReceiver;
 import org.prelle.telnet.mud.GenericMUDCommunicationProtocol.RawGMCPMessage;
 import org.prelle.telnet.mud.MUDTerminalTypeData;
+import org.prelle.telnet.option.TelnetEnvironmentOption;
 import org.prelle.telnet.option.TelnetWindowSize;
 import org.prelle.terminal.TerminalEmulator;
 import org.prelle.terminal.TerminalMode;
@@ -46,7 +46,7 @@ import lombok.Getter;
  *
  */
 @Getter
-public class MUDSession implements TelnetSocketListener, TelnetOptionListener, GMCPReceiver {
+public class MUDSession implements TelnetListener, TelnetOptionListener, GMCPReceiver {
 
 	private final static Logger logger = System.getLogger("mud.client");
 
@@ -55,7 +55,7 @@ public class MUDSession implements TelnetSocketListener, TelnetOptionListener, G
 		private TerminalEmulator terminal;
 		private Config clientConfig;
 		private SessionConfig sessionData;
-		private TelnetSocketListener telnetListener;
+		private TelnetListener telnetListener;
 		private Charset charset;
 
 		public Builder(TerminalEmulator terminal) {
@@ -98,7 +98,7 @@ public class MUDSession implements TelnetSocketListener, TelnetOptionListener, G
 	}
 
 	//-------------------------------------------------------------------
-	public MUDSession(TerminalEmulator terminal, TelnetSocketListener callback, int[] naws, Charset charset) throws IOException {
+	public MUDSession(TerminalEmulator terminal, TelnetListener callback, int[] naws, Charset charset) throws IOException {
 		logger.log(Level.INFO, "ENTER: MUDSession.<init>");
 		this.console = terminal;
 		console.setLocalEchoActive(false);
@@ -145,9 +145,9 @@ public class MUDSession implements TelnetSocketListener, TelnetOptionListener, G
 
 	//-------------------------------------------------------------------
 	@Deprecated
-	public MUDSession(SessionConfig session, TelnetSocketListener callback, int[] naws, Charset charset) throws IOException {
+	public MUDSession(SessionConfig session, TelnetListener callback, int[] naws, Charset charset) throws IOException {
 		logger.log(Level.INFO, "ENTER: MUDSession.<init>");
-		TelnetOptionRegistry.register(TelnetOption.MUSHCLIENT.getCode(), new AardwolfMushclientProtocol());
+//		TelnetOptionRegistry.register(WellKnownTelnetOptions.MUSHCLIENT.getCode(), new AardwolfMushclientProtocol());
 
 		GMCPManager.registerPackage(new ClientMediaPackage());
 //		GMCPManager.registerPackage(new CharPackage());
@@ -165,29 +165,29 @@ public class MUDSession implements TelnetSocketListener, TelnetOptionListener, G
 
 		logger.log(Level.INFO, "Connecting to {0} port {1}", session.getServer(), session.getPort());
 		socket = new TelnetSocket(session.getServer(), session.getPort())
-				.addSocketListener(this)
-				.addSocketListener(callback)
-				.setOptionListener(TelnetOption.ECHO, this)
-//				.addSocketListener(new GMCPHandler(true))
-				.support(TelnetOption.ECHO.getCode(), ControlCode.WILL)
-				.support(TelnetOption.SGA.getCode(), ControlCode.DO)
-				.support(TelnetOption.EOR.getCode(), ControlCode.DO)
-				.support(TelnetOption.NEW_ENVIRON.getCode(), ControlCode.WILL, environment)
-				.support(TelnetOption.NAWS.getCode(), ControlCode.WILL, naws)
-				.support(TelnetOption.LINEMODE.getCode(), ControlCode.WILL)
-				.support(TelnetOption.TERMINAL_TYPE.getCode(), ControlCode.WILL, mttData)
-				.support(TelnetOption.MSP.getCode(), ControlCode.DO)
-				.support(TelnetOption.MXP.getCode(), ControlCode.DO)
-				.support(TelnetOption.GMCP.getCode(), ControlCode.DO)
-				.support(TelnetOption.MUSHCLIENT.getCode(), ControlCode.DO)
-				.support(TelnetOption.CHARSET.getCode(), ControlCode.DO, charset)
-//				.support(new MUDClientCompression1(), Role.REJECT_OUTRIGHT)
-//				.support(new MUDClientCompression2(), Role.REJECT_OUTRIGHT)
-//				.support(new ZenithMUDProtocol(), Role.REJECT_OUTRIGHT)
+				.addListener(callback)
+				.setOptionListener(WellKnownTelnetOptions.ECHO, this)
+////				.addSocketListener(new GMCPHandler(true))
+//				.support(WellKnownTelnetOptions.ECHO.getCode(), ControlCode.WILL)
+//				.support(WellKnownTelnetOptions.SGA.getCode(), ControlCode.DO)
+//				.support(WellKnownTelnetOptions.EOR.getCode(), ControlCode.DO)
+//				.support(WellKnownTelnetOptions.NEW_ENVIRON.getCode(), ControlCode.WILL, environment)
+//				.support(WellKnownTelnetOptions.NAWS.getCode(), ControlCode.WILL, naws)
+//				.support(WellKnownTelnetOptions.LINEMODE.getCode(), ControlCode.WILL)
+//				.support(WellKnownTelnetOptions.TERMINAL_TYPE.getCode(), ControlCode.WILL, mttData)
+//				.support(WellKnownTelnetOptions.MSP.getCode(), ControlCode.DO)
+//				.support(WellKnownTelnetOptions.MXP.getCode(), ControlCode.DO)
+//				.support(WellKnownTelnetOptions.GMCP.getCode(), ControlCode.DO)
+//				.support(WellKnownTelnetOptions.MUSHCLIENT.getCode(), ControlCode.DO)
+//				.support(WellKnownTelnetOptions.CHARSET.getCode(), ControlCode.DO, charset)
+////				.support(new MUDClientCompression1(), Role.REJECT_OUTRIGHT)
+////				.support(new MUDClientCompression2(), Role.REJECT_OUTRIGHT)
+////				.support(new ZenithMUDProtocol(), Role.REJECT_OUTRIGHT)
 				;
 		socket.setTcpNoDelay(true);
+		socket.getStack().add(new TelnetEnvironmentOption(environment, null));
 		logger.log(Level.INFO, "Register MUDSession as GMCP listener");
-		socket.setOptionListener(TelnetOption.GMCP, this);
+//		socket.setOptionListener(WellKnownTelnetOptions.GMCP, this);
 		streamToMUD   = new ANSIOutputStream( socket.getOutputStream());
 		streamFromMUD = (TelnetInputStream) socket.getInputStream();
 		logger.log(Level.INFO, "LEAVE: MUDSession.<init>");
@@ -220,26 +220,6 @@ public class MUDSession implements TelnetSocketListener, TelnetOptionListener, G
 	//-------------------------------------------------------------------
 	public void sendWindowSizeUpdate(int width, int height) throws IOException {
 		TelnetWindowSize.sendUpdate(socket, width, height);
-	}
-
-	//-------------------------------------------------------------------
-	/**
-	 * @see org.prelle.telnet.TelnetSocketListener#telnetOptionStatusChange(org.prelle.telnet.TelnetSocket, org.prelle.telnet.TelnetOption, boolean)
-	 */
-	@Override
-	public void telnetOptionStatusChange(TelnetSocket nvt, TelnetOption option, boolean active) {
-		// TODO Auto-generated method stub
-
-	}
-
-
-	//-------------------------------------------------------------------
-	/**
-	 * @see org.prelle.telnet.TelnetSocketListener#telnetSocketChanged(org.prelle.telnet.TelnetSocket, org.prelle.telnet.TelnetSocket.State, org.prelle.telnet.TelnetSocket.State)
-	 */
-	@Override
-	public void telnetSocketChanged(TelnetSocket nvt, State oldState, State newState) {
-		logger.log(Level.DEBUG, "state changed "+newState);
 	}
 
 	//-------------------------------------------------------------------
@@ -296,6 +276,12 @@ public class MUDSession implements TelnetSocketListener, TelnetOptionListener, G
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void optionStateChanged(TelnetSubnegotiationHandler extension, boolean active) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

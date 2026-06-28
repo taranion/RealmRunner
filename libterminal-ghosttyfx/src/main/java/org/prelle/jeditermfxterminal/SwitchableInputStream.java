@@ -63,10 +63,10 @@ public class SwitchableInputStream extends InputStream {
 	 */
 	@Override
 	public int read(byte[] buf) throws IOException {
-		logger.log(Logger.Level.ERROR, "ENTER: read(byte[])");
+		logger.log(Logger.Level.TRACE, "ENTER: read(byte[])");
 		try {
 			while (source==null || source.available()==0) {
-				logger.log(Logger.Level.INFO, "ENTER: read(byte[]) avail="+((source!=null)?source.available():null));
+//				logger.log(Logger.Level.INFO, "ENTER: read(byte[]) avail="+((source!=null)?source.available():null));
 				synchronized (this) {
 					try {
 						wait(50);
@@ -82,13 +82,13 @@ public class SwitchableInputStream extends InputStream {
 				return -1;
 			}
 			int c = source.read(buf);
-			logger.log(Logger.Level.INFO, "read : {0}", new String(buf, 0, c));
+//			logger.log(Logger.Level.INFO, "read : {0}", new String(buf, 0, c));
 			return c;
 		} catch (Exception e) {
 			logger.log(Logger.Level.ERROR, "Exception in read(byte[]) : {0}", e);
 			throw e;
 		} finally {
-			logger.log(Logger.Level.INFO, "LEAVE: read(byte[]) ");
+			logger.log(Logger.Level.TRACE, "LEAVE: read(byte[]) ");
 		}
 	}
 	

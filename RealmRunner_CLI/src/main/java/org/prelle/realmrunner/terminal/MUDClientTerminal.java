@@ -89,10 +89,9 @@ import org.prelle.realmrunner.network.SessionConfig.SessionConfigBuilder;
 import org.prelle.realmrunner.network.SoundManager;
 import org.prelle.telnet.TelnetCommand;
 import org.prelle.telnet.TelnetConstants.ControlCode;
-import org.prelle.telnet.TelnetOption;
+import org.prelle.telnet.WellKnownTelnetOptions;
 import org.prelle.telnet.TelnetSocket;
 import org.prelle.telnet.TelnetSocket.State;
-import org.prelle.telnet.TelnetSocketListener;
 import org.prelle.telnet.mud.AardwolfMushclientProtocol.AardwolfMushclientListener;
 import org.prelle.telnet.mud.AardwolfMushclientProtocol.MUDMode;
 import org.prelle.telnet.option.TelnetWindowSize;
@@ -118,7 +117,7 @@ import javazoom.jl.player.Player;
 /**
  *
  */
-public class MUDClientTerminal implements TelnetSocketListener, LineBufferListener,
+public class MUDClientTerminal implements LineBufferListener,
 	AardwolfMushclientListener, MUDSessionGMCPListener  {
 
 	private enum OSType {
@@ -488,9 +487,9 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 
 	//-------------------------------------------------------------------
 	private void setupSession(SessionConfig config, Config activeConfig) throws IOException, InterruptedException {
-		session = new MUDSession(config, this, console.getConsoleSize(), charset);
-		session.getSocket().setOptionListener(TelnetOption.MUSHCLIENT, (AardwolfMushclientListener)this);
-		session.getSocket().setOptionListener(TelnetOption.MSP, sound);
+		session = new MUDSession(config,null, console.getConsoleSize(), charset);
+		session.getSocket().setOptionListener(WellKnownTelnetOptions.MUSHCLIENT, (AardwolfMushclientListener)this);
+		session.getSocket().setOptionListener(WellKnownTelnetOptions.MSP, sound);
 		session.setGmcpListener(this);
 		readFromConsole.setForwardTo(session.getSocket());
 
@@ -623,29 +622,29 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 		}
 	}
 
-	//-------------------------------------------------------------------
-	/**
-	 * @see org.prelle.telnet.TelnetSocketListener#telnetOptionStatusChange(org.prelle.telnet.TelnetSocket, org.prelle.telnet.TelnetOption, boolean)
-	 */
-	@Override
-	public void telnetOptionStatusChange(TelnetSocket nvt, TelnetOption option, boolean active) {
-		logger.log(Level.INFO, "Feature {0} is {1}", option, active?"enabled":"disabled");
-		if (option==TelnetOption.ECHO) {
-			console.setLocalEchoActive(!active);
-			//console.setMode(TerminalMode.LINE_MODE)
-		}
-		if (option==TelnetOption.NAWS && active) {
-			sendNAWS();
-		}
-		if (option==TelnetOption.GMCP && active) {
-			try {
-				GMCPManager.initiateAsClient(nvt.out());
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
+//	//-------------------------------------------------------------------
+//	/**
+//	 * @see org.prelle.telnet.TelnetSocketListener#telnetOptionStatusChange(org.prelle.telnet.TelnetSocket, org.prelle.telnet.WellKnownTelnetOptions, boolean)
+//	 */
+//	@Override
+//	public void telnetOptionStatusChange(TelnetSocket nvt, WellKnownTelnetOptions option, boolean active) {
+//		logger.log(Level.INFO, "Feature {0} is {1}", option, active?"enabled":"disabled");
+//		if (option==WellKnownTelnetOptions.ECHO) {
+//			console.setLocalEchoActive(!active);
+//			//console.setMode(TerminalMode.LINE_MODE)
+//		}
+//		if (option==WellKnownTelnetOptions.NAWS && active) {
+//			sendNAWS();
+//		}
+//		if (option==WellKnownTelnetOptions.GMCP && active) {
+//			try {
+//				GMCPManager.initiateAsClient(nvt.out());
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
+//	}
 
 	//-------------------------------------------------------------------
 	/**
@@ -709,22 +708,22 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 
 	}
 
-	//-------------------------------------------------------------------
-	/**
-	 * @see org.prelle.telnet.TelnetSocketListener#telnetCommandReceived(org.prelle.telnet.TelnetSocket, org.prelle.telnet.TelnetCommand)
-	 */
-	@Override
-	public void telnetCommandReceived(TelnetSocket nvt, TelnetCommand command) {
-//		logger.log(Level.INFO, "TODO: Command "+command);
-		if (command.getCode()==ControlCode.GA) {
-			try {
-				console.getOutputStream().flush();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
+//	//-------------------------------------------------------------------
+//	/**
+//	 * @see org.prelle.telnet.TelnetSocketListener#telnetCommandReceived(org.prelle.telnet.TelnetSocket, org.prelle.telnet.TelnetCommand)
+//	 */
+//	@Override
+//	public void telnetCommandReceived(TelnetSocket nvt, TelnetCommand command) {
+////		logger.log(Level.INFO, "TODO: Command "+command);
+//		if (command.getCode()==ControlCode.GA) {
+//			try {
+//				console.getOutputStream().flush();
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
+//	}
 
 //	//-------------------------------------------------------------------
 //	public static String buildLine(List<MarkupElement> elements, int lineLength, boolean justify) {
@@ -1007,14 +1006,6 @@ public class MUDClientTerminal implements TelnetSocketListener, LineBufferListen
 	}
 
 
-	//-------------------------------------------------------------------
-	/**
-	 * @see org.prelle.telnet.TelnetSocketListener#telnetSocketChanged(org.prelle.telnet.TelnetSocket, org.prelle.telnet.TelnetSocket.State, org.prelle.telnet.TelnetSocket.State)
-	 */
-	@Override
-	public void telnetSocketChanged(TelnetSocket nvt, State oldState, State newState) {
-		logger.log(Level.DEBUG, "state changed "+newState);
-	}
 
 	//-------------------------------------------------------------------
 	/**

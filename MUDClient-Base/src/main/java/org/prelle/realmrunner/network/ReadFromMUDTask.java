@@ -13,20 +13,15 @@ import org.prelle.ansi.AParsedElement;
 import org.prelle.ansi.C0Code;
 import org.prelle.ansi.C0Fragment;
 import org.prelle.ansi.PrintableFragment;
-import org.prelle.ansi.commands.MXPLine;
 import org.prelle.ansi.control.AreaControls;
 import org.prelle.telnet.TelnetCommand;
 import org.prelle.telnet.TelnetInputStream;
-import org.prelle.telnet.TelnetOption;
 import org.prelle.telnet.TelnetSocket;
-import org.prelle.telnet.TelnetSocket.State;
-import org.prelle.telnet.mud.MUDSoundProtocolListener;
-import org.prelle.telnet.TelnetSocketListener;
 
 /**
  *
  */
-public class ReadFromMUDTask implements Runnable, TelnetSocketListener {
+public class ReadFromMUDTask implements Runnable {
 
 	private final static Logger logger = System.getLogger("mud.client");
 
@@ -53,7 +48,7 @@ public class ReadFromMUDTask implements Runnable, TelnetSocketListener {
 			e.printStackTrace();
 		}
 		
-		mud.addSocketListener(this);
+//		mud.addSocketListener(this);
 	}
 
 	//-------------------------------------------------------------------
@@ -172,14 +167,6 @@ public class ReadFromMUDTask implements Runnable, TelnetSocketListener {
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.telnet.TelnetSocketListener#telnetOptionStatusChange(org.prelle.telnet.TelnetSocket, org.prelle.telnet.TelnetSubnegotiationHandler, boolean)
-	 */
-	@Override
-	public void telnetOptionStatusChange(TelnetSocket nvt, TelnetOption option, boolean active) {
-	}
-
-	//-------------------------------------------------------------------
-	/**
 	 * @see org.prelle.telnet.TelnetSocketListener#telnetCommandReceived(org.prelle.telnet.TelnetSocket, org.prelle.telnet.TelnetCommand)
 	 */
 	public void telnetCommandReceived(TelnetSocket nvt, TelnetCommand command) {
@@ -204,12 +191,6 @@ public class ReadFromMUDTask implements Runnable, TelnetSocketListener {
 		}
 	}
 
-	@Override
-	public void telnetSocketChanged(TelnetSocket nvt, State oldState, State newState) {
-		// TODO Auto-generated method stub
-
-	}
-
 	//-------------------------------------------------------------------
 	private void receivedMXP(String line) {
 		logger.log(Level.WARNING, "MXP: "+line);
@@ -221,15 +202,15 @@ public class ReadFromMUDTask implements Runnable, TelnetSocketListener {
 		lineBuffer.delete(0, lineBuffer.length());
 		inMSPMode=false;
 
-		MUDSoundProtocolListener listener = mud.getOptionListener(TelnetOption.MSP.getCode());
-		try {
-			if (listener!=null) {
-				listener.mspReceivedCommand(line);
-			} else
-				logger.log(Level.WARNING, "No MSP listener");
-		} catch (Exception e) {
-			logger.log(Level.ERROR, "Failed interpreting MSP",e);
-		}
+//		MUDSoundProtocolListener listener = mud.getOptionListener(WellKnownTelnetOptions.MSP.getCode());
+//		try {
+//			if (listener!=null) {
+//				listener.mspReceivedCommand(line);
+//			} else
+//				logger.log(Level.WARNING, "No MSP listener");
+//		} catch (Exception e) {
+//			logger.log(Level.ERROR, "Failed interpreting MSP",e);
+//		}
 	}
 
 	//-------------------------------------------------------------------

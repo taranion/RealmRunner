@@ -17,7 +17,7 @@ import org.prelle.ansi.C0Fragment;
 import org.prelle.ansi.PrintableFragment;
 import org.prelle.telnet.TelnetCommand;
 import org.prelle.telnet.TelnetConstants;
-import org.prelle.telnet.TelnetOption;
+import org.prelle.telnet.WellKnownTelnetOptions;
 import org.prelle.telnet.TelnetSocket;
 import org.prelle.telnet.option.LineMode.LineModeListener;
 import org.prelle.telnet.option.LineMode.ModeBit;
@@ -236,36 +236,36 @@ public class ReadFromConsoleTask implements Runnable, LineModeListener {
 		logger.log(Level.INFO, "Flush buffer on: {0}", flushCodes);
 	}
 
-	//-------------------------------------------------------------------
-	/**
-	 * @see org.prelle.telnet.TelnetOptionListener#remotePartySent(org.prelle.telnet.TelnetSocket, int, org.prelle.telnet.TelnetCommand)
-	 */
-	@Override
-	public void remotePartySent(TelnetSocket socket, int code, TelnetCommand command) {
-		try {
-			switch (code) {
-			case 1: // ECHO
-				switch (command.getCode().code()) {
-				case TelnetConstants.WILL:
-					logger.log(Level.INFO, "disable local echo creation");
-					mustCreateLocalEcho=false;
-					socket.out().sendDo(code);
-					break;
-				case TelnetConstants.WONT:
-					logger.log(Level.INFO, "enable local echo creation");
-					mustCreateLocalEcho=true;
-					socket.out().sendDont(code);
-					break;
-				}
-				break;
-			default:
-				logger.log(Level.INFO, "TODO: remotePartySent {0}", command);
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+//	//-------------------------------------------------------------------
+//	/**
+//	 * @see org.prelle.telnet.TelnetOptionListener#remotePartySent(org.prelle.telnet.TelnetSocket, int, org.prelle.telnet.TelnetCommand)
+//	 */
+//	@Override
+//	public void remotePartySent(TelnetSocket socket, int code, TelnetCommand command) {
+//		try {
+//			switch (code) {
+//			case 1: // ECHO
+//				switch (command.getCode().code()) {
+//				case TelnetConstants.WILL:
+//					logger.log(Level.INFO, "disable local echo creation");
+//					mustCreateLocalEcho=false;
+//					socket.out().sendDo(code);
+//					break;
+//				case TelnetConstants.WONT:
+//					logger.log(Level.INFO, "enable local echo creation");
+//					mustCreateLocalEcho=true;
+//					socket.out().sendDont(code);
+//					break;
+//				}
+//				break;
+//			default:
+//				logger.log(Level.INFO, "TODO: remotePartySent {0}", command);
+//			}
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	}
 
 	//-------------------------------------------------------------------
 	public void setForwardMode(boolean value) {
@@ -278,8 +278,8 @@ public class ReadFromConsoleTask implements Runnable, LineModeListener {
 	public void setForwardTo(TelnetSocket mud) throws IOException {
 		this.forwardTo = new ANSIOutputStream(mud.getOutputStream());
 		forwardTo.setLoggingListener( (type,text) -> logger.log(Level.INFO, "MUD --> {0} = {1}", type,text));
-		mud.setOptionListener(TelnetOption.LINEMODE, (LineModeListener)this);
-		mud.setOptionListener(TelnetOption.ECHO, this);
+		mud.setOptionListener(WellKnownTelnetOptions.LINEMODE, (LineModeListener)this);
+		mud.setOptionListener(WellKnownTelnetOptions.ECHO, this);
 	}
 
 	//-------------------------------------------------------------------

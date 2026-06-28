@@ -9,15 +9,12 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.prelle.telnet.TelnetOption;
 import org.prelle.telnet.TelnetSocket;
-import org.prelle.telnet.TelnetSocket.State;
-import org.prelle.telnet.TelnetSocketListener;
 
 /**
  *
  */
-public class Session implements Runnable, TelnetSocketListener {
+public class Session implements Runnable {
 
 	private final static Logger logger = System.getLogger("mud.client.session");
 
@@ -26,7 +23,7 @@ public class Session implements Runnable, TelnetSocketListener {
 	private transient TelnetSocket socket;
 	private transient Thread thread;
 	private transient Thread bufferThread;
-	private transient SessionListener listener;
+//	private transient SessionListener listener;
 	private transient int lastReceiveBufSize;
 
 	private List<Integer> receiveBuf = new ArrayList<>();
@@ -42,10 +39,10 @@ public class Session implements Runnable, TelnetSocketListener {
 	 * @throws UnknownHostException
 	 * @throws IOException
 	 */
-	public void connect(SessionListener listener) throws IOException {
-		this.listener = listener;
+	public void connect() throws IOException {
+//		this.listener = listener;
 		socket = new TelnetSocket(server, port);
-		socket.addSocketListener(this);
+//		socket.addSocketListener(this);
 		thread = new Thread(this);
 		thread.start();
 	}
@@ -66,8 +63,8 @@ public class Session implements Runnable, TelnetSocketListener {
 				int foo = in.read();
 				if (foo==-1) {
 					logger.log(Level.WARNING, "Connection lost");
-					if (listener!=null)
-						listener.connectionLost(this);
+//					if (listener!=null)
+//						listener.connectionLost(this);
 					break;
 				}
 //				synchronized (receiveBuf) {
@@ -102,12 +99,12 @@ public class Session implements Runnable, TelnetSocketListener {
 						}
 						receiveBuf.clear();
 						String line = new String(buf, Charset.defaultCharset());
-						if (listener!=null) {
-							listener.textReceived(line);
-						} else {
+//						if (listener!=null) {
+//							listener.textReceived(line);
+//						} else {
 							System.out.print(line);
 							System.out.flush();
-						}
+//						}
 					}
 
 //					try {
@@ -149,23 +146,5 @@ public class Session implements Runnable, TelnetSocketListener {
 //				listener.mapReceived((TileMapData) data);
 //		}
 //	}
-
-	//-------------------------------------------------------------------
-	/**
-	 * @see org.prelle.telnet.TelnetSocketListener#telnetOptionStatusChange(org.prelle.telnet.TelnetSocket, org.prelle.telnet.TelnetSubnegotiationHandler, boolean)
-	 */
-	@Override
-	public void telnetOptionStatusChange(TelnetSocket nvt, TelnetOption option, boolean active) {
-		logger.log(Level.INFO, "Feature {0} is {1}", option.name(), active?"enabled":"disabled");
-	}
-
-	//-------------------------------------------------------------------
-	/**
-	 * @see org.prelle.telnet.TelnetSocketListener#telnetSocketChanged(org.prelle.telnet.TelnetSocket, org.prelle.telnet.TelnetSocket.State, org.prelle.telnet.TelnetSocket.State)
-	 */
-	@Override
-	public void telnetSocketChanged(TelnetSocket nvt, State oldState, State newState) {
-		logger.log(Level.DEBUG, "state changed "+newState);
-	}
 
 }
