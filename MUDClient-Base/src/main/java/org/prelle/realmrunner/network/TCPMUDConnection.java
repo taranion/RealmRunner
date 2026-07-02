@@ -31,6 +31,7 @@ public class TCPMUDConnection implements MUDConnection {
 		socket = new Socket(host.getHostAddress(), port);
 		in =  socket.getInputStream();
 		out = socket.getOutputStream();
+		socket.setSoTimeout(100);
 	}
 
 	//-------------------------------------------------------------------

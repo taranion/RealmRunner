@@ -16,7 +16,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.prelle.ansi.ANSIInputStream;
 import org.prelle.ansi.AParsedElement;
+import org.prelle.ansi.LinefeedToCRLFFilter;
 import org.prelle.ansi.commands.DeviceAttributes;
 import org.prelle.ansi.commands.DeviceAttributes.Variant;
 import org.prelle.jeditermfxterminal.GhosttyTerminalView;
@@ -26,17 +28,23 @@ import org.prelle.realmrunner.network.Config;
 import org.prelle.realmrunner.network.DataFileManager;
 import org.prelle.realmrunner.network.MUDConnection;
 import org.prelle.realmrunner.network.MUDSession;
+import org.prelle.realmrunner.network.MXPInputStreamFilter;
 import org.prelle.realmrunner.network.MainConfig;
 import org.prelle.realmrunner.network.ReadFromConsoleTask;
 import org.prelle.realmrunner.network.ReadFromMUDTask;
 import org.prelle.realmrunner.network.SessionConfig;
 import org.prelle.realmrunner.network.TCPMUDConnection;
 import org.prelle.telnet.CommunicationRole;
+import org.prelle.telnet.TelnetCommand;
+import org.prelle.telnet.TelnetConstants.ControlCode;
 import org.prelle.telnet.TelnetInputStream;
+import org.prelle.telnet.TelnetListener;
 import org.prelle.telnet.TelnetOutputStream;
 import org.prelle.telnet.TelnetProtocol;
+import org.prelle.telnet.TelnetSubnegotiationHandler;
 import org.prelle.telnet.WellKnownTelnetOptions;
 import org.prelle.telnet.mud.AardwolfMushclientProtocol.AardwolfMushclientListener;
+import org.prelle.telnet.option.MXPOption;
 import org.prelle.telnet.option.TelnetCharset;
 import org.prelle.telnet.option.TerminalType;
 import org.prelle.terminal.emulated.Terminal;
@@ -155,6 +163,7 @@ public class MUDClientMain extends Application {
 
         tfInput  = new TextField();
         tfInput.setOnAction(ev -> {
+        	logger.log(Level.INFO, "Typed {0}", tfInput.getText());
         	sendInput(tfInput.getText());
         	tfInput.clear();
         });
@@ -199,13 +208,39 @@ public class MUDClientMain extends Application {
 			TelnetProtocol protocol = new TelnetProtocol(CommunicationRole.CLIENT)
 					.add(new TelnetCharset(null, "UTF-8","ASCII"))
 					.add(new TerminalType("ghostty","ghostty-xterm"))
+					.add(new MXPOption("b"))
 					;
 			
-			TelnetOutputStream out = new TelnetOutputStream(connection.getStreamToMUD(), protocol);
-			TelnetInputStream   in = new TelnetInputStream(connection.getStreamFromMUD(), protocol);
-			in.setReverseStream(out);
+			TelnetOutputStream tout = new TelnetOutputStream(connection.getStreamToMUD(), protocol);
+			TelnetInputStream   tin = new TelnetInputStream(connection.getStreamFromMUD(), protocol);
+			tin.setReverseStream(tout);
 			
-			((SwitchableOutputStream)console.input()).setSink(out);
+			MXPInputStreamFilter mxpFilter = new MXPInputStreamFilter();
+			
+			ANSIInputStream in = new ANSIInputStream(tin);
+			in.addFilter(mxpFilter);
+			// TODO: create config option "assumeCRbeforeLF" - some MUDs send only LF, but we want CRLF for the terminal
+			if (true)
+				in.addFilter(new LinefeedToCRLFFilter());
+			
+			protocol.addListener(new TelnetListener() {
+				@Override
+				public void telnetCommandReceived(TelnetCommand command) {
+					if (command.getCode()==ControlCode.GA) {
+						logger.log(Level.INFO, "Telnet command received: {0}", command);
+						in.releaseBuffer();
+					}
+				}
+				@Override
+				public void optionStateChanged(TelnetSubnegotiationHandler extension, boolean active) {
+					if (extension instanceof MXPOption) {
+						logger.log(Level.INFO, "MXP option state changed: {0} = {1}", extension, active);
+						mxpFilter.setMXPActive(active);
+					}
+				}
+			});
+			
+			((SwitchableOutputStream)console.input()).setSink(tout);
 			((SwitchableInputStream)console.output()).setSource(in);
 			
 			protocol.initializeExtensions();
@@ -286,7 +321,7 @@ public class MUDClientMain extends Application {
 	//			session = SessionManager.createSession("mg.mud.de", 4711);
 				session = SessionManager.createSession(connectWith.getServer(), connectWith.getPort());
 	//			session = SessionManager.createSession("localhost", 4000);
-				InetAddress host = InetAddress.getByName("eden-test.rpgframework.de");
+				InetAddress host = InetAddress.getByName("rom.mud.de");
 				MUDConnection con = new TCPMUDConnection(host, 4000);
 //				connect(con);
 //				MUDConnection con = new WebsocketMUDConnection(host, 4002);
@@ -362,15 +397,7 @@ public class MUDClientMain extends Application {
 
 	//-------------------------------------------------------------------
 	private void sendInput(String text) {
-		byte[] data = (text+"\r\n").getBytes(Charset.defaultCharset());
-		try {
-			console.getOutputStream().write(data);
-			console.getOutputStream().flush();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-//		session.sendMessage(text);
+		console.sendUserInput(text);
 	}
 
 	//-------------------------------------------------------------------

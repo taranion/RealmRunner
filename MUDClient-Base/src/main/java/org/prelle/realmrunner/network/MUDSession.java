@@ -24,6 +24,7 @@ import org.prelle.mud4j.gmcp.beip.BeipTilemapData;
 import org.prelle.mud4j.gmcp.beip.BeipTilemapInfo;
 import org.prelle.mudansi.CapabilityDetector;
 import org.prelle.mudansi.TerminalCapabilities;
+import org.prelle.telnet.TelnetCommand;
 import org.prelle.telnet.TelnetConstants.ControlCode;
 import org.prelle.telnet.TelnetInputStream;
 import org.prelle.telnet.TelnetListener;
@@ -280,6 +281,12 @@ public class MUDSession implements TelnetListener, TelnetOptionListener, GMCPRec
 
 	@Override
 	public void optionStateChanged(TelnetSubnegotiationHandler extension, boolean active) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void telnetCommandReceived(TelnetCommand command) {
 		// TODO Auto-generated method stub
 		
 	}

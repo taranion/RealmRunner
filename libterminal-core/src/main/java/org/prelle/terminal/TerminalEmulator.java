@@ -35,4 +35,16 @@ public interface TerminalEmulator {
 	 * @return Array with Input encoding and Output encoding
 	 */
 	public Charset[] getEncodings();
+
+	//-------------------------------------------------------------------
+	public default void sendUserInput(String text) {
+		byte[] data = (text+"\r\n").getBytes(Charset.defaultCharset());
+		try {
+			getOutputStream().write(data);
+			getOutputStream().flush();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 }

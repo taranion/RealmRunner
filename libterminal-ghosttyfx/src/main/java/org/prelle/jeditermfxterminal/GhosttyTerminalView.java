@@ -148,7 +148,6 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 
 	@Override
 	public ANSIOutputStream getOutputStream() {
-		// TODO Auto-generated method stub
 		return out;
 	}
 
@@ -204,6 +203,29 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	public void close() throws Exception {
 		// TODO Auto-generated method stub
 		
+	}
+
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.terminal.TerminalEmulator#sendUserInput(java.lang.String)
+	 */
+	@Override
+	public void sendUserInput(String text) {
+		byte[] data = (text+"\r\n").getBytes(Charset.defaultCharset());
+//		widget.sendText(text+"\r\n");
+		try {
+			// Send to terminal widget
+			outPipe.write("OutPipe\r\n".getBytes(Charset.defaultCharset()));
+			out.write("out\r\n");
+			input().write(data);
+			input().flush();
+			// Send to MUD
+			getOutputStream().write(data);
+			getOutputStream().flush();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

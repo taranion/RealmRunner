@@ -16,21 +16,9 @@
     	<Logger name="java" level="INFO"/>
     	<Logger name="javafx" level="INFO"/>
     	<Logger name="telnet" level="INFO"/>
-    	<Logger name="telnet.lvl1.out" level="WARN"/>
+    	<Logger name="telnet.lvl1.out" level="DEBUG"/>
      	<Logger name="org.prelle.ansi" level="INFO"/>
-        <Logger name="mud.map" level="INFO"/>
-    	<Logger name="mud.network" level="DEBUG"/>
-        <Logger name="mud.splittermond" level="INFO"/>
-    	<Logger name="mud.symbol" level="INFO"/>
     	<Logger name="mud.world" level="INFO"/>
-    	<Logger name="de.rpgframework" level="INFO"/>
-    	<Logger name="de.rpgframework.genericrpg" level="ERROR"/>
-    	<Logger name="org.prelle.splimo" level="WARN"/>
-    	<Logger name="org.prelle.splittermond" level="WARN"/>
-        <Logger name="org.prelle.mud.ecs" level="INFO"/>
-        <Logger name="org.prelle.mud.action" level="DEBUG"/>
-        <Logger name="org.prelle.mud.action.cooked" level="DEBUG"/>
-    	<Logger name="org.prelle.mud.commands" level="DEBUG"/>
-        <Logger name="splittermond" level="INFO"/>
+        <Logger name="org.prelle.ansi" level="INFO"/>
 	</Loggers>
 </Configuration>
