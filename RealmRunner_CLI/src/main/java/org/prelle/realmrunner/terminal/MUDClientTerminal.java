@@ -487,10 +487,15 @@ public class MUDClientTerminal implements LineBufferListener,
 
 	//-------------------------------------------------------------------
 	private void setupSession(SessionConfig config, Config activeConfig) throws IOException, InterruptedException {
-		session = new MUDSession(config,null, console.getConsoleSize(), charset);
-		session.getSocket().setOptionListener(WellKnownTelnetOptions.MUSHCLIENT, (AardwolfMushclientListener)this);
-		session.getSocket().setOptionListener(WellKnownTelnetOptions.MSP, sound);
-		session.setGmcpListener(this);
+		session = MUDSession.builder(console)
+				.setCharset(charset)
+				.setClientConfig(activeConfig)
+				.setConfig(config)
+				.build();
+//		session = new MUDSession(config, console.getConsoleSize(), charset);
+//		session.getSocket().setOptionListener(WellKnownTelnetOptions.MUSHCLIENT, (AardwolfMushclientListener)this);
+//		session.getSocket().setOptionListener(WellKnownTelnetOptions.MSP, sound);
+//		session.setGmcpListener(this);
 		readFromConsole.setForwardTo(session.getSocket());
 
 		Charset useCharset = charset;

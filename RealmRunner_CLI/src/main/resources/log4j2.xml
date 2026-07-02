@@ -20,12 +20,11 @@
     	<Logger name="network" level="TRACE"/>
     	<Logger name="telnet" level="INFO"/>
     	<Logger name="telnet.lvl1" level="WARN"/>
-    	<Logger name="org.prelle.ansi" level="DEBUG"/>
+    	<Logger name="org.prelle.ansi" level="INFO"/>
     	<Logger name="gmcp" level="ERROR"/>
     	<Logger name="mud" level="DEBUG"/>
     	<Logger name="mud.client" level="ERROR"/>
     	<Logger name="mud.mxp" level="DEBUG"/>
     	<Logger name="terminal.unix" level="WARN"/>
-    	<Logger name="org.prelle.ansi" level="TRACE"/>
 	</Loggers>
 </Configuration>

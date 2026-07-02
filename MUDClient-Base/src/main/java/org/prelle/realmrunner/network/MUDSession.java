@@ -56,13 +56,12 @@ public class MUDSession implements TelnetListener, TelnetOptionListener, GMCPRec
 		private TerminalEmulator terminal;
 		private Config clientConfig;
 		private SessionConfig sessionData;
-		private TelnetListener telnetListener;
 		private Charset charset;
 
 		public Builder(TerminalEmulator terminal) {
 			this.terminal = terminal;
 		}
-		public MUDSession build() throws Exception {
+		public MUDSession build() throws IOException {
 			ReadFromConsoleTask readFromConsole = new ReadFromConsoleTask(terminal, clientConfig, (LineBufferListener)null);
 
 			Thread readFromTerminal = new Thread(readFromConsole, "FromConsole");
@@ -71,11 +70,15 @@ public class MUDSession implements TelnetListener, TelnetOptionListener, GMCPRec
 			terminal.getOutputStream().write(new SetConformanceLevel(OperatingLevel.LEVEL4_VT520, true));
 			readFromConsole.setForwardMode(false);
 
-			MUDSession session = new MUDSession(sessionData, telnetListener, terminal.getConsoleSize(), charset);
+			MUDSession session = new MUDSession(sessionData, terminal.getConsoleSize(), charset);
 			return session;
 		}
 		//-------------------------------------------------------------------
 		public Builder setCharset(Charset value) { this.charset = value; return this; }
+		//-------------------------------------------------------------------
+		public Builder setConfig(SessionConfig value) { this.sessionData = value; return this; }
+		//-------------------------------------------------------------------
+		public Builder setClientConfig(Config value) { this.clientConfig = value; return this; }
 	}
 
 	private TerminalEmulator console;
@@ -146,7 +149,7 @@ public class MUDSession implements TelnetListener, TelnetOptionListener, GMCPRec
 
 	//-------------------------------------------------------------------
 	@Deprecated
-	public MUDSession(SessionConfig session, TelnetListener callback, int[] naws, Charset charset) throws IOException {
+	public MUDSession(SessionConfig session, int[] naws, Charset charset) throws IOException {
 		logger.log(Level.INFO, "ENTER: MUDSession.<init>");
 //		TelnetOptionRegistry.register(WellKnownTelnetOptions.MUSHCLIENT.getCode(), new AardwolfMushclientProtocol());
 
@@ -166,7 +169,7 @@ public class MUDSession implements TelnetListener, TelnetOptionListener, GMCPRec
 
 		logger.log(Level.INFO, "Connecting to {0} port {1}", session.getServer(), session.getPort());
 		socket = new TelnetSocket(session.getServer(), session.getPort())
-				.addListener(callback)
+				.addListener(this)
 				.setOptionListener(WellKnownTelnetOptions.ECHO, this)
 ////				.addSocketListener(new GMCPHandler(true))
 //				.support(WellKnownTelnetOptions.ECHO.getCode(), ControlCode.WILL)
