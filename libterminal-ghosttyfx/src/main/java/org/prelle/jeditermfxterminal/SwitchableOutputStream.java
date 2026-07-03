@@ -18,12 +18,16 @@ public class SwitchableOutputStream extends OutputStream {
 	}
 
 	//-------------------------------------------------------------------
+	public String toString() {
+		return "Switch --> "+sink;
+	}
+
+	//-------------------------------------------------------------------
 	/**
 	 * @param sink the sink to set
 	 */
 	public void setSink(OutputStream sink) {
 		this.sink = sink;
-		System.getLogger("ghostty").log(System.Logger.Level.INFO, "Write to {0}", sink);
 	}
 
 	@Override

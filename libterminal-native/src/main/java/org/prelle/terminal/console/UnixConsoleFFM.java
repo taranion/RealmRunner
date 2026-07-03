@@ -6,7 +6,9 @@ import static java.lang.foreign.ValueLayout.JAVA_SHORT;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.lang.foreign.Arena;
@@ -375,6 +377,13 @@ public class UnixConsoleFFM implements TerminalEmulator {
 		if (!consoleSizeListeners.contains(listener)) {
 			consoleSizeListeners.add(listener);
 		}
+	}
+
+
+	@Override
+	public void connectWith(InputStream in, OutputStream out) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

@@ -1,6 +1,8 @@
 package org.prelle.terminal.emulated;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.function.Consumer;
 
@@ -73,6 +75,12 @@ public class TerminalEmulatorModel implements TerminalEmulator {
 
 	@Override
 	public void addConsoleSizeListener(Consumer<int[]> listener) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void connectWith(InputStream in, OutputStream out) {
 		// TODO Auto-generated method stub
 		
 	}

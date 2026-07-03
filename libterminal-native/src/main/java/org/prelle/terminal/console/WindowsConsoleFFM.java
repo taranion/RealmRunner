@@ -5,6 +5,8 @@ import static java.lang.foreign.ValueLayout.JAVA_INT;
 import static java.lang.foreign.ValueLayout.JAVA_SHORT;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.lang.foreign.Arena;
@@ -613,6 +615,12 @@ public class WindowsConsoleFFM implements TerminalEmulator {
 		if (!consoleSizeListeners.contains(listener)) {
 			consoleSizeListeners.add(listener);
 		}
+	}
+
+	@Override
+	public void connectWith(InputStream in, OutputStream out) {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

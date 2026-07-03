@@ -15,6 +15,7 @@ import java.util.function.Consumer;
 
 import org.prelle.ansi.ANSIInputStream;
 import org.prelle.ansi.ANSIOutputStream;
+import org.prelle.jeditermfxterminal.impl.SwitchableInputStream;
 import org.prelle.terminal.TerminalEmulator;
 import org.prelle.terminal.TerminalMode;
 
@@ -47,11 +48,15 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 
 		widget = new TerminalView( (columns,rows) -> {
 			logger.log(Level.DEBUG, "TerminalView<init> create terminal with {0}x{1}", columns, rows);
+			terminalWidth = columns-3;
+			terminalHeight = rows;
 			return this;
 		});
 
 		out = new ANSIOutputStream(outPipe);
 		in  = new ANSIInputStream(inPipe);
+		in.setLoggingListener( (k,v) -> logger.log(Level.ERROR, "GhosttyTerminalView<init> input: {0}={1}", k, v));
+		out.setLoggingListener( (k,v) -> logger.log(Level.ERROR, "GhosttyTerminalView<init> input: {0}={1}", k, v));
 
 //		getBackground();
 //		setBackground(Background.fill(backgroundColor.get()));
@@ -59,6 +64,24 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 //		calculateWindowSize();
 //		refresh();
 		logger.log(Level.DEBUG, "TerminalView<init> done");
+	}
+
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.terminal.TerminalEmulator#connectWith(java.io.InputStream, java.io.InputStream)
+	 */
+	@Override
+	public void connectWith(InputStream in, OutputStream out) {
+		outPipe.setSink(out);
+		inPipe.setSource(in);
+		
+		try {
+			logger.log(Level.WARNING, "Output: "+output());
+			logger.log(Level.WARNING, "Input: "+input());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	//-------------------------------------------------------------------
@@ -186,9 +209,12 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 		return widget;
 	}
 
+	//-------------------------------------------------------------------
+	/**
+	 * @see io.github.vlaaad.ghosttyfx.Terminal#output()
+	 */
 	@Override
 	public InputStream output() throws Exception {
-		System.err.println("GhosttyTerminalView.output() called");
 		return inPipe;
 	}
 
@@ -198,7 +224,6 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	 */
 	@Override
 	public OutputStream input() throws Exception {
-		System.err.println("GhosttyTerminalView.input() called");
 		return outPipe;
 	}
 
@@ -220,23 +245,15 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	 */
 	@Override
 	public void sendUserInput(String text) {
-		byte[] data = (text+"\r\n").getBytes(Charset.defaultCharset());
-//		widget.sendText(text+"\r\n");
-		try {
-			// Send to terminal widget
-			outPipe.write("OutPipe\r\n".getBytes(Charset.defaultCharset()));
-			out.write("out\r\n");
-			input().write(data);
-			input().flush();
-			// Send to MUD
-			getOutputStream().write(data);
-			getOutputStream().flush();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		byte[] data = ("\u001B[1;33m"+text+"\u001B[0m\r\n").getBytes(Charset.defaultCharset());
+		inPipe.inject(data);
+		widget.sendText(text+"\r\n");
 	}
 
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.terminal.TerminalEmulator#addConsoleSizeListener(java.util.function.Consumer)
+	 */
 	@Override
 	public void addConsoleSizeListener(Consumer<int[]> listener) {
 		if (!consoleSizeListeners.contains(listener)) {

@@ -22,8 +22,8 @@ import org.prelle.ansi.LinefeedToCRLFFilter;
 import org.prelle.ansi.commands.DeviceAttributes;
 import org.prelle.ansi.commands.DeviceAttributes.Variant;
 import org.prelle.jeditermfxterminal.GhosttyTerminalView;
-import org.prelle.jeditermfxterminal.SwitchableInputStream;
 import org.prelle.jeditermfxterminal.SwitchableOutputStream;
+import org.prelle.jeditermfxterminal.impl.SwitchableInputStream;
 import org.prelle.realmrunner.network.Config;
 import org.prelle.realmrunner.network.DataFileManager;
 import org.prelle.realmrunner.network.MUDConnection;
@@ -240,8 +240,7 @@ public class MUDClientMain extends Application {
 				}
 			});
 			
-			((SwitchableOutputStream)console.input()).setSink(tout);
-			((SwitchableInputStream)console.output()).setSource(in);
+			console.connectWith(in, tout);
 			
 			protocol.initializeExtensions();
 		} catch (Exception e) {
@@ -321,8 +320,8 @@ public class MUDClientMain extends Application {
 	//			session = SessionManager.createSession("mg.mud.de", 4711);
 				session = SessionManager.createSession(connectWith.getServer(), connectWith.getPort());
 	//			session = SessionManager.createSession("localhost", 4000);
-				InetAddress host = InetAddress.getByName("mg.mud.de");
-				MUDConnection con = new TCPMUDConnection(host, 4711);
+				InetAddress host = InetAddress.getByName("rom.mud.de");
+				MUDConnection con = new TCPMUDConnection(host, 4000);
 //				connect(con);
 //				MUDConnection con = new WebsocketMUDConnection(host, 4002);
 				connect(con);
