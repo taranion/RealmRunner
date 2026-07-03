@@ -9,6 +9,9 @@ import java.io.OutputStream;
 import java.lang.System.Logger.Level;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 import org.prelle.ansi.ANSIInputStream;
 import org.prelle.ansi.ANSIOutputStream;
@@ -32,6 +35,10 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	private TerminalView widget;
     private ANSIOutputStream out;
     private ANSIInputStream in;
+    
+    private int terminalWidth = -1;
+    private int terminalHeight = -1;
+    private List<Consumer<int[]>> consoleSizeListeners = new ArrayList<>();
 
 	//-------------------------------------------------------------------
 	public GhosttyTerminalView() {
@@ -48,10 +55,28 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 
 //		getBackground();
 //		setBackground(Background.fill(backgroundColor.get()));
-		initListener();
+		initInteractivity();
 //		calculateWindowSize();
 //		refresh();
 		logger.log(Level.DEBUG, "TerminalView<init> done");
+	}
+	
+	//-------------------------------------------------------------------
+	private void initInteractivity() {
+		widget.terminalSizeProperty().addListener( (_,_,n) -> {
+			if (n!=null) {
+				int w = n.columns();
+				int h = n.rows();
+				if (w!=terminalWidth || h!=terminalHeight) {
+					terminalWidth = w;
+					terminalHeight = h;
+					logger.log(Level.DEBUG, "terminal size changed to {0}x{1}", w, h);
+					for (Consumer<int[]> listener : consoleSizeListeners) {
+						listener.accept(new int[] {w,h});
+					}
+				}
+			}
+		});
 	}
 
 //	//-------------------------------------------------------------------
@@ -105,22 +130,6 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 //
 //		refresh();
 //	}
-
-	//-------------------------------------------------------------------
-	private void initListener() {
-//		widthProperty().addListener( (ov,o,n) -> calculateWindowSize());
-//		heightProperty().addListener( (ov,o,n) -> calculateWindowSize());
-//		fontProperty().addListener( (ov,o,n) -> {
-//			logger.log(Level.INFO, "Font changed to "+n);
-////			try {
-////				throw new RuntimeException("Trace");
-////			} catch (Exception e) {
-////				// TODO Auto-generated catch block
-////				e.printStackTrace();
-////			}
-//			calculateWindowSize();
-//		});
-	}
 
 	@Override
 	public TerminalMode getMode() {
@@ -225,6 +234,13 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void addConsoleSizeListener(Consumer<int[]> listener) {
+		if (!consoleSizeListeners.contains(listener)) {
+			consoleSizeListeners.add(listener);
 		}
 	}
 

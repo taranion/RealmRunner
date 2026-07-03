@@ -7,6 +7,11 @@ import java.io.IOException;
 import java.lang.System.Logger.Level;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.function.Consumer;
 
 import org.prelle.ansi.ANSIInputStream;
 import org.prelle.ansi.ANSIOutputStream;
@@ -29,6 +34,10 @@ public class JediTerminalView implements TerminalEmulator {
 	private JediTtyConnector connector;
     private ANSIOutputStream out;
     private ANSIInputStream in;
+    
+    private int terminalWidth = -1;
+    private int terminalHeight = -1;
+    private List<Consumer<int[]>> consoleSizeListeners = new ArrayList<>();
 
 	//-------------------------------------------------------------------
 	public JediTerminalView() {
@@ -47,6 +56,36 @@ public class JediTerminalView implements TerminalEmulator {
 //		calculateWindowSize();
 //		refresh();
 		logger.log(Level.DEBUG, "TerminalView<init> done");
+        listenForConsoleSizeChanges();
+	}
+
+	//-------------------------------------------------------------------
+	private void listenForConsoleSizeChanges() {
+		TimerTask updateNAWSTask = new TimerTask() {
+			public void run() {
+				try {
+					int[] size = getConsoleSize();
+					boolean changed = size[0]!=terminalWidth || size[1]!=terminalHeight;
+					terminalWidth = size[0];
+					terminalHeight= size[1];
+					if (changed ) {
+						logger.log(Level.DEBUG, "Window size changed");
+						for (Consumer<int[]> listener : consoleSizeListeners) {
+							try {
+								listener.accept(size);
+							} catch (Exception e) {
+								logger.log(Level.ERROR, "Error invoking console size listener",e);
+							}
+						}
+					}
+				} catch (Exception e) {
+					logger.log(Level.ERROR, "Failed for NAWS update",e);
+				}
+			}
+		};
+
+		Timer timer = new Timer("polling", true);
+		timer.schedule(updateNAWSTask, 0, 500);
 	}
 
 	//-------------------------------------------------------------------
@@ -207,5 +246,16 @@ public class JediTerminalView implements TerminalEmulator {
 //		logger.log(Level.DEBUG, "create CLEAR event");
 //        getProperties().put(Properties.CLEAR, Boolean.TRUE);
 //	}
+
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.terminal.TerminalEmulator#addConsoleSizeListener(java.util.function.Consumer)
+	 */
+	@Override
+	public void addConsoleSizeListener(Consumer<int[]> listener) {
+		if (!consoleSizeListeners.contains(listener)) {
+			consoleSizeListeners.add(listener);
+		}
+	}
 
 }

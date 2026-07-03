@@ -2,6 +2,7 @@ package org.prelle.terminal.emulated;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.function.Consumer;
 
 import org.prelle.ansi.ANSIInputStream;
 import org.prelle.ansi.ANSIOutputStream;
@@ -68,6 +69,12 @@ public class TerminalEmulatorModel implements TerminalEmulator {
 	public Charset[] getEncodings() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void addConsoleSizeListener(Consumer<int[]> listener) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

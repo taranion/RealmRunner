@@ -523,32 +523,49 @@ public class MUDClientTerminal implements LineBufferListener,
 
 	//-------------------------------------------------------------------
 	private void setupTimer() {
-		updateNAWSTask = new TimerTask() {
-			public void run() {
+		console.addConsoleSizeListener( size -> {
+			logger.log(Level.DEBUG, "Window size changed");
+			if (capabilities!=null)
+				setupInterface();
+//			format.setSize(terminalWidth, terminalHeight);
+//			format.recreate();
+			if (session!=null) {
 				try {
-					int[] size = console.getConsoleSize();
-					boolean changed = size[0]!=terminalWidth || size[1]!=terminalHeight;
-					terminalWidth = size[0];
-					terminalHeight= size[1];
-					if (changed ) {
-						logger.log(Level.DEBUG, "Window size changed");
-						if (capabilities!=null)
-							setupInterface();
-//						format.setSize(terminalWidth, terminalHeight);
-//						format.recreate();
-						if (session!=null) {
-							session.sendWindowSizeUpdate(terminalWidth, terminalHeight);
-							sendNAWS();
-						}
-					}
-				} catch (Exception e) {
-					logger.log(Level.ERROR, "Failed for NAWS update",e);
+					session.sendWindowSizeUpdate(size[0], size[1]);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
+				sendNAWS();
 			}
-		};
-
-		timer = new Timer("polling", true);
-		timer.schedule(updateNAWSTask, 0, 500);
+		});
+		
+//		updateNAWSTask = new TimerTask() {
+//			public void run() {
+//				try {
+//					int[] size = console.getConsoleSize();
+//					boolean changed = size[0]!=terminalWidth || size[1]!=terminalHeight;
+//					terminalWidth = size[0];
+//					terminalHeight= size[1];
+//					if (changed ) {
+//						logger.log(Level.DEBUG, "Window size changed");
+//						if (capabilities!=null)
+//							setupInterface();
+////						format.setSize(terminalWidth, terminalHeight);
+////						format.recreate();
+//						if (session!=null) {
+//							session.sendWindowSizeUpdate(terminalWidth, terminalHeight);
+//							sendNAWS();
+//						}
+//					}
+//				} catch (Exception e) {
+//					logger.log(Level.ERROR, "Failed for NAWS update",e);
+//				}
+//			}
+//		};
+//
+//		timer = new Timer("polling", true);
+//		timer.schedule(updateNAWSTask, 0, 500);
 	}
 
 	//-------------------------------------------------------------------

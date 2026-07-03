@@ -2,6 +2,7 @@ package org.prelle.terminal;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.function.Consumer;
 
 import org.prelle.ansi.ANSIInputStream;
 import org.prelle.ansi.ANSIOutputStream;
@@ -29,6 +30,7 @@ public interface TerminalEmulator {
 
 	//-------------------------------------------------------------------
 	public int[] getConsoleSize() throws IOException;
+	public void addConsoleSizeListener(Consumer<int[]> listener);
 
 	//-------------------------------------------------------------------
 	/**

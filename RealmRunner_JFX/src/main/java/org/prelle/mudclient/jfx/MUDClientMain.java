@@ -276,7 +276,7 @@ public class MUDClientMain extends Application {
 			useCharset = Charset.forName(activeConfig.getServerEncoding());
 
 
-		MUDSession session = new MUDSession(config, null, console.getConsoleSize(), useCharset);
+		MUDSession session = new MUDSession(config,  console.getConsoleSize(), useCharset);
 		session.getSocket().setOptionListener(WellKnownTelnetOptions.MUSHCLIENT, (AardwolfMushclientListener)this);
 //		session.getSocket().setOptionListener(TelnetOption.MSP, sound);
 //		session.setGmcpListener(this);
@@ -321,8 +321,8 @@ public class MUDClientMain extends Application {
 	//			session = SessionManager.createSession("mg.mud.de", 4711);
 				session = SessionManager.createSession(connectWith.getServer(), connectWith.getPort());
 	//			session = SessionManager.createSession("localhost", 4000);
-				InetAddress host = InetAddress.getByName("rom.mud.de");
-				MUDConnection con = new TCPMUDConnection(host, 4000);
+				InetAddress host = InetAddress.getByName("mg.mud.de");
+				MUDConnection con = new TCPMUDConnection(host, 4711);
 //				connect(con);
 //				MUDConnection con = new WebsocketMUDConnection(host, 4002);
 				connect(con);

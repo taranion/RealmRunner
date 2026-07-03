@@ -19,6 +19,9 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.function.Consumer;
 
 import org.prelle.ansi.ANSIInputStream;
 import org.prelle.ansi.ANSIOutputStream;
@@ -126,6 +129,10 @@ public class WindowsConsoleFFM implements TerminalEmulator {
     private MemorySegment currentMode;
     private MemorySegment consoleInfo;
     private GroupLayout consoleScreenBufferInfoLayout;
+    
+    private int terminalWidth = -1;
+    private int terminalHeight = -1;
+    private List<Consumer<int[]>> consoleSizeListeners = new ArrayList<>();
 
 	//-------------------------------------------------------------------
 	/**
@@ -214,6 +221,38 @@ public class WindowsConsoleFFM implements TerminalEmulator {
         	setInputMode(savedStateIn);
         });
         Runtime.getRuntime().addShutdownHook(restoreHook);
+        
+        listenForConsoleSizeChanges();
+	}
+
+	//-------------------------------------------------------------------
+	private void listenForConsoleSizeChanges() {
+		TimerTask updateNAWSTask = new TimerTask() {
+			public void run() {
+				try {
+					int[] size = getConsoleSize();
+					boolean changed = size[0]!=terminalWidth || size[1]!=terminalHeight;
+					terminalWidth = size[0];
+					terminalHeight= size[1];
+					if (changed ) {
+						logger.log(Level.DEBUG, "Window size changed");
+						for (Consumer<int[]> listener : consoleSizeListeners) {
+							try {
+								listener.accept(size);
+							} catch (Exception e) {
+								logger.log(Level.ERROR, "Error invoking console size listener",e);
+							}
+						}
+					}
+				} catch (Exception e) {
+					logger.log(Level.ERROR, "Failed for NAWS update",e);
+				}
+			}
+		};
+
+		Timer timer = new Timer("polling", true);
+		timer.schedule(updateNAWSTask, 0, 500);
+
 	}
 
 	private void setANSICompatibility() {
@@ -564,5 +603,16 @@ public class WindowsConsoleFFM implements TerminalEmulator {
             default: return Charset.forName("CP" + codePage); // Standardmäßig die Codepage-Nummer verwenden
         }
     }
+
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.terminal.TerminalEmulator#addConsoleSizeListener(java.util.function.Consumer)
+	 */
+	@Override
+	public void addConsoleSizeListener(Consumer<int[]> listener) {
+		if (!consoleSizeListeners.contains(listener)) {
+			consoleSizeListeners.add(listener);
+		}
+	}
 }
 

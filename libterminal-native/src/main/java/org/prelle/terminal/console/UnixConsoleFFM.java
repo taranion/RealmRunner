@@ -19,6 +19,11 @@ import java.lang.foreign.SymbolLookup;
 import java.lang.invoke.MethodHandle;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.function.Consumer;
 
 import org.prelle.ansi.ANSIInputStream;
 import org.prelle.ansi.ANSIOutputStream;
@@ -63,6 +68,10 @@ public class UnixConsoleFFM implements TerminalEmulator {
 
     private Arena arena;
     private MethodHandle tcgetattr, tcsetattr, ioctl;
+    
+    private int terminalWidth = -1;
+    private int terminalHeight = -1;
+    private List<Consumer<int[]>> consoleSizeListeners = new ArrayList<>();
 
     private GroupLayout winsizeLayout = MemoryLayout.structLayout(
             JAVA_SHORT.withName("ws_row"),    // Zeilen
@@ -123,8 +132,40 @@ public class UnixConsoleFFM implements TerminalEmulator {
         	setLocalEchoActive(true);
         });
         Runtime.getRuntime().addShutdownHook(restoreHook);
+        
+        listenForConsoleSizeChanges();
 	}
 
+	//-------------------------------------------------------------------
+	private void listenForConsoleSizeChanges() {
+		TimerTask updateNAWSTask = new TimerTask() {
+			public void run() {
+				try {
+					int[] size = getConsoleSize();
+					boolean changed = size[0]!=terminalWidth || size[1]!=terminalHeight;
+					terminalWidth = size[0];
+					terminalHeight= size[1];
+					if (changed ) {
+						logger.log(Level.DEBUG, "Window size changed");
+						for (Consumer<int[]> listener : consoleSizeListeners) {
+							try {
+								listener.accept(size);
+							} catch (Exception e) {
+								logger.log(Level.ERROR, "Error invoking console size listener",e);
+							}
+						}
+					}
+				} catch (Exception e) {
+					logger.log(Level.ERROR, "Failed for NAWS update",e);
+				}
+			}
+		};
+
+		Timer timer = new Timer("polling", true);
+		timer.schedule(updateNAWSTask, 0, 500);
+
+	}
+	
 	//-------------------------------------------------------------------
 	private int getLFlag() {
         try {
@@ -323,6 +364,17 @@ public class UnixConsoleFFM implements TerminalEmulator {
 			return new Charset[] {StandardCharsets.UTF_8, StandardCharsets.UTF_8};
 		}
 		return new Charset[] {StandardCharsets.ISO_8859_1, StandardCharsets.ISO_8859_1};
+	}
+
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.terminal.TerminalEmulator#addConsoleSizeListener(java.util.function.Consumer)
+	 */
+	@Override
+	public void addConsoleSizeListener(Consumer<int[]> listener) {
+		if (!consoleSizeListeners.contains(listener)) {
+			consoleSizeListeners.add(listener);
+		}
 	}
 
 }
