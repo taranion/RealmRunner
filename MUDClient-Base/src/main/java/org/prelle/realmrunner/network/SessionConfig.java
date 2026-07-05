@@ -12,6 +12,7 @@ import lombok.Setter;
 @Setter
 public class SessionConfig {
 
+	private SessionProtocol protocol = SessionProtocol.TELNET;
 	private String server;
 	private int    port;
 	private String login;

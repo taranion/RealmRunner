@@ -63,6 +63,7 @@ public class WebsocketMUDConnection implements MUDConnection {
 	
 	@Getter private InetAddress host;
 	@Getter private int port;
+	@Getter private String negotiatedSubprotocol;
 	
 	ReceiveDatagramInputStream incomingData;
 	SendDatagramOutputStream outgoingData;
@@ -85,7 +86,7 @@ public class WebsocketMUDConnection implements MUDConnection {
 		};
 		
 		ClientEndpointConfig config = ClientEndpointConfig.Builder.create()
-				.preferredSubprotocols(List.of("telnet.mudstandards.org","terminal.mudstandards.org"))
+				.preferredSubprotocols(List.of("telnet.mudstandards.org","terminal.mudstandards.org","muddown"))
 				.configurator(new ClientEndpointConfig.Configurator() {
 					@Override
 					public void beforeRequest(java.util.Map<String, java.util.List<String>> headers) {
@@ -98,6 +99,7 @@ public class WebsocketMUDConnection implements MUDConnection {
 	        try {
 	        	Session session = container.connectToServer(MyWebSocketClient.class, config, URI.create(uri));
 	        	session.addMessageHandler(binaryHandler);
+	        	negotiatedSubprotocol = session.getNegotiatedSubprotocol();
 	    		outgoingData = new SendDatagramOutputStream( buf -> {
 					try {
 						session.getBasicRemote().sendBinary(ByteBuffer.wrap(buf));

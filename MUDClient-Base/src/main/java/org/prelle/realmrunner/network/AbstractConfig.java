@@ -40,6 +40,8 @@ public class AbstractConfig {
 	 * Shall codes passed by the terminal to the MUD be sent?
 	 */
 	private Boolean ignoreControlCodesFromTerminal;
+	
+	private Boolean disableMXP;
 
 	//-------------------------------------------------------------------
 	public AbstractConfig() {
@@ -57,4 +59,8 @@ public class AbstractConfig {
 		this.sound = copy.sound;
 	}
 
+	//-------------------------------------------------------------------
+	public boolean isMXPEnabled() {
+		return disableMXP == null || !disableMXP;
+	}
 }

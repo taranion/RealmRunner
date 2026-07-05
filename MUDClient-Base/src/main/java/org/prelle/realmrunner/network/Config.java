@@ -12,6 +12,7 @@ import lombok.ToString;
 @ToString
 public class Config extends AbstractConfig {
 
+	private SessionProtocol protocol = SessionProtocol.TELNET;
 	private String server;
 	private int    port;
 	private String login;

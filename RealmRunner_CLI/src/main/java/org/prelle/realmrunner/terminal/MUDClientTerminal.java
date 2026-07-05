@@ -492,80 +492,80 @@ public class MUDClientTerminal implements LineBufferListener,
 				.setClientConfig(activeConfig)
 				.setConfig(config)
 				.build();
-//		session = new MUDSession(config, console.getConsoleSize(), charset);
-//		session.getSocket().setOptionListener(WellKnownTelnetOptions.MUSHCLIENT, (AardwolfMushclientListener)this);
-//		session.getSocket().setOptionListener(WellKnownTelnetOptions.MSP, sound);
-//		session.setGmcpListener(this);
-		readFromConsole.setForwardTo(session.getSocket());
-
-		Charset useCharset = charset;
-		if (activeConfig.getServerEncoding()!=null)
-			useCharset = Charset.forName(activeConfig.getServerEncoding());
-
-		if ((activeConfig instanceof Config)  &&((Config)activeConfig).getServerEncoding()!=null) {
-			console.getInputStream().setEncoding(useCharset);
-		}
-
-		logger.log(Level.INFO, "Read from MUD with charset {0}", useCharset);
-		ReadFromMUDTask readTask = new ReadFromMUDTask(session.getSocket(), console.getOutputStream(), activeConfig, useCharset);
-		readTask.setControlSequenceFilter( frag -> filterFragmentFromMUD(frag));
-		session.getStreamToMUD().setLoggingListener( (type,text) -> {if (!"PRINT".equals(type)) logger.log(Level.INFO, "MUD --> {0} = {1}", type,text);});
-		Thread readThread = new Thread(readTask);
-		readThread.start();
-
-		if (config.getLogin()!=null) {
-			session.getStreamToMUD().write( (config.getLogin()+"\r\n").getBytes(StandardCharsets.UTF_8));
-			if (config.getPasswd()!=null) {
-				session.getStreamToMUD().write( (config.getPasswd()+"\r\n").getBytes(StandardCharsets.UTF_8));
-			}
-		}
+////		session = new MUDSession(config, console.getConsoleSize(), charset);
+////		session.getSocket().setOptionListener(WellKnownTelnetOptions.MUSHCLIENT, (AardwolfMushclientListener)this);
+////		session.getSocket().setOptionListener(WellKnownTelnetOptions.MSP, sound);
+////		session.setGmcpListener(this);
+//		readFromConsole.setForwardTo(session.getSocket());
+//
+//		Charset useCharset = charset;
+//		if (activeConfig.getServerEncoding()!=null)
+//			useCharset = Charset.forName(activeConfig.getServerEncoding());
+//
+//		if ((activeConfig instanceof Config)  &&((Config)activeConfig).getServerEncoding()!=null) {
+//			console.getInputStream().setEncoding(useCharset);
+//		}
+//
+//		logger.log(Level.INFO, "Read from MUD with charset {0}", useCharset);
+//		ReadFromMUDTask readTask = new ReadFromMUDTask(session.getSocket(), console.getOutputStream(), activeConfig, useCharset);
+//		readTask.setControlSequenceFilter( frag -> filterFragmentFromMUD(frag));
+//		session.getStreamToMUD().setLoggingListener( (type,text) -> {if (!"PRINT".equals(type)) logger.log(Level.INFO, "MUD --> {0} = {1}", type,text);});
+//		Thread readThread = new Thread(readTask);
+//		readThread.start();
+//
+//		if (config.getLogin()!=null) {
+//			session.getStreamToMUD().write( (config.getLogin()+"\r\n").getBytes(StandardCharsets.UTF_8));
+//			if (config.getPasswd()!=null) {
+//				session.getStreamToMUD().write( (config.getPasswd()+"\r\n").getBytes(StandardCharsets.UTF_8));
+//			}
+//		}
 	}
 
 	//-------------------------------------------------------------------
 	private void setupTimer() {
-		console.addConsoleSizeListener( size -> {
-			logger.log(Level.DEBUG, "Window size changed");
-			if (capabilities!=null)
-				setupInterface();
-//			format.setSize(terminalWidth, terminalHeight);
-//			format.recreate();
-			if (session!=null) {
-				try {
-					session.sendWindowSizeUpdate(size[0], size[1]);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				sendNAWS();
-			}
-		});
-		
-//		updateNAWSTask = new TimerTask() {
-//			public void run() {
+//		console.addConsoleSizeListener( size -> {
+//			logger.log(Level.DEBUG, "Window size changed");
+//			if (capabilities!=null)
+//				setupInterface();
+////			format.setSize(terminalWidth, terminalHeight);
+////			format.recreate();
+//			if (session!=null) {
 //				try {
-//					int[] size = console.getConsoleSize();
-//					boolean changed = size[0]!=terminalWidth || size[1]!=terminalHeight;
-//					terminalWidth = size[0];
-//					terminalHeight= size[1];
-//					if (changed ) {
-//						logger.log(Level.DEBUG, "Window size changed");
-//						if (capabilities!=null)
-//							setupInterface();
-////						format.setSize(terminalWidth, terminalHeight);
-////						format.recreate();
-//						if (session!=null) {
-//							session.sendWindowSizeUpdate(terminalWidth, terminalHeight);
-//							sendNAWS();
-//						}
-//					}
-//				} catch (Exception e) {
-//					logger.log(Level.ERROR, "Failed for NAWS update",e);
+//					session.sendWindowSizeUpdate(size[0], size[1]);
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
 //				}
+//				sendNAWS();
 //			}
-//		};
-//
-//		timer = new Timer("polling", true);
-//		timer.schedule(updateNAWSTask, 0, 500);
+//		});
+//		
+////		updateNAWSTask = new TimerTask() {
+////			public void run() {
+////				try {
+////					int[] size = console.getConsoleSize();
+////					boolean changed = size[0]!=terminalWidth || size[1]!=terminalHeight;
+////					terminalWidth = size[0];
+////					terminalHeight= size[1];
+////					if (changed ) {
+////						logger.log(Level.DEBUG, "Window size changed");
+////						if (capabilities!=null)
+////							setupInterface();
+//////						format.setSize(terminalWidth, terminalHeight);
+//////						format.recreate();
+////						if (session!=null) {
+////							session.sendWindowSizeUpdate(terminalWidth, terminalHeight);
+////							sendNAWS();
+////						}
+////					}
+////				} catch (Exception e) {
+////					logger.log(Level.ERROR, "Failed for NAWS update",e);
+////				}
+////			}
+////		};
+////
+////		timer = new Timer("polling", true);
+////		timer.schedule(updateNAWSTask, 0, 500);
 	}
 
 	//-------------------------------------------------------------------
@@ -623,26 +623,26 @@ public class MUDClientTerminal implements LineBufferListener,
 		}
 	}
 
-	//-------------------------------------------------------------------
-	private void sendNAWS() {
-		if (session==null || session.getSocket()==null) return;
-
-		AreaDefinition def = format.getArea(UIGridFormat.ID_SCROLL);
-		if (def==null) {
-			ANSIOutputConfig config = ANSIOutputConfig.builder()
-				.useMxpLinks(true)
-				.useOSCLinks(true)
-				.trim(true).build();
-			def = new AreaDefinition(0, 0, terminalWidth, terminalHeight, config);
-		}
-		logger.log(Level.DEBUG, "Real size is {0}x{1}, but tell server the size is {2}x{3}", terminalWidth, terminalHeight, def.getW(), def.getH());
-		try {
-			TelnetWindowSize.sendUpdate(session.getSocket(), def.getW(), def.getH());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+//	//-------------------------------------------------------------------
+//	private void sendNAWS() {
+//		if (session==null || session.getSocket()==null) return;
+//
+//		AreaDefinition def = format.getArea(UIGridFormat.ID_SCROLL);
+//		if (def==null) {
+//			ANSIOutputConfig config = ANSIOutputConfig.builder()
+//				.useMxpLinks(true)
+//				.useOSCLinks(true)
+//				.trim(true).build();
+//			def = new AreaDefinition(0, 0, terminalWidth, terminalHeight, config);
+//		}
+//		logger.log(Level.DEBUG, "Real size is {0}x{1}, but tell server the size is {2}x{3}", terminalWidth, terminalHeight, def.getW(), def.getH());
+//		try {
+//			TelnetWindowSize.sendUpdate(session.getSocket(), def.getW(), def.getH());
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	}
 
 //	//-------------------------------------------------------------------
 //	/**

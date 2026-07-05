@@ -28,7 +28,7 @@ import javafx.scene.Node;
  */
 public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 
-	private final static System.Logger logger = System.getLogger("jedi.terminal");
+	private final static System.Logger logger = System.getLogger("ghostty");
 	
 	private SwitchableInputStream inPipe;
 	private SwitchableOutputStream outPipe;
@@ -56,7 +56,7 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 		out = new ANSIOutputStream(outPipe);
 		in  = new ANSIInputStream(inPipe);
 		in.setLoggingListener( (k,v) -> logger.log(Level.ERROR, "GhosttyTerminalView<init> input: {0}={1}", k, v));
-		out.setLoggingListener( (k,v) -> logger.log(Level.ERROR, "GhosttyTerminalView<init> input: {0}={1}", k, v));
+		out.setLoggingListener( (k,v) -> logger.log(Level.ERROR, "GhosttyTerminalView<init> output: {0}={1}", k, v));
 
 //		getBackground();
 //		setBackground(Background.fill(backgroundColor.get()));
@@ -76,8 +76,8 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 		inPipe.setSource(in);
 		
 		try {
-			logger.log(Level.WARNING, "Output: "+output());
-			logger.log(Level.WARNING, "Input: "+input());
+			logger.log(Level.WARNING, "Output: "+this.out);
+			logger.log(Level.WARNING, "Input : "+this.in);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -178,6 +178,10 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 		return null;
 	}
 
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.terminal.TerminalEmulator#getOutputStream()
+	 */
 	@Override
 	public ANSIOutputStream getOutputStream() {
 		return out;
@@ -215,6 +219,7 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	 */
 	@Override
 	public InputStream output() throws Exception {
+		System.err.println("GhosttyTerminalView.output() called and returns "+inPipe);
 		return inPipe;
 	}
 
@@ -224,6 +229,7 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	 */
 	@Override
 	public OutputStream input() throws Exception {
+		System.err.println("GhosttyTerminalView.input() called and returns "+outPipe);
 		return outPipe;
 	}
 
