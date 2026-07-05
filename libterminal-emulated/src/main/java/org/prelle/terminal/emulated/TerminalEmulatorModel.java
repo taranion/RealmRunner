@@ -6,8 +6,7 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.function.Consumer;
 
-import org.prelle.ansi.ANSIInputStream;
-import org.prelle.ansi.ANSIOutputStream;
+import org.prelle.ansi.FilteringANSIStream;
 import org.prelle.terminal.TerminalEmulator;
 import org.prelle.terminal.TerminalMode;
 
@@ -50,18 +49,6 @@ public class TerminalEmulatorModel implements TerminalEmulator {
 	}
 
 	@Override
-	public ANSIOutputStream getOutputStream() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ANSIInputStream getInputStream() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public int[] getConsoleSize() throws IOException {
 		// TODO Auto-generated method stub
 		return null;
@@ -80,7 +67,13 @@ public class TerminalEmulatorModel implements TerminalEmulator {
 	}
 
 	@Override
-	public void connectWith(InputStream in, OutputStream out) {
+	public FilteringANSIStream connectWith(InputStream in, OutputStream out) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void sendUserInput(String text) {
 		// TODO Auto-generated method stub
 		
 	}

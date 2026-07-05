@@ -15,8 +15,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.function.Consumer;
 
-import org.prelle.ansi.ANSIInputStream;
-import org.prelle.ansi.ANSIOutputStream;
+import org.prelle.ansi.FilteringANSIStream;
+import org.prelle.terminal.SwitchableInputStream;
+import org.prelle.terminal.SwitchableOutputStream;
 import org.prelle.terminal.TerminalEmulator;
 import org.prelle.terminal.TerminalMode;
 
@@ -31,11 +32,14 @@ import javafx.scene.layout.Pane;
 public class JediTerminalView implements TerminalEmulator {
 
 	private final static System.Logger logger = System.getLogger("jedi.terminal");
+	
+	private SwitchableInputStream inPipe;
+	private SwitchableOutputStream outPipe;
 
 	private JediTermFxWidget widget;
 	private JediTtyConnector connector;
-    private ANSIOutputStream out;
-    private ANSIInputStream in;
+//    private ANSIOutputStream out;
+//    private ANSIInputStream in;
     
     private int terminalWidth = -1;
     private int terminalHeight = -1;
@@ -43,20 +47,18 @@ public class JediTerminalView implements TerminalEmulator {
 
 	//-------------------------------------------------------------------
 	public JediTerminalView() {
+		inPipe = new SwitchableInputStream();
+		outPipe = new SwitchableOutputStream();
 		connector = new JediTtyConnector();
 
 		widget = new JediTermFxWidget(80, 24, new DefaultSettingsProvider());
 		widget.getPane().setMinSize(640, 400);
 		widget.setTtyConnector(connector);
 
-		out = new ANSIOutputStream(new JediTtyConnector.ConnectorOutputStream(connector));
-		in  = new ANSIInputStream(new JediTtyConnector.ConnectorInputStream(connector));
+//		out = new ANSIOutputStream(new JediTtyConnector.ConnectorOutputStream(connector));
+//		in  = new ANSIInputStream(new JediTtyConnector.ConnectorInputStream(connector));
 
-//		getBackground();
-//		setBackground(Background.fill(backgroundColor.get()));
 		initListener();
-//		calculateWindowSize();
-//		refresh();
 		logger.log(Level.DEBUG, "TerminalView<init> done");
         listenForConsoleSizeChanges();
 	}
@@ -67,9 +69,11 @@ public class JediTerminalView implements TerminalEmulator {
 			public void run() {
 				try {
 					int[] size = getConsoleSize();
-					boolean changed = size[0]!=terminalWidth || size[1]!=terminalHeight;
-					terminalWidth = size[0];
-					terminalHeight= size[1];
+					boolean changed = (size!=null) && (size[0]!=terminalWidth || size[1]!=terminalHeight);
+					if (size!=null) {
+						terminalWidth = size[0];
+						terminalHeight= size[1];
+					}
 					if (changed ) {
 						logger.log(Level.DEBUG, "Window size changed");
 						for (Consumer<int[]> listener : consoleSizeListeners) {
@@ -185,17 +189,17 @@ public class JediTerminalView implements TerminalEmulator {
 		return null;
 	}
 
-	@Override
-	public ANSIOutputStream getOutputStream() {
-		// TODO Auto-generated method stub
-		return out;
-	}
-
-	@Override
-	public ANSIInputStream getInputStream() {
-		// TODO Auto-generated method stub
-		return in;
-	}
+//	@Override
+//	public ANSIOutputStream getOutputStream() {
+//		// TODO Auto-generated method stub
+//		return out;
+//	}
+//
+//	@Override
+//	public ANSIInputStream getInputStream() {
+//		// TODO Auto-generated method stub
+//		return in;
+//	}
 
 	@Override
 	public int[] getConsoleSize() throws IOException {
@@ -261,7 +265,24 @@ public class JediTerminalView implements TerminalEmulator {
 	}
 
 	@Override
-	public void connectWith(InputStream in, OutputStream out) {
+	public FilteringANSIStream connectWith(InputStream in, OutputStream out) {
+//		this.in = in;
+//		this.out = out;
+		outPipe.setSink(out);
+		inPipe.setSource(in);
+		
+		try {
+			logger.log(Level.WARNING, "Output: "+this.outPipe);
+			logger.log(Level.WARNING, "Input : "+this.inPipe);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	@Override
+	public void sendUserInput(String text) {
 		// TODO Auto-generated method stub
 		
 	}

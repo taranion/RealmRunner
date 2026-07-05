@@ -27,6 +27,7 @@ import java.util.function.Consumer;
 
 import org.prelle.ansi.ANSIInputStream;
 import org.prelle.ansi.ANSIOutputStream;
+import org.prelle.ansi.FilteringANSIStream;
 import org.prelle.terminal.TerminalEmulator;
 import org.prelle.terminal.TerminalMode;
 /**
@@ -475,23 +476,23 @@ public class WindowsConsoleFFM implements TerminalEmulator {
 		return this;
 	}
 
-	//-------------------------------------------------------------------
-	/**
-	 * @see org.prelle.terminal.TerminalEmulator#getOutputStream()
-	 */
-	@Override
-	public ANSIOutputStream getOutputStream() {
-		return out;
-	}
-
-	//-------------------------------------------------------------------
-	/**
-	 * @see org.prelle.terminal.TerminalEmulator#getInputStream()
-	 */
-	@Override
-	public ANSIInputStream getInputStream() {
-		return in;
-	}
+//	//-------------------------------------------------------------------
+//	/**
+//	 * @see org.prelle.terminal.TerminalEmulator#getOutputStream()
+//	 */
+//	@Override
+//	public ANSIOutputStream getOutputStream() {
+//		return out;
+//	}
+//
+//	//-------------------------------------------------------------------
+//	/**
+//	 * @see org.prelle.terminal.TerminalEmulator#getInputStream()
+//	 */
+//	@Override
+//	public ANSIInputStream getInputStream() {
+//		return in;
+//	}
 
 	//-------------------------------------------------------------------
 	/**
@@ -618,7 +619,13 @@ public class WindowsConsoleFFM implements TerminalEmulator {
 	}
 
 	@Override
-	public void connectWith(InputStream in, OutputStream out) {
+	public FilteringANSIStream connectWith(InputStream in, OutputStream out) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void sendUserInput(String text) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -6,8 +6,7 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.function.Consumer;
 
-import org.prelle.ansi.ANSIInputStream;
-import org.prelle.ansi.ANSIOutputStream;
+import org.prelle.ansi.FilteringANSIStream;
 
 /**
  *
@@ -20,15 +19,15 @@ public interface TerminalEmulator {
 	public boolean isLocalEchoActive();
 	public TerminalEmulator setLocalEchoActive(boolean value);
 
-	//-------------------------------------------------------------------
-	/**
-	 * Obtain the stream required to write to the terminal
-	 * @return
-	 */
-	public ANSIOutputStream getOutputStream();
-
-	//-------------------------------------------------------------------
-	public ANSIInputStream getInputStream();
+//	//-------------------------------------------------------------------
+//	/**
+//	 * Obtain the stream required to write to the terminal
+//	 * @return
+//	 */
+//	public ANSIOutputStream getOutputStream();
+//
+//	//-------------------------------------------------------------------
+//	public ANSIInputStream getInputStream();
 
 	//-------------------------------------------------------------------
 	public int[] getConsoleSize() throws IOException;
@@ -41,17 +40,9 @@ public interface TerminalEmulator {
 	public Charset[] getEncodings();
 
 	//-------------------------------------------------------------------
-	public default void sendUserInput(String text) {
-		byte[] data = (text+"\r\n").getBytes(Charset.defaultCharset());
-		try {
-			getOutputStream().write(data);
-			getOutputStream().flush();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+	public void sendUserInput(String text) ;
 
 	//-------------------------------------------------------------------
-	void connectWith(InputStream in, OutputStream out);
+	FilteringANSIStream connectWith(InputStream in, OutputStream out);
 	
 }

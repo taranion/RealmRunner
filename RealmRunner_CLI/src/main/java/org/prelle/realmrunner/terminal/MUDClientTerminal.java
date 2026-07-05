@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.lang.System.Logger;
-import java.lang.System.LoggerFinder;
 import java.lang.System.Logger.Level;
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -19,12 +18,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.ServiceLoader;
 import java.util.Map.Entry;
 import java.util.StringTokenizer;
 import java.util.Timer;
@@ -34,7 +31,6 @@ import org.prelle.ansi.ANSIOutputStream;
 import org.prelle.ansi.AParsedElement;
 import org.prelle.ansi.C0Code;
 import org.prelle.ansi.C0Fragment;
-import org.prelle.ansi.DeviceAttributes.OperatingLevel;
 import org.prelle.ansi.PrintableFragment;
 import org.prelle.ansi.commands.CursorPosition;
 import org.prelle.ansi.commands.EraseInDisplay;
@@ -43,36 +39,26 @@ import org.prelle.ansi.commands.LeftRightMarginMode;
 import org.prelle.ansi.commands.ModeState;
 import org.prelle.ansi.commands.SelectGraphicRendition;
 import org.prelle.ansi.commands.SelectGraphicRendition.Meaning;
-import org.prelle.ansi.commands.SetConformanceLevel;
 import org.prelle.ansi.commands.SetLeftAndRightMargin;
 import org.prelle.ansi.commands.SetTopAndBottomMargin;
 import org.prelle.ansi.control.AreaControls;
 import org.prelle.ansi.control.CursorControls;
 import org.prelle.ansi.control.DisplayControl;
 import org.prelle.ansi.control.ReportingControls;
-import org.prelle.mud4j.gmcp.GMCPManager;
-import org.prelle.mud4j.gmcp.Char.CharPackage;
 import org.prelle.mud4j.gmcp.Char.Stats;
 import org.prelle.mud4j.gmcp.Char.Vitals;
-import org.prelle.mud4j.gmcp.Client.ClientMediaPackage;
 import org.prelle.mud4j.gmcp.Client.ClientMediaPlay;
 import org.prelle.mud4j.gmcp.Client.ClientMediaStop;
-import org.prelle.mud4j.gmcp.Client.ClientPackage;
-import org.prelle.mud4j.gmcp.Core.CorePackage;
 import org.prelle.mud4j.gmcp.Room.GMCPRoomInfo;
-import org.prelle.mud4j.gmcp.Room.RoomPackage;
 import org.prelle.mud4j.gmcp.beip.BeipTilemapData;
 import org.prelle.mud4j.gmcp.beip.BeipTilemapDef;
 import org.prelle.mud4j.gmcp.beip.BeipTilemapInfo;
-import org.prelle.mud4j.gmcp.beip.BeipTilemapPackage;
-import org.prelle.mudansi.CapabilityDetector;
 import org.prelle.mudansi.FormatUtil;
 import org.prelle.mudansi.OutputFormatter.ANSIOutputConfig;
 import org.prelle.mudansi.TerminalCapabilities;
 import org.prelle.mudansi.UIGridFormat;
 import org.prelle.mudansi.UIGridFormat.Area;
 import org.prelle.mudansi.UIGridFormat.AreaDefinition;
-import org.prelle.realmrunner.network.AbstractConfig;
 import org.prelle.realmrunner.network.Config;
 import org.prelle.realmrunner.network.DataFileManager;
 import org.prelle.realmrunner.network.LineBufferListener;
@@ -82,23 +68,11 @@ import org.prelle.realmrunner.network.MXPEndTag;
 import org.prelle.realmrunner.network.MXPSingleTag;
 import org.prelle.realmrunner.network.MXPStartTag;
 import org.prelle.realmrunner.network.MainConfig;
-import org.prelle.realmrunner.network.ReadFromConsoleTask;
-import org.prelle.realmrunner.network.ReadFromMUDTask;
 import org.prelle.realmrunner.network.SessionConfig;
-import org.prelle.realmrunner.network.SessionConfig.SessionConfigBuilder;
 import org.prelle.realmrunner.network.SoundManager;
-import org.prelle.telnet.TelnetCommand;
-import org.prelle.telnet.TelnetConstants.ControlCode;
-import org.prelle.telnet.WellKnownTelnetOptions;
-import org.prelle.telnet.TelnetSocket;
-import org.prelle.telnet.TelnetSocket.State;
 import org.prelle.telnet.mud.AardwolfMushclientProtocol.AardwolfMushclientListener;
 import org.prelle.telnet.mud.AardwolfMushclientProtocol.MUDMode;
-import org.prelle.telnet.option.TelnetWindowSize;
 import org.prelle.terminal.TerminalEmulator;
-import org.prelle.terminal.TerminalMode;
-import org.prelle.terminal.console.UnixConsoleFFM;
-import org.prelle.terminal.console.WindowsConsoleFFM;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
@@ -135,7 +109,6 @@ public class MUDClientTerminal implements LineBufferListener,
 	private TerminalEmulator console;
 	private Charset charset = StandardCharsets.US_ASCII;
 	private UIGridFormat format;
-	private ReadFromConsoleTask readFromConsole;
 	private SoundManager sound;
 	private TileGraphicService graphic;
 
@@ -150,151 +123,151 @@ public class MUDClientTerminal implements LineBufferListener,
 	private Map<String, BeipTilemapDef> mapsByID = new HashMap<>();
 	private Map<String, SymbolSet> setsByID = new HashMap<>();
 
-	//-------------------------------------------------------------------
-	public static void main(String[] args) throws Exception {
-		System.setProperty("app.name", "RealmRunner");
-		if (args.length==2) {
-			String host = args[0];
-			int    port = Integer.parseInt(args[1]);
-			new MUDClientTerminal(null, host, port);
-		} else if (args.length>0) {
-			new MUDClientTerminal(args[0], null, 0);
-		} else {
-			new MUDClientTerminal(null, null, 0);
-		}
-	}
-
-	//-------------------------------------------------------------------
-	public MUDClientTerminal(String world, String server, int port) throws Exception {
-		setupLogging();
-		logger.log(Level.INFO, "----------------------------------------------------\r\n");
-		readConfig();
-		logger.log(Level.DEBUG, "Configure file manager");
-		DataFileManager.configure(mainConfig);
-		sound = new JLayerSoundManager();
-
-		AbstractConfig activeConfig = mainConfig;
-		if (world!=null) {
-			if (mainConfig.getWorld().containsKey(world))
-				activeConfig = mainConfig.getWorld().get(world);
-			else
-				System.err.println("Unknown world '"+world+"'");
-		} else if (server!=null) {
-			activeConfig = new Config();
-			((Config)activeConfig).setServer(server);
-			((Config)activeConfig).setPort(port);
-			((Config)activeConfig).setDataDir("dynamic");
-			world = "dynamic";
-		}
-
-		getOperatingSystemType();
-		if (detectedOS==OSType.Windows) {
-			logger.log(Level.INFO, "Create a windows console");
-			console = new WindowsConsoleFFM();
-			charset = console.getEncodings()[1];
-		} else if (detectedOS==OSType.Linux) {
-			logger.log(Level.INFO, "Create a unix console");
-			console = new UnixConsoleFFM();
-			charset = console.getEncodings()[1];
-		} else if (detectedOS==OSType.MacOS) {
-			logger.log(Level.INFO, "Create a unix console on Mac");
-			console = new UnixConsoleFFM();
-			charset = console.getEncodings()[1];
-		} else {
-			System.err.println("No supported OS type: "+System.getProperty("os.name"));
-			System.exit(1);
-		}
-		logger.log(Level.DEBUG, "Console is {0} with charset {1}",console.getClass().getSimpleName(), charset);
-		setupTimer();
-		int[] size = console.getConsoleSize();
-		logger.log(Level.DEBUG, "size is "+Arrays.toString(size));
-		terminalHeight = size[1];
-		terminalWidth  = size[0];
-		terminalConfig = ANSIOutputConfig.builder()
-				.useDECDoubleChars(true)
-				.width(terminalWidth)
-				.build();
-
-		console.getInputStream().setLoggingListener( (type,text) -> logger.log(Level.DEBUG, "CONSOLE <-- {0} = {1}", type,text));
-		console.getOutputStream().setLoggingListener( (type,text) -> {if (!"PRINT".equals(type)) logger.log(Level.DEBUG, "CONSOLE --> {0} = {1}", type,text);});
-		console.setLocalEchoActive(false);
-		console.setMode(TerminalMode.RAW);
-		readFromConsole = new ReadFromConsoleTask(console, activeConfig, (LineBufferListener)this);
-
-		Thread readFromTerminal = new Thread(readFromConsole, "FromConsole");
-		readFromTerminal.start();
-
-		console.getOutputStream().write(new SetConformanceLevel(OperatingLevel.LEVEL4_VT520, true));
-		readFromConsole.setForwardMode(false);
-		this.capabilities = new TerminalCapabilities();
-		learnTerminal(readFromConsole);
-
-//		DynamicallyRedefinableCharacterSet decdld = new DynamicallyRedefinableCharacterSet(
-//				1,1,DynamicallyRedefinableCharacterSet.Erase.ALL_MATCHING_WIDTH_RENDITION,0,0,TextOrFullCell.FULL_CELL,0,0,
-//				"???owYn||~ywo??/?IRJaVNn^NVbJRI");
-//		console.getOutputStream().write(decdld);
-//		console.getOutputStream().write( '!');
-////		console.getOutputStream().write(new EscapeSequenceFragment("{ ", '@', "SCS0", org.prelle.ansi.Level.VT200));
-//		console.getOutputStream().write(new DesignateCharacterSet(0, "P"));
-//		console.getOutputStream().write( '!');
-//		console.getOutputStream().write(new C0Fragment(C0Code.SI));
-//		console.getOutputStream().write( '!');
+//	//-------------------------------------------------------------------
+//	public static void main(String[] args) throws Exception {
+//		System.setProperty("app.name", "RealmRunner");
+//		if (args.length==2) {
+//			String host = args[0];
+//			int    port = Integer.parseInt(args[1]);
+//			new MUDClientTerminal(null, host, port);
+//		} else if (args.length>0) {
+//			new MUDClientTerminal(args[0], null, 0);
+//		} else {
+//			new MUDClientTerminal(null, null, 0);
+//		}
+//	}
 //
-//		console.getOutputStream().write(new Sixel(0, BackgroundMode.TRANSPARENT, List.of(
-//				new RasterAttribute(1,1,20,20),
-//				new SpecifyColor(0,2,100,0,0),
-//				new SpecifyColor(1,2,0,0,100),
-//				new SpecifyColor(2,2,0,100,0),
-//				new UseColor(1),
-//				new SixelData("~~@@vv@@~~@@~~$"),
-//				new UseColor(2),
-//				new SixelData("??}}GG}}??}}??"),
-//				new NewLine(),
-//				new Repeat(14,'@')
-//				)));
-//		console.getOutputStream().write("\r\r\n");
+//	//-------------------------------------------------------------------
+//	public MUDClientTerminal(String world, String server, int port) throws Exception {
+//		setupLogging();
+//		logger.log(Level.INFO, "----------------------------------------------------\r\n");
+//		readConfig();
+//		logger.log(Level.DEBUG, "Configure file manager");
+//		DataFileManager.configure(mainConfig);
+//		sound = new JLayerSoundManager();
 //
-//		console.getOutputStream().flush();
-//		System.exit(1);
-		setupInterface();
-		logger.log(Level.DEBUG, "---Interface all set up ---- now connect --------------------------");
-//		console.setLocalEchoActive(true);
-//		console.setMode(TerminalMode.LINE_MODE);
-		readFromConsole.setForwardMode(true);
-
-		/*
-		 * Prepare telnet connection
-		 */
-		//GMCPManager.registerPackage(new ClientMediaPackage()); // Already in MUDSession
-		GMCPManager.registerPackage(new ClientPackage());
-		GMCPManager.registerPackage(new RoomPackage());
-		GMCPManager.registerPackage(new CorePackage());
-		GMCPManager.registerPackage(new CharPackage());
-		GMCPManager.registerPackage(new BeipTilemapPackage());
-
-		try {
-
-			SessionConfigBuilder builder = SessionConfig.builder();
-			if (activeConfig instanceof Config) {
-				builder.server( ((Config)activeConfig).getServer());
-				builder.port  ( ((Config)activeConfig).getPort());
-				builder.login ( ((Config)activeConfig).getLogin());
-				builder.passwd( ((Config)activeConfig).getPassword());
-
-				DataFileManager.setActiveMUD(world, (Config)activeConfig);
-
-			} else {
-				builder.server("localhost").port(4000);
-			}
-			SessionConfig config = builder.build();
-			logger.log(Level.INFO, "Starting the session");
-//			setupSession(config, activeConfig);
-		} catch (Exception e) {
-			PrintStream pout = new PrintStream(console.getOutputStream());
-			pout.append("Failed to connect: "+e);
-			pout.flush();
-		}
-	}
+//		AbstractConfig activeConfig = mainConfig;
+//		if (world!=null) {
+//			if (mainConfig.getWorld().containsKey(world))
+//				activeConfig = mainConfig.getWorld().get(world);
+//			else
+//				System.err.println("Unknown world '"+world+"'");
+//		} else if (server!=null) {
+//			activeConfig = new Config();
+//			((Config)activeConfig).setServer(server);
+//			((Config)activeConfig).setPort(port);
+//			((Config)activeConfig).setDataDir("dynamic");
+//			world = "dynamic";
+//		}
+//
+//		getOperatingSystemType();
+//		if (detectedOS==OSType.Windows) {
+//			logger.log(Level.INFO, "Create a windows console");
+//			console = new WindowsConsoleFFM();
+//			charset = console.getEncodings()[1];
+//		} else if (detectedOS==OSType.Linux) {
+//			logger.log(Level.INFO, "Create a unix console");
+//			console = new UnixConsoleFFM();
+//			charset = console.getEncodings()[1];
+//		} else if (detectedOS==OSType.MacOS) {
+//			logger.log(Level.INFO, "Create a unix console on Mac");
+//			console = new UnixConsoleFFM();
+//			charset = console.getEncodings()[1];
+//		} else {
+//			System.err.println("No supported OS type: "+System.getProperty("os.name"));
+//			System.exit(1);
+//		}
+//		logger.log(Level.DEBUG, "Console is {0} with charset {1}",console.getClass().getSimpleName(), charset);
+//		setupTimer();
+//		int[] size = console.getConsoleSize();
+//		logger.log(Level.DEBUG, "size is "+Arrays.toString(size));
+//		terminalHeight = size[1];
+//		terminalWidth  = size[0];
+//		terminalConfig = ANSIOutputConfig.builder()
+//				.useDECDoubleChars(true)
+//				.width(terminalWidth)
+//				.build();
+//
+//		console.getInputStream().setLoggingListener( (type,text) -> logger.log(Level.DEBUG, "CONSOLE <-- {0} = {1}", type,text));
+//		console.getOutputStream().setLoggingListener( (type,text) -> {if (!"PRINT".equals(type)) logger.log(Level.DEBUG, "CONSOLE --> {0} = {1}", type,text);});
+//		console.setLocalEchoActive(false);
+//		console.setMode(TerminalMode.RAW);
+//		readFromConsole = new ReadFromConsoleTask(console, activeConfig, (LineBufferListener)this);
+//
+//		Thread readFromTerminal = new Thread(readFromConsole, "FromConsole");
+//		readFromTerminal.start();
+//
+//		console.getOutputStream().write(new SetConformanceLevel(OperatingLevel.LEVEL4_VT520, true));
+//		readFromConsole.setForwardMode(false);
+//		this.capabilities = new TerminalCapabilities();
+//		learnTerminal(readFromConsole);
+//
+////		DynamicallyRedefinableCharacterSet decdld = new DynamicallyRedefinableCharacterSet(
+////				1,1,DynamicallyRedefinableCharacterSet.Erase.ALL_MATCHING_WIDTH_RENDITION,0,0,TextOrFullCell.FULL_CELL,0,0,
+////				"???owYn||~ywo??/?IRJaVNn^NVbJRI");
+////		console.getOutputStream().write(decdld);
+////		console.getOutputStream().write( '!');
+//////		console.getOutputStream().write(new EscapeSequenceFragment("{ ", '@', "SCS0", org.prelle.ansi.Level.VT200));
+////		console.getOutputStream().write(new DesignateCharacterSet(0, "P"));
+////		console.getOutputStream().write( '!');
+////		console.getOutputStream().write(new C0Fragment(C0Code.SI));
+////		console.getOutputStream().write( '!');
+////
+////		console.getOutputStream().write(new Sixel(0, BackgroundMode.TRANSPARENT, List.of(
+////				new RasterAttribute(1,1,20,20),
+////				new SpecifyColor(0,2,100,0,0),
+////				new SpecifyColor(1,2,0,0,100),
+////				new SpecifyColor(2,2,0,100,0),
+////				new UseColor(1),
+////				new SixelData("~~@@vv@@~~@@~~$"),
+////				new UseColor(2),
+////				new SixelData("??}}GG}}??}}??"),
+////				new NewLine(),
+////				new Repeat(14,'@')
+////				)));
+////		console.getOutputStream().write("\r\r\n");
+////
+////		console.getOutputStream().flush();
+////		System.exit(1);
+//		setupInterface();
+//		logger.log(Level.DEBUG, "---Interface all set up ---- now connect --------------------------");
+////		console.setLocalEchoActive(true);
+////		console.setMode(TerminalMode.LINE_MODE);
+//		readFromConsole.setForwardMode(true);
+//
+//		/*
+//		 * Prepare telnet connection
+//		 */
+//		//GMCPManager.registerPackage(new ClientMediaPackage()); // Already in MUDSession
+//		GMCPManager.registerPackage(new ClientPackage());
+//		GMCPManager.registerPackage(new RoomPackage());
+//		GMCPManager.registerPackage(new CorePackage());
+//		GMCPManager.registerPackage(new CharPackage());
+//		GMCPManager.registerPackage(new BeipTilemapPackage());
+//
+//		try {
+//
+//			SessionConfigBuilder builder = SessionConfig.builder();
+//			if (activeConfig instanceof Config) {
+//				builder.server( ((Config)activeConfig).getServer());
+//				builder.port  ( ((Config)activeConfig).getPort());
+//				builder.login ( ((Config)activeConfig).getLogin());
+//				builder.passwd( ((Config)activeConfig).getPassword());
+//
+//				DataFileManager.setActiveMUD(world, (Config)activeConfig);
+//
+//			} else {
+//				builder.server("localhost").port(4000);
+//			}
+//			SessionConfig config = builder.build();
+//			logger.log(Level.INFO, "Starting the session");
+////			setupSession(config, activeConfig);
+//		} catch (Exception e) {
+//			PrintStream pout = new PrintStream(console.getOutputStream());
+//			pout.append("Failed to connect: "+e);
+//			pout.flush();
+//		}
+//	}
 
 	//-------------------------------------------------------------------
 	private OSType getOperatingSystemType() {
@@ -422,37 +395,37 @@ public class MUDClientTerminal implements LineBufferListener,
 		}
 	}
 
-	//-------------------------------------------------------------------
-	private void learnTerminal(ReadFromConsoleTask readTask) {
-		logger.log(Level.DEBUG, "ENTER: learnTerminal");
-		Charset[] encodings = console.getEncodings();
-		logger.log(Level.INFO, "Encoding: Input={0}  Output={1}", encodings[0], encodings[1]);
-		this.charset = encodings[1];
-
-
-		ANSIOutputStream out = console.getOutputStream();
-		CapabilityDetector detector = new CapabilityDetector(out);
-		readTask.setWhenNotForwarding( frag -> {
-			try {
-				detector.process(frag);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		});
-		try {
-			capabilities = detector.performCheck(terminalWidth, terminalHeight);
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			capabilities.report(new ANSIOutputStream(baos));
-			logger.log(Level.INFO, baos.toString(StandardCharsets.UTF_8));
-			capabilities.report(new ANSIOutputStream(System.out));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		logger.log(Level.DEBUG, "LEAVE: learnTerminal");
-
-	}
+//	//-------------------------------------------------------------------
+//	private void learnTerminal(ReadFromConsoleTask readTask) {
+//		logger.log(Level.DEBUG, "ENTER: learnTerminal");
+//		Charset[] encodings = console.getEncodings();
+//		logger.log(Level.INFO, "Encoding: Input={0}  Output={1}", encodings[0], encodings[1]);
+//		this.charset = encodings[1];
+//
+//
+//		ANSIOutputStream out = session.getOutputStream();
+//		CapabilityDetector detector = new CapabilityDetector(out);
+//		readTask.setWhenNotForwarding( frag -> {
+//			try {
+//				detector.process(frag);
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		});
+//		try {
+//			capabilities = detector.performCheck(terminalWidth, terminalHeight);
+//			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//			capabilities.report(new ANSIOutputStream(baos));
+//			logger.log(Level.INFO, baos.toString(StandardCharsets.UTF_8));
+//			capabilities.report(new ANSIOutputStream(System.out));
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		logger.log(Level.DEBUG, "LEAVE: learnTerminal");
+//
+//	}
 
 	//-------------------------------------------------------------------
 	private void installShutdown() {
@@ -466,20 +439,20 @@ public class MUDClientTerminal implements LineBufferListener,
 				session.close();
 			}
 			// Resetting terminal
-			ANSIOutputStream out = console.getOutputStream();
-			logger.log(Level.INFO, "Resetting console");
-			try {
-				AreaControls.setLeftAndRightMargins(out, 1, 200);
-				DisplayControl.setLeftRightMarginMode(out, ModeState.RESET);
-				AreaControls.setTopAndBottomMargins(out, 1, 200);
-				CursorControls.enableCursor(out, true);
-				AreaControls.clearScreen(out);
-				out.flush();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			out.reset();
+//			ANSIOutputStream out = console.getOutputStream();
+//			logger.log(Level.INFO, "Resetting console");
+//			try {
+//				AreaControls.setLeftAndRightMargins(out, 1, 200);
+//				DisplayControl.setLeftRightMarginMode(out, ModeState.RESET);
+//				AreaControls.setTopAndBottomMargins(out, 1, 200);
+//				CursorControls.enableCursor(out, true);
+//				AreaControls.clearScreen(out);
+//				out.flush();
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			out.reset();
 		});
 		Runtime.getRuntime().addShutdownHook(onShutdown);
 
@@ -572,55 +545,55 @@ public class MUDClientTerminal implements LineBufferListener,
 	private void setupInterface() {
 		logger.log(Level.INFO, "###############################Set up a split screen interface");
 		installShutdown();
-		ANSIOutputStream out = console.getOutputStream();
-
-		format = new UIGridFormat(out,terminalWidth, terminalHeight, capabilities.isEditRectangular());
-		// Outer border only works when splitting on both axis
-		format.setOuterBorder(capabilities.isMarginLeftRight() && capabilities.isMarginTopBottom());
-		// Reserve space for the input line
-		format.setBottomHeight(1);
-//		format.setTopHeight(11);
-//		format.setLeftWidth(22);
-		format.join(UIGridFormat.ID_INPUT, Area.BOTTOM_LEFT, Area.BOTTOM, Area.BOTTOM_RIGHT);
-		format.join(AREA_ROOMDESC, Area.TOP, Area.TOP_RIGHT);
-		format.join(UIGridFormat.ID_SCROLL, Area.CENTER, Area.RIGHT);
-
-		logger.log(Level.INFO, "Format.dump: "+format.dump());
-		try {
-			format.recreate(charset);
-			CursorControls.enableCursor(out, false);
-			lineBufferChanged("", 0);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		logger.log(Level.INFO, "Done initializing");
-//		System.exit(0);
-		readFromConsole.setForwardMode(true);
-
-		try {
-			//out.write(new DeviceControlFragment("$", null, "qmrs"));
-			logger.log(Level.DEBUG, "Request current margins");
-			ReportingControls.requestTopBottomMargin(out);
-//			AreaControls.clearScreen(out);
-//			AreaControls.setLeftAndRightMargins(out, 13, terminalWidth);
-////			AreaControls.setTopAndBottomMargins(out, 13, terminalWidth);
-//			CursorControls.setCursorPosition(out, 13, 13);
-
-			Path configFile = CONFIG_DIR.resolve("config.yml");
-			out.write("Reading your configuration from "+configFile.toRealPath()+"\r\n");
-			capabilities.report(out);
-			out.write("\r\n");
-			out.write("\r\n".repeat(2));
-			out.write("Usage:\r\n"
-					+ "#SESSION <name> <host> <port> [<charset>] - connect to the given server \r\n"
-					+ "                                            Optionally define server <charset>\r\n"
-					+ "#SESSION <name>               - connect to a stored server entry\r\n");
-			out.flush();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		ANSIOutputStream out = console.getOutputStream();
+//
+//		format = new UIGridFormat(out,terminalWidth, terminalHeight, capabilities.isEditRectangular());
+//		// Outer border only works when splitting on both axis
+//		format.setOuterBorder(capabilities.isMarginLeftRight() && capabilities.isMarginTopBottom());
+//		// Reserve space for the input line
+//		format.setBottomHeight(1);
+////		format.setTopHeight(11);
+////		format.setLeftWidth(22);
+//		format.join(UIGridFormat.ID_INPUT, Area.BOTTOM_LEFT, Area.BOTTOM, Area.BOTTOM_RIGHT);
+//		format.join(AREA_ROOMDESC, Area.TOP, Area.TOP_RIGHT);
+//		format.join(UIGridFormat.ID_SCROLL, Area.CENTER, Area.RIGHT);
+//
+//		logger.log(Level.INFO, "Format.dump: "+format.dump());
+//		try {
+//			format.recreate(charset);
+//			CursorControls.enableCursor(out, false);
+//			lineBufferChanged("", 0);
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		logger.log(Level.INFO, "Done initializing");
+////		System.exit(0);
+////		readFromConsole.setForwardMode(true);
+//
+//		try {
+//			//out.write(new DeviceControlFragment("$", null, "qmrs"));
+//			logger.log(Level.DEBUG, "Request current margins");
+//			ReportingControls.requestTopBottomMargin(out);
+////			AreaControls.clearScreen(out);
+////			AreaControls.setLeftAndRightMargins(out, 13, terminalWidth);
+//////			AreaControls.setTopAndBottomMargins(out, 13, terminalWidth);
+////			CursorControls.setCursorPosition(out, 13, 13);
+//
+//			Path configFile = CONFIG_DIR.resolve("config.yml");
+//			out.write("Reading your configuration from "+configFile.toRealPath()+"\r\n");
+//			capabilities.report(out);
+//			out.write("\r\n");
+//			out.write("\r\n".repeat(2));
+//			out.write("Usage:\r\n"
+//					+ "#SESSION <name> <host> <port> [<charset>] - connect to the given server \r\n"
+//					+ "                                            Optionally define server <charset>\r\n"
+//					+ "#SESSION <name>               - connect to a stored server entry\r\n");
+//			out.flush();
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 
 //	//-------------------------------------------------------------------
@@ -961,69 +934,69 @@ public class MUDClientTerminal implements LineBufferListener,
 	@Override
 	public void gmcpReceivedRoomInfo(GMCPRoomInfo info) {
 		logger.log(Level.DEBUG, "Room "+info.getName());
-		ANSIOutputStream out = console.getOutputStream();
-
-		StringBuffer buf = new StringBuffer("<b><u>");
-		buf.append(info.getName());
-		buf.append("</b></u>");
-		// Exits
-		if (info.getExits()!=null) {
-			buf.append("  [<cyan>");
-			buf.append( String.join(" ", info.getExits().keySet().stream().map(k -> k.toUpperCase()) .toList()) );
-			buf.append("</cyan>]");
-		}
-		buf.append("<br/>");
-
-		// Description
-		if (info.getDesc()!=null) {
-			buf.append(info.getDesc());
-		}
-
-
-		try {
-			if (format.getArea(AREA_ROOMDESC)!=null)
-				format.showMarkupIn(AREA_ROOMDESC, buf.toString(), true);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		if (true)
-			return;
-
-		int mapHeight=11;
-		int mapWidth=11;
-		int columns=terminalWidth;
-
-
-		try {
-			CursorControls.savePositionDEC(out);
-			// Clear old content
-			for (int i=0; i<mapHeight; i++) {
-				CursorControls.setCursorPosition(out, mapWidth+3, i+2);
-				AreaControls.clearFromHere(out);
-				CursorControls.setCursorPosition(out, columns, i+2);
-				out.write("\u2551");
-			}
-
-			CursorControls.setCursorPosition(out, mapWidth+3, 2);
-			out.write(info.getName());
-//			out.write(makeHeaderLine(info));
-//		CursorControls.setCursorPosition(out, columns, 2);
-//		out.write("\u2551");
-
-			// Write room description
-			List<String> roomDesc = FormatUtil.convertXMLToANSILines(info.getDesc(), terminalConfig);
-			int y = 3;
-			for (String line : roomDesc) {
-				CursorControls.setCursorPosition(out, mapWidth+3, y++);
-				out.write(line.getBytes(StandardCharsets.ISO_8859_1));
-			}
-			CursorControls.restorePositionDEC(out);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		ANSIOutputStream out = console.getOutputStream();
+//
+//		StringBuffer buf = new StringBuffer("<b><u>");
+//		buf.append(info.getName());
+//		buf.append("</b></u>");
+//		// Exits
+//		if (info.getExits()!=null) {
+//			buf.append("  [<cyan>");
+//			buf.append( String.join(" ", info.getExits().keySet().stream().map(k -> k.toUpperCase()) .toList()) );
+//			buf.append("</cyan>]");
+//		}
+//		buf.append("<br/>");
+//
+//		// Description
+//		if (info.getDesc()!=null) {
+//			buf.append(info.getDesc());
+//		}
+//
+//
+//		try {
+//			if (format.getArea(AREA_ROOMDESC)!=null)
+//				format.showMarkupIn(AREA_ROOMDESC, buf.toString(), true);
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//
+//		if (true)
+//			return;
+//
+//		int mapHeight=11;
+//		int mapWidth=11;
+//		int columns=terminalWidth;
+//
+//
+//		try {
+//			CursorControls.savePositionDEC(out);
+//			// Clear old content
+//			for (int i=0; i<mapHeight; i++) {
+//				CursorControls.setCursorPosition(out, mapWidth+3, i+2);
+//				AreaControls.clearFromHere(out);
+//				CursorControls.setCursorPosition(out, columns, i+2);
+//				out.write("\u2551");
+//			}
+//
+//			CursorControls.setCursorPosition(out, mapWidth+3, 2);
+//			out.write(info.getName());
+////			out.write(makeHeaderLine(info));
+////		CursorControls.setCursorPosition(out, columns, 2);
+////		out.write("\u2551");
+//
+//			// Write room description
+//			List<String> roomDesc = FormatUtil.convertXMLToANSILines(info.getDesc(), terminalConfig);
+//			int y = 3;
+//			for (String line : roomDesc) {
+//				CursorControls.setCursorPosition(out, mapWidth+3, y++);
+//				out.write(line.getBytes(StandardCharsets.ISO_8859_1));
+//			}
+//			CursorControls.restorePositionDEC(out);
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 
 	}
 
@@ -1077,17 +1050,17 @@ public class MUDClientTerminal implements LineBufferListener,
 				activeConfig!=null?activeConfig.getServerLayoutControl():"?");
 		if (activeConfig!=null && activeConfig.getServerLayoutControl()!=null && activeConfig.getServerLayoutControl())
 			return;
-		try {
-			CursorControls.savePositionDEC(console.getOutputStream());
-			format.showLinebuffer(content, false);
-			console.getOutputStream().write(new SelectGraphicRendition(Meaning.BLINKING_ON));
-			console.getOutputStream().write("\u2588");
-			console.getOutputStream().write(new SelectGraphicRendition(Meaning.BLINK_OFF));
-			CursorControls.restorePositionDEC(console.getOutputStream());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			CursorControls.savePositionDEC(console.getOutputStream());
+//			format.showLinebuffer(content, false);
+//			console.getOutputStream().write(new SelectGraphicRendition(Meaning.BLINKING_ON));
+//			console.getOutputStream().write("\u2588");
+//			console.getOutputStream().write(new SelectGraphicRendition(Meaning.BLINK_OFF));
+//			CursorControls.restorePositionDEC(console.getOutputStream());
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 
 
@@ -1278,7 +1251,7 @@ public class MUDClientTerminal implements LineBufferListener,
 				System.exit(0);
 			default:
 				logger.log(Level.ERROR, "Unknown command {0}", command);
-				console.getOutputStream().write("Unknown command #"+command+"\r\n");
+//				console.getOutputStream().write("Unknown command #"+command+"\r\n");
 			}
 		} catch (IOException e) {
 			logger.log(Level.ERROR, "Failed executing command '"+command+"'",e);
@@ -1289,73 +1262,73 @@ public class MUDClientTerminal implements LineBufferListener,
 	private void performSession(StringTokenizer tok) throws IOException {
 		activeConfig = new Config(mainConfig);
 		String world = null;
-		switch (tok.countTokens()) {
-		case 1:
-			// Connect to existing server
-			world = tok.nextToken();
-			if (mainConfig.getWorld().containsKey(world))
-				activeConfig = mainConfig.getWorld().get(world);
-			else {
-				console.getOutputStream().write("Unknown world '"+world+"'\r\n");
-				return;
-			}
-			break;
-		case 3:
-		case 4:
-			// Set up a new server
-			world      = tok.nextToken();
-			String host= tok.nextToken();
-			String port= tok.nextToken();
-			String enc = (tok.hasMoreTokens())?tok.nextToken():null;
-			activeConfig = new Config();
-			activeConfig.setServer(host);
-			activeConfig.setPort(Integer.parseInt(port));
-			activeConfig.setServerEncoding(enc);
-			if (enc!=null) {
-				try {
-					Charset.forName(enc);
-				} catch (Exception e) {
-					// Invalid charset
-					console.getOutputStream().write("Invalid character encoding: "+enc+"\r\n");
-					return;
-				}
-			}
-			mainConfig.addWorld(world, activeConfig);
-			saveConfig();
-			break;
-		default:
-			console.getOutputStream().write("Usage:\r\n"
-					+ "#SESSION <name> <host> <port> [<charset>] - connect to the given server \r\n"
-					+ "                                            Optionally define server <charset>\r\n"
-					+ "#SESSION <name>               - connect to a stored server entry\r\n");
-			return;
-		}
-		// Do connect
-		logger.log(Level.INFO, "Establish session with {0}", world);
-		format.clear(format.getArea(UIGridFormat.ID_SCROLL));
-		DataFileManager.setActiveMUD(world, activeConfig);
-		if (activeConfig.getServerLayoutControl()!=null && activeConfig.getServerLayoutControl()==true) {
-			logger.log(Level.INFO, "Clear all layout");
-			format.reset();
-		}
-		try {
-			SessionConfig config = SessionConfig.builder()
-				.server(activeConfig.getServer())
-				.port(activeConfig.getPort())
-				.build();
-			Path dataDir = DataFileManager.getCurrentDataDir().resolve(world);
-			Files.createDirectories(dataDir);
-			activeConfig.setDataDir(dataDir.toString());
-			graphic = new SwingTileGraphicLoader();
-			graphic.setSymbolDir(DataFileManager.getCurrentDataDir().resolve("tilesets"));
-			logger.log(Level.INFO, "Starting the session to {0} with dir {1}", activeConfig.getServer(), dataDir);
-			setupSession(config, activeConfig);
-		} catch (Exception e) {
-			logger.log(Level.ERROR, "Failed to connect",e);
-			PrintStream pout = new PrintStream(console.getOutputStream());
-			pout.append("Failed to connect: "+e);
-			pout.flush();
-		}
+//		switch (tok.countTokens()) {
+//		case 1:
+//			// Connect to existing server
+//			world = tok.nextToken();
+//			if (mainConfig.getWorld().containsKey(world))
+//				activeConfig = mainConfig.getWorld().get(world);
+//			else {
+//				console.getOutputStream().write("Unknown world '"+world+"'\r\n");
+//				return;
+//			}
+//			break;
+//		case 3:
+//		case 4:
+//			// Set up a new server
+//			world      = tok.nextToken();
+//			String host= tok.nextToken();
+//			String port= tok.nextToken();
+//			String enc = (tok.hasMoreTokens())?tok.nextToken():null;
+//			activeConfig = new Config();
+//			activeConfig.setServer(host);
+//			activeConfig.setPort(Integer.parseInt(port));
+//			activeConfig.setServerEncoding(enc);
+//			if (enc!=null) {
+//				try {
+//					Charset.forName(enc);
+//				} catch (Exception e) {
+//					// Invalid charset
+//					console.getOutputStream().write("Invalid character encoding: "+enc+"\r\n");
+//					return;
+//				}
+//			}
+//			mainConfig.addWorld(world, activeConfig);
+//			saveConfig();
+//			break;
+//		default:
+//			console.getOutputStream().write("Usage:\r\n"
+//					+ "#SESSION <name> <host> <port> [<charset>] - connect to the given server \r\n"
+//					+ "                                            Optionally define server <charset>\r\n"
+//					+ "#SESSION <name>               - connect to a stored server entry\r\n");
+//			return;
+//		}
+//		// Do connect
+//		logger.log(Level.INFO, "Establish session with {0}", world);
+//		format.clear(format.getArea(UIGridFormat.ID_SCROLL));
+//		DataFileManager.setActiveMUD(world, activeConfig);
+//		if (activeConfig.getServerLayoutControl()!=null && activeConfig.getServerLayoutControl()==true) {
+//			logger.log(Level.INFO, "Clear all layout");
+//			format.reset();
+//		}
+//		try {
+//			SessionConfig config = SessionConfig.builder()
+//				.server(activeConfig.getServer())
+//				.port(activeConfig.getPort())
+//				.build();
+//			Path dataDir = DataFileManager.getCurrentDataDir().resolve(world);
+//			Files.createDirectories(dataDir);
+//			activeConfig.setDataDir(dataDir.toString());
+//			graphic = new SwingTileGraphicLoader();
+//			graphic.setSymbolDir(DataFileManager.getCurrentDataDir().resolve("tilesets"));
+//			logger.log(Level.INFO, "Starting the session to {0} with dir {1}", activeConfig.getServer(), dataDir);
+//			setupSession(config, activeConfig);
+//		} catch (Exception e) {
+//			logger.log(Level.ERROR, "Failed to connect",e);
+//			PrintStream pout = new PrintStream(console.getOutputStream());
+//			pout.append("Failed to connect: "+e);
+//			pout.flush();
+//		}
 
 
 	}
@@ -1363,12 +1336,12 @@ public class MUDClientTerminal implements LineBufferListener,
 	//-------------------------------------------------------------------
 	private void performSessions(StringTokenizer tok) throws IOException {
 		List<Entry<String,Config>> worlds = mainConfig.getWorlds();
-		worlds = worlds.stream().sorted( (w1,w2) -> w1.getKey().compareTo(w2.getKey())).toList();
-		StringBuffer buf = new StringBuffer();
-		for (Entry<String,Config> entry : worlds) {
-			buf.append(String.format("%10s : %s, Port %d\r\n", entry.getKey(), entry.getValue().getServer(), entry.getValue().getPort()));
-		}
-		console.getOutputStream().write(buf.toString());
+//		worlds = worlds.stream().sorted( (w1,w2) -> w1.getKey().compareTo(w2.getKey())).toList();
+//		StringBuffer buf = new StringBuffer();
+//		for (Entry<String,Config> entry : worlds) {
+//			buf.append(String.format("%10s : %s, Port %d\r\n", entry.getKey(), entry.getValue().getServer(), entry.getValue().getPort()));
+//		}
+//		console.getOutputStream().write(buf.toString());
 	}
 
 }

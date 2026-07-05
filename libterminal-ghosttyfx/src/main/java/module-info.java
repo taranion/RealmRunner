@@ -7,4 +7,5 @@ module org.prelle.jeditermfxterminal {
 	requires java.desktop;
 	requires org.prelle.libterminal;
 	requires ghosttyfx;
+	requires org.prelle.libansi;
 }

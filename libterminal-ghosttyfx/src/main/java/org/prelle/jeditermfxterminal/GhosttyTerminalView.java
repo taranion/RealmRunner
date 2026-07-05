@@ -13,9 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.prelle.ansi.ANSIInputStream;
-import org.prelle.ansi.ANSIOutputStream;
-import org.prelle.jeditermfxterminal.impl.SwitchableInputStream;
+import org.prelle.ansi.FilteringANSIStream;
+import org.prelle.ansi.PassthroughANSIInputStream;
+import org.prelle.terminal.SwitchableInputStream;
+import org.prelle.terminal.SwitchableOutputStream;
 import org.prelle.terminal.TerminalEmulator;
 import org.prelle.terminal.TerminalMode;
 
@@ -34,8 +35,6 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	private SwitchableOutputStream outPipe;
 
 	private TerminalView widget;
-    private ANSIOutputStream out;
-    private ANSIInputStream in;
     
     private int terminalWidth = -1;
     private int terminalHeight = -1;
@@ -53,10 +52,10 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 			return this;
 		});
 
-		out = new ANSIOutputStream(outPipe);
-		in  = new ANSIInputStream(inPipe);
-		in.setLoggingListener( (k,v) -> logger.log(Level.ERROR, "GhosttyTerminalView<init> input: {0}={1}", k, v));
-		out.setLoggingListener( (k,v) -> logger.log(Level.ERROR, "GhosttyTerminalView<init> output: {0}={1}", k, v));
+//		out = new ANSIOutputStream(outPipe);
+//		in  = new ANSIInputStream(inPipe);
+//		in.setLoggingListener( (k,v) -> logger.log(Level.ERROR, "GhosttyTerminalView<init> input: {0}={1}", k, v));
+//		out.setLoggingListener( (k,v) -> logger.log(Level.ERROR, "GhosttyTerminalView<init> output: {0}={1}", k, v));
 
 //		getBackground();
 //		setBackground(Background.fill(backgroundColor.get()));
@@ -71,17 +70,20 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	 * @see org.prelle.terminal.TerminalEmulator#connectWith(java.io.InputStream, java.io.InputStream)
 	 */
 	@Override
-	public void connectWith(InputStream in, OutputStream out) {
+	public FilteringANSIStream connectWith(InputStream in, OutputStream out) {
+		PassthroughANSIInputStream pin = new PassthroughANSIInputStream(in);
+//		this.out = out;
 		outPipe.setSink(out);
-		inPipe.setSource(in);
+		inPipe.setSource(pin);
 		
 		try {
-			logger.log(Level.WARNING, "Output: "+this.out);
-			logger.log(Level.WARNING, "Input : "+this.in);
+			logger.log(Level.WARNING, "Output: "+this.outPipe);
+			logger.log(Level.WARNING, "Input : "+this.inPipe);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return pin;
 	}
 	
 	//-------------------------------------------------------------------
@@ -178,24 +180,23 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 		return null;
 	}
 
-	//-------------------------------------------------------------------
-	/**
-	 * @see org.prelle.terminal.TerminalEmulator#getOutputStream()
-	 */
-	@Override
-	public ANSIOutputStream getOutputStream() {
-		return out;
-	}
-
-	//-------------------------------------------------------------------
-	/**
-	 * @see org.prelle.terminal.TerminalEmulator#getInputStream()
-	 */
-	@Override
-	public ANSIInputStream getInputStream() {
-		// TODO Auto-generated method stub
-		return in;
-	}
+//	//-------------------------------------------------------------------
+//	/**
+//	 * @see org.prelle.terminal.TerminalEmulator#getOutputStream()
+//	 */
+//	@Override
+//	public ANSIOutputStream getOutputStream() {
+//		return out;
+//	}
+//
+//	//-------------------------------------------------------------------
+//	/**
+//	 * @see org.prelle.terminal.TerminalEmulator#getInputStream()
+//	 */
+//	@Override
+//	public ANSIInputStream getInputStream() {
+//		return in;
+//	}
 
 	@Override
 	public int[] getConsoleSize() throws IOException {

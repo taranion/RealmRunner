@@ -12,10 +12,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.prelle.ansi.ANSIInputStream;
+import org.prelle.ansi.ANSIOutputStream;
 import org.prelle.ansi.DeviceAttributes.OperatingLevel;
+import org.prelle.ansi.FilteringANSIStream;
 import org.prelle.ansi.commands.SetConformanceLevel;
 import org.prelle.telnet.CommunicationRole;
 import org.prelle.telnet.TelnetCommand;
+import org.prelle.telnet.TelnetConstants.ControlCode;
 import org.prelle.telnet.TelnetInputStream;
 import org.prelle.telnet.TelnetListener;
 import org.prelle.telnet.TelnetOptionListener;
@@ -89,7 +93,10 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 					}
 				}
 				
-				MUDSession session = new MUDSession(terminal, in, out);
+				MUDSession session = new MUDSession(terminal, in, out, clientConfig);
+				if (in instanceof TelnetInputStream tin) {
+					tin.getProtocol().addListener(session);
+				}
 				return session;
 			} catch (UnknownHostException e) {
 				// TODO Auto-generated catch block
@@ -112,15 +119,13 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 	}
 
 	private TerminalEmulator console;
-	private InputStream streamFromMUD;
-	private OutputStream streamToMUD;
 //	private Charset charset;
 //	private ReadFromConsoleTask readFromConsole;
 //	private TerminalCapabilities capabilities;
 //
 //	private TelnetSocket socket;
-//	private ANSIOutputStream streamToMUD;
-//	private TelnetInputStream streamFromMUD;
+	private ANSIOutputStream streamToMUD;
+	private FilteringANSIStream streamFromMUD;
 //	private Thread thread;
 //
 //	private boolean characterMode = false;
@@ -134,17 +139,22 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 	}
 
 	//-------------------------------------------------------------------
-	public MUDSession(TerminalEmulator terminal, InputStream in, OutputStream out) throws IOException {
+	public MUDSession(TerminalEmulator terminal, InputStream in, OutputStream out, Config config) throws IOException {
 		logger.log(Level.INFO, "ENTER: MUDSession.<init>");
 		this.console = terminal;
 		console.setLocalEchoActive(false);
 		console.setMode(TerminalMode.RAW);
 
-		console.getOutputStream().write(new SetConformanceLevel(OperatingLevel.LEVEL4_VT520, true));
+//		console.getOutputStream().write(new SetConformanceLevel(OperatingLevel.LEVEL4_VT520, true));
 		
-		this.streamFromMUD = in;
-		this.streamToMUD   = out;
-		terminal.connectWith(in, out);
+		streamToMUD   = new ANSIOutputStream(out);
+//		streamFromMUD.setLoggingListener( (k,v) -> logger.log(Level.ERROR, "GhosttyTerminalView<init> input: {0}={1}", k, v));
+//		streamToMUD.setLoggingListener( (k,v) -> logger.log(Level.ERROR, "GhosttyTerminalView<init> output: {0}={1}", k, v));
+		
+		
+		streamFromMUD = terminal.connectWith(in, streamToMUD);
+		
+		
 //		terminal.connectWith(con.getStreamFromMUD(), con.getStreamToMUD());
 //		readFromConsole.setForwardMode(false);
 //		this.capabilities = new TerminalCapabilities();
@@ -328,11 +338,13 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 	@Override
 	public void telnetCommandReceived(TelnetCommand command) {
 		// TODO Auto-generated method stub
-		
+		logger.log(Level.WARNING, "RCV Telnet command: {0}", command);
 	}
 
 	private static void configureTelnetProtocol(MUDSession.Builder builder,TelnetProtocol protocol, Config config) {
 		logger.log(Level.INFO, "ENTER: configureTelnetProtocol");
+		
+		// Prepare NAWS
 		var naws = new TelnetWindowSize();
 		builder.terminal.addConsoleSizeListener( size -> {
 			try {
@@ -345,8 +357,14 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 		
 		protocol.add(new TerminalType(builder.terminalTypes!=null ? builder.terminalTypes : new String[] {"xterm-256color"}))
 				.add(naws)
-//				.add(new MXPOption("b"))
 				;
+		
+		// Prepare MXP
+		if (config.isMXPEnabled()) {
+			var mxp = new MXPOption(CommunicationRole.CLIENT,"b");
+			protocol.add(mxp);
+			
+		}
 		logger.log(Level.INFO, "LEAVE: configureTelnetProtocol");
 	}
 }

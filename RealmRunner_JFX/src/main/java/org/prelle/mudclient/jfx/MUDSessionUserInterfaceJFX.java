@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.prelle.jeditermfxterminal.GhosttyTerminalView;
+import org.prelle.jeditermfxterminal.JediTerminalView;
 import org.prelle.mudclient.jfx.MUDClientMain.HistoryEntry;
 import org.prelle.realmrunner.network.DataFileManager;
 import org.prelle.realmrunner.network.MUDSessionUserInterface;
@@ -23,6 +24,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
@@ -39,8 +41,8 @@ public class MUDSessionUserInterfaceJFX extends AnchorPane implements MUDSession
 	private VBox historyPane;
 	private TextField tfInput;
 	private VBox textLayout;
-//	private TerminalView terminal;
 	private GhosttyTerminalView console;
+//	private JediTerminalView console;
 	private VBox mapLayout;
 	private HBox layout;
 
@@ -70,10 +72,11 @@ public class MUDSessionUserInterfaceJFX extends AnchorPane implements MUDSession
 		scroll.setFitToWidth(true);
 
 		console = new GhosttyTerminalView();
-		((AnchorPane)console.getPane()).setPrefWidth(1000);
-		((AnchorPane)console.getPane()).setPrefHeight(800);
-		((AnchorPane)console.getPane()).setMaxWidth(Double.MAX_VALUE);
-		((AnchorPane)console.getPane()).setMaxHeight(Double.MAX_VALUE);
+		//console = new JediTerminalView();
+		((Pane)console.getPane()).setPrefWidth(1000);
+		((Pane)console.getPane()).setPrefHeight(800);
+		((Pane)console.getPane()).setMaxWidth(Double.MAX_VALUE);
+		((Pane)console.getPane()).setMaxHeight(Double.MAX_VALUE);
 		ScrollPane scroll3 = new ScrollPane(console.getPane());
 		scroll3.setMaxHeight(Double.MAX_VALUE);
 		scroll3.setMaxWidth(Double.MAX_VALUE);
