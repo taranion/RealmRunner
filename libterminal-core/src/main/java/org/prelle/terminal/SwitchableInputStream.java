@@ -1,10 +1,9 @@
-package org.prelle.jeditermfxterminal.impl;
+package org.prelle.terminal;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,11 +16,6 @@ public class SwitchableInputStream extends InputStream {
 	
 	private List<Integer> injectedData = new ArrayList<>();
 	private InputStream source;
-
-	//-------------------------------------------------------------------
-	public SwitchableInputStream() {
-//		source = new StringBufferInputStream("Greeting!\r\nHello World");
-	}
 
 	//-------------------------------------------------------------------
 	public String toString() {
@@ -60,6 +54,7 @@ public class SwitchableInputStream extends InputStream {
 	//-------------------------------------------------------------------
 	public int read(byte[] buf) throws IOException {
 		while (true) {
+			try {
 //			System.err.println("SwitchableInputStream.read(byte[]): waiting for data");
 			waitAMoment();
 			// If there are injected data return as many as possible into the buffer
@@ -68,7 +63,7 @@ public class SwitchableInputStream extends InputStream {
 				for (int i=0; i<len; i++) {
 					buf[i] = (byte)(int)injectedData.remove(0);
 				}
-//				System.err.println("SwitchableInputStream.read(byte[]): reading "+len+" injected");
+				System.err.println("SwitchableInputStream.read(byte[]): reading "+len+" injected");
 				return len;
 			}
 			if (source==null) {
@@ -76,13 +71,27 @@ public class SwitchableInputStream extends InputStream {
 				System.exit(1);
 				return -1;
 			}
-			if (source.available()>0) {
+			int available = source.available();
+			if (available==-1) {
+				System.err.println("SwitchableInputStream: source is closed");
+				inject("Connection lost\r\n".getBytes());
+				source = null;
+				return 0;
+			}
+			if (available>0) {
 //				System.err.println("SwitchableInputStream.read(byte[]): reading "+source.available()+" from source");
 				int len = source.read(buf,0,source.available());
-//				// Convert read to String
-//				String s = new String(buf, 0, len);
-//				System.err.println("SwitchableInputStream.read(byte[]): "+s);
-				return len;
+				// Convert read to String
+				if (logger.isLoggable(Level.TRACE)) {
+					String s = new String(buf, 0, len);
+					logger.log(Level.TRACE, "RCV {0} bytes from source = {1}", len, s);
+				}
+				if (len>0)
+					return len;
+			}
+			} catch (Exception e) {
+				logger.log(Level.ERROR, "SwitchableInputStream.read(byte[]): Exception: {0}", e);
+				throw e;
 			}
 		}
 	}
@@ -121,44 +130,5 @@ public class SwitchableInputStream extends InputStream {
 			notifyAll();
 		}
 	}
-
-	
-//	//-------------------------------------------------------------------
-//	/**
-//	 * @see java.io.InputStream#read(byte[])
-//	 */
-//	@Override
-//	public int read(byte[] buf) throws IOException {
-//		logger.log(Logger.Level.TRACE, "ENTER: read(byte[])");
-//		try {
-//			while (source==null || source.available()==0) {
-////				logger.log(Logger.Level.INFO, "ENTER: read(byte[]) avail="+((source!=null)?source.available():null));
-//				synchronized (this) {
-//					try {
-//						wait(50);
-//					} catch (InterruptedException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//				}
-//			}
-//			if (source==null) {
-//				System.err.println("SwitchableInputStream: source is null");
-//				System.exit(1);
-//				return -1;
-//			}
-//			int c = source.read(buf);
-////			logger.log(Logger.Level.INFO, "read : {0}", new String(buf, 0, c));
-//			return c;
-//		} catch (SocketTimeoutException e) {
-//			logger.log(Logger.Level.ERROR, "Timeout");
-//			throw e;
-//		} catch (Exception e) {
-//			logger.log(Logger.Level.ERROR, "Exception in read(byte[]) : "+e.toString());
-//			throw e;
-//		} finally {
-//			logger.log(Logger.Level.TRACE, "LEAVE: read(byte[]) ");
-//		}
-//	}
 	
 }

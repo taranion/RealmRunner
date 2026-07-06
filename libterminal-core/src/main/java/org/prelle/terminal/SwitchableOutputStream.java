@@ -1,4 +1,4 @@
-package org.prelle.jeditermfxterminal;
+package org.prelle.terminal;
 
 import java.io.IOException;
 import java.io.InputStream;
