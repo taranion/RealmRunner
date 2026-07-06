@@ -1,42 +1,45 @@
 package org.prelle.mudclient.jfx;
 
-import java.io.IOException;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.prelle.jeditermfxterminal.GhosttyTerminalView;
-import org.prelle.jeditermfxterminal.JediTerminalView;
 import org.prelle.mudclient.jfx.MUDClientMain.HistoryEntry;
-import org.prelle.realmrunner.network.DataFileManager;
+import org.prelle.realmrunner.network.MUDSession;
 import org.prelle.realmrunner.network.MUDSessionUserInterface;
 import org.prelle.terminal.TerminalEmulator;
-import org.prelle.terminal.emulated.Terminal;
-import org.prelle.terminal.emulated.Terminal.Size;
-import org.prelle.terminal.emulated.delete.Emulation;
 
-import com.graphicmud.symbol.DefaultSymbolManager;
 import com.graphicmud.symbol.SymbolManager;
 
+import javafx.geometry.Side;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TabPane.TabClosingPolicy;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 /**
  * 
  */
-public class MUDSessionUserInterfaceJFX extends AnchorPane implements MUDSessionUserInterface {
+public class MUDSessionUserInterfaceJFX extends VBox implements MUDSessionUserInterface {
 
 	private final static Logger logger = System.getLogger("realmrunner");
-
+	
 	private SymbolManager symbols;
 
+	private TabPane sessionTabs;
+	private Tab tabPlay;
+	private Tab tabSettings;
+	private Tab tabMXP;
+	
 	private ScrollPane scroll;
 	private VBox historyPane;
 	private TextField tfInput;
@@ -47,6 +50,8 @@ public class MUDSessionUserInterfaceJFX extends AnchorPane implements MUDSession
 	private HBox layout;
 
 	private List<HistoryEntry> history;
+
+	private transient MUDSession session;
 
 	//-------------------------------------------------------------------
 	/**
@@ -73,31 +78,49 @@ public class MUDSessionUserInterfaceJFX extends AnchorPane implements MUDSession
 
 		console = new GhosttyTerminalView();
 		//console = new JediTerminalView();
-		((Pane)console.getPane()).setPrefWidth(1000);
-		((Pane)console.getPane()).setPrefHeight(800);
-		((Pane)console.getPane()).setMaxWidth(Double.MAX_VALUE);
-		((Pane)console.getPane()).setMaxHeight(Double.MAX_VALUE);
-		ScrollPane scroll3 = new ScrollPane(console.getPane());
-		scroll3.setMaxHeight(Double.MAX_VALUE);
-		scroll3.setMaxWidth(Double.MAX_VALUE);
-		scroll3.setFitToHeight(true);
-		scroll3.setFitToWidth(true);
-		//scroll2.setMaxHeight(400);
-
+		// console is already on MAX_VALUE
+		
+//		ScrollPane scroll3 = new ScrollPane(console.getPane());
+//		scroll3.setMaxHeight(Double.MAX_VALUE);
+//		scroll3.setMaxWidth(Double.MAX_VALUE);
+//		scroll3.setFitToHeight(true);
+//		scroll3.setFitToWidth(true);
+//		//scroll2.setMaxHeight(400);
+//
         tfInput  = new TextField();
-		textLayout = new VBox(10, scroll3, tfInput);
-		VBox.setVgrow(scroll3, Priority.ALWAYS);
-
-
+        tfInput.setPromptText("Your input here...");
+        
+        
+        sessionTabs = new TabPane();
+        sessionTabs.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
+        sessionTabs.setSide(Side.BOTTOM);
+        sessionTabs.setTabMaxHeight(25);
+        sessionTabs.getStyleClass().addAll("session","dense");
 	}
 	
 	//-------------------------------------------------------------------
 	private void initLayout() {
-		layout = new HBox(20, textLayout);
-		HBox.setHgrow(textLayout, Priority.ALWAYS);
+		// Play tab
+		VBox bxPlay = new VBox(console.getPane(),  tfInput);
+		VBox.setVgrow(console.getPane(), Priority.ALWAYS);
+		tabPlay = new Tab("Play", bxPlay);
+		tabPlay.getStyleClass().addAll("session-tab","dense");
 		
-		super.getChildren().add(layout);
-		AnchorPane.setTopAnchor(layout, 0.0);
+		// Settings tab
+		tabSettings = new Tab("Settings", new Label("TO Do"));
+		
+		// Settings tab
+		TextArea mxpArea = new TextArea();
+		mxpArea.setPromptText("No MXP custom tags defined for this session.");
+		tabMXP = new Tab("MXP", mxpArea);
+		
+		sessionTabs.getTabs().addAll(tabPlay, tabSettings);
+		sessionTabs.setMaxHeight(Double.MAX_VALUE);
+		VBox.setVgrow(sessionTabs, Priority.ALWAYS);
+		
+		getChildren().addAll(sessionTabs);
+//		AnchorPane.setTopAnchor(layout, 0.0);
+		
 	}
 	
 	//-------------------------------------------------------------------
@@ -108,6 +131,7 @@ public class MUDSessionUserInterfaceJFX extends AnchorPane implements MUDSession
         	sendInput(tfInput.getText());
         	tfInput.clear();
         });
+		
 	}
 
 	//-------------------------------------------------------------------
@@ -132,6 +156,24 @@ public class MUDSessionUserInterfaceJFX extends AnchorPane implements MUDSession
 	@Override
 	public TerminalEmulator getTerminal() {
 		return console;
+	}
+
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.realmrunner.network.MUDSessionUserInterface#setSession(org.prelle.realmrunner.network.MUDSession)
+	 */
+	@Override
+	public void setSession(MUDSession value) {
+		this.session = value;
+		
+		Optional<String> mxp = value.getMXPDefinitions();
+		if (mxp.isPresent()) {
+			sessionTabs.getTabs().add(tabMXP);
+			TextArea area = (TextArea) tabMXP.getContent();
+			area.setText(mxp.get());
+		} else {
+			sessionTabs.getTabs().remove(tabMXP);
+		}
 	}
 
 }

@@ -22,7 +22,11 @@ import org.prelle.terminal.TerminalMode;
 
 import io.github.vlaaad.ghosttyfx.Terminal;
 import io.github.vlaaad.ghosttyfx.TerminalView;
-import javafx.scene.Node;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.input.Clipboard;
 
 /**
  *
@@ -51,17 +55,10 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 			terminalHeight = rows;
 			return this;
 		});
+		widget.setMaxHeight(Double.MAX_VALUE);
+		widget.setMaxWidth(Double.MAX_VALUE);
 
-//		out = new ANSIOutputStream(outPipe);
-//		in  = new ANSIInputStream(inPipe);
-//		in.setLoggingListener( (k,v) -> logger.log(Level.ERROR, "GhosttyTerminalView<init> input: {0}={1}", k, v));
-//		out.setLoggingListener( (k,v) -> logger.log(Level.ERROR, "GhosttyTerminalView<init> output: {0}={1}", k, v));
-
-//		getBackground();
-//		setBackground(Background.fill(backgroundColor.get()));
 		initInteractivity();
-//		calculateWindowSize();
-//		refresh();
 		logger.log(Level.DEBUG, "TerminalView<init> done");
 	}
 
@@ -101,6 +98,43 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 					}
 				}
 			}
+		});
+		widget.setOnMouseClicked(ev -> {
+			logger.log(Level.INFO, "Mouse clicked on console {0}", ev);
+			if (ev.getButton()==javafx.scene.input.MouseButton.SECONDARY) {
+				// Copy selection to system clipboard and read from it
+				widget.copySelection();
+				// Read from clipboard
+				String selectedText = Clipboard.getSystemClipboard().getString();
+				logger.log(Level.INFO, "Read "+selectedText);
+				if (selectedText!=null && !selectedText.isEmpty()) {
+					// Show pop up menu 
+					final ContextMenu contextMenu = new ContextMenu();
+					MenuItem copy = new MenuItem("Copy");
+					MenuItem trigger = new MenuItem("Trigger definieren");
+					contextMenu.getItems().addAll(copy, trigger);
+					copy.setOnAction(new EventHandler<ActionEvent>() {
+					    @Override
+					    public void handle(ActionEvent event) {
+					        System.out.println("Cut...");
+					        contextMenu.hide();
+					    }
+					});
+					trigger.setOnAction(new EventHandler<ActionEvent>() {
+					    @Override
+					    public void handle(ActionEvent event) {
+					        System.out.println("trigger...");
+					        contextMenu.hide();
+					    }
+					});
+					contextMenu.show(widget, ev.getScreenX(), ev.getScreenY());
+					
+//					
+//					Popup popup = new Popup();
+//					popup.getContent().add(contextMenu);
+				}
+			}
+			
 		});
 	}
 
@@ -210,7 +244,7 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 		return new Charset[] {StandardCharsets.UTF_8, StandardCharsets.ISO_8859_1, StandardCharsets.US_ASCII};
 	}
 
-	public Node getPane() {
+	public TerminalView getPane() {
 		return widget;
 	}
 

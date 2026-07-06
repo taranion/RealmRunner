@@ -11,4 +11,6 @@ public interface MUDSessionUserInterface {
 	
 	public void indicateFeatureState(String feature, boolean state);
 
+	public void setSession(MUDSession session);
+	
 }
