@@ -16,11 +16,15 @@ import org.prelle.ansi.C0Fragment;
 import org.prelle.ansi.ControlSequenceFragment;
 import org.prelle.ansi.PrintableFragment;
 import org.prelle.ansi.commands.SelectGraphicRendition;
+import org.prelle.telnet.TelnetCommand;
+import org.prelle.telnet.TelnetListener;
+import org.prelle.telnet.TelnetSubnegotiationHandler;
+import org.prelle.telnet.option.MXPOption;
 
 /**
  * 
  */
-public class MXPInputStreamFilter implements ANSIInputStreamFilter {
+public class MXPInputStreamFilter implements ANSIInputStreamFilter, TelnetListener {
 	
 	private static enum MXPDefinition {
 		BR((cmd) -> new C0Fragment(C0Code.CR), (cmd)->null, "BR"),
@@ -87,11 +91,14 @@ public class MXPInputStreamFilter implements ANSIInputStreamFilter {
 
 	private StringBuilder dtd = new StringBuilder();
 	
+	private transient MXPOption mxpOption;
 	
 	//-------------------------------------------------------------------
 	/**
+	 * @param mxp 
 	 */
-	public MXPInputStreamFilter() {
+	public MXPInputStreamFilter(MXPOption mxp) {
+		this.mxpOption = mxp;
 	}
 
 	//-------------------------------------------------------------------
@@ -109,6 +116,16 @@ public class MXPInputStreamFilter implements ANSIInputStreamFilter {
 		if (event instanceof PrintableFragment) {
 			// Handle printable content based on current mode
 			return currentMode!=MXPMode.LOCKED;
+		} else if (event instanceof C0Fragment c0) {
+			// If this is a newline and the mode was just valued for the line, reset to default mode
+			if (c0.getCode()==C0Code.CR || c0.getCode()==C0Code.LF) {
+				if (duration==MXPUntil.LINE) {
+					currentMode = defaultMode;
+					logger.log(Level.INFO, "Return mode to "+defaultMode+" after line break");
+					duration = null;
+				}
+			}
+			return false;
 		}
 		return false;
 	}
@@ -234,6 +251,7 @@ public class MXPInputStreamFilter implements ANSIInputStreamFilter {
 	}
 
 	private Optional<AParsedElement> processMXPCommand(String value) {
+		logger.log(Level.INFO, "processMXPCommand: "+value);
 		for (MXPDefinition def: MXPDefinition.values()) {
 			for (String name: def.names) {
 				if (value.equalsIgnoreCase(name)) {
@@ -244,12 +262,45 @@ public class MXPInputStreamFilter implements ANSIInputStreamFilter {
 				}
 			}
 		}
-		System.err.println("MXPInputStreamFilter: MXP command received: "+value);
+		if (value.toUpperCase().startsWith("!")) {
+			dtd.append('<'+value+">\n");
+			mxpOption.fireDTDChange(dtd.toString());
+		} else {
+			logger.log(Level.WARNING, "Unknown MXP: {0}", value);
+		}
 		return Optional.empty();
 	}
 
+	//-------------------------------------------------------------------
 	public void setMXPActive(boolean active) {
 		this.mxpActive = active;
+	}
+
+	//-------------------------------------------------------------------
+	public String getDTD() {
+		return dtd.toString();
+	}
+
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.telnet.TelnetListener#optionStateChanged(org.prelle.telnet.TelnetSubnegotiationHandler, boolean)
+	 */
+	@Override
+	public void optionStateChanged(TelnetSubnegotiationHandler extension, boolean active) {
+		if (extension instanceof MXPOption) {
+			logger.log(Level.INFO, "MXP option state changed: {0}", active);
+			setMXPActive(active);
+		}
+	}
+
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.telnet.TelnetListener#telnetCommandReceived(org.prelle.telnet.TelnetCommand)
+	 */
+	@Override
+	public void telnetCommandReceived(TelnetCommand command) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	

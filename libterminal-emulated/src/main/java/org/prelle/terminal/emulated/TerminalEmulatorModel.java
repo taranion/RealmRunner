@@ -78,4 +78,10 @@ public class TerminalEmulatorModel implements TerminalEmulator {
 		
 	}
 
+	@Override
+	public void releaseInputBuffer() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

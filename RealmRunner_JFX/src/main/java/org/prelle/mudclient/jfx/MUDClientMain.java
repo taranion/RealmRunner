@@ -425,6 +425,7 @@ public class MUDClientMain extends Application {
 					.setTerminalTypes("ghostty","ghostty-xterm","xterm-256color","xterm")
 					.build();
 			sessionTabs.put(session, tab);
+			ui.setSession(session);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

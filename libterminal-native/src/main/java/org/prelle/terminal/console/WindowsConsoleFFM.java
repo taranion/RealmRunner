@@ -629,5 +629,11 @@ public class WindowsConsoleFFM implements TerminalEmulator {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void releaseInputBuffer() {
+		// TODO Auto-generated method stub
+		
+	}
 }
 

@@ -43,6 +43,8 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
     private int terminalWidth = -1;
     private int terminalHeight = -1;
     private List<Consumer<int[]>> consoleSizeListeners = new ArrayList<>();
+    
+    private PassthroughANSIInputStream pin;
 
 	//-------------------------------------------------------------------
 	public GhosttyTerminalView() {
@@ -68,7 +70,7 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	 */
 	@Override
 	public FilteringANSIStream connectWith(InputStream in, OutputStream out) {
-		PassthroughANSIInputStream pin = new PassthroughANSIInputStream(in);
+		pin = new PassthroughANSIInputStream(in);
 //		this.out = out;
 		outPipe.setSink(out);
 		inPipe.setSource(pin);
@@ -300,6 +302,15 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 		if (!consoleSizeListeners.contains(listener)) {
 			consoleSizeListeners.add(listener);
 		}
+	}
+
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.terminal.TerminalEmulator#releaseInputBuffer()
+	 */
+	@Override
+	public void releaseInputBuffer() {
+		pin.releaseBuffer();
 	}
 
 }

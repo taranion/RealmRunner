@@ -40,6 +40,9 @@ public interface TerminalEmulator {
 	public Charset[] getEncodings();
 
 	//-------------------------------------------------------------------
+	public void releaseInputBuffer();
+
+	//-------------------------------------------------------------------
 	public void sendUserInput(String text) ;
 
 	//-------------------------------------------------------------------

@@ -5,34 +5,30 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.function.Consumer;
 
-import org.prelle.ansi.ANSIInputStream;
 import org.prelle.ansi.ANSIOutputStream;
-import org.prelle.ansi.DeviceAttributes.OperatingLevel;
 import org.prelle.ansi.FilteringANSIStream;
-import org.prelle.ansi.commands.SetConformanceLevel;
 import org.prelle.telnet.CommunicationRole;
 import org.prelle.telnet.TelnetCommand;
-import org.prelle.telnet.TelnetConstants.ControlCode;
-import org.prelle.telnet.TelnetInputStream;
 import org.prelle.telnet.TelnetListener;
 import org.prelle.telnet.TelnetOptionListener;
-import org.prelle.telnet.TelnetOutputStream;
 import org.prelle.telnet.TelnetProtocol;
 import org.prelle.telnet.TelnetSubnegotiationHandler;
 import org.prelle.telnet.option.MXPOption;
+import org.prelle.telnet.option.MXPOption.MXPFeatures;
+import org.prelle.telnet.option.MXPOption.MXPListener;
 import org.prelle.telnet.option.TelnetWindowSize;
 import org.prelle.telnet.option.TerminalType;
 import org.prelle.terminal.TerminalEmulator;
 import org.prelle.terminal.TerminalMode;
 
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  *
@@ -40,108 +36,28 @@ import lombok.Getter;
 @Getter
 public class MUDSession implements TelnetListener, TelnetOptionListener {
 
-	private final static Logger logger = System.getLogger("mud.client");
-
-	public static class Builder {
-
-		private TerminalEmulator terminal;
-		private Config clientConfig;
-		private SessionConfig sessionData;
-		private Charset charset;
-		private String[] terminalTypes;
-		
-
-		public Builder(TerminalEmulator terminal) {
-			this.terminal = terminal;
-		}
-		public MUDSession build() throws IOException {
-			try {
-				InetAddress host = InetAddress.getByName(clientConfig.getServer());
-				
-				MUDConnection con = switch (clientConfig.getProtocol()) {
-					case TELNET    -> new TCPMUDConnection(host, clientConfig.getPort());
-					case WEBSOCKET -> new WebsocketMUDConnection(host, clientConfig.getPort());
-					default -> throw new IllegalArgumentException("Unsupported protocol "+clientConfig.getProtocol());
-				};
-				logger.log(Level.DEBUG, "New connection: {0}", con);
-				InputStream in = con.getStreamFromMUD();
-				OutputStream out = con.getStreamToMUD();
-				if (con instanceof TCPMUDConnection || (con instanceof WebsocketMUDConnection ws && ws.getNegotiatedSubprotocol().contains("telnet")) ) {
-					logger.log(Level.WARNING, "TODO: Initialize telnet wrapper");			
-					try {
-						TelnetProtocol protocol = new TelnetProtocol(CommunicationRole.CLIENT);
-						MUDSession.configureTelnetProtocol(this, protocol, clientConfig);
-						protocol.addListener(new TelnetListener() {
-							@Override
-							public void telnetCommandReceived(TelnetCommand command) {
-								logger.log(Level.WARNING, "Telnet command received: {0}", command);
-							}
-							
-							@Override
-							public void optionStateChanged(TelnetSubnegotiationHandler extension, boolean active) {
-								logger.log(Level.WARNING, "Telnet option state changed: {0} active={1}", extension, active);
-							}
-						});
-						out = new TelnetOutputStream(out, protocol);
-						protocol.setOutputStream((TelnetOutputStream) out);
-						in = new TelnetInputStream(in, protocol);
-						protocol.setInputStream( (TelnetInputStream) in);
-						((TelnetInputStream)in).setReverseStream((TelnetOutputStream) out);
-					} catch (Throwable e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-				
-				MUDSession session = new MUDSession(terminal, in, out, clientConfig);
-				if (in instanceof TelnetInputStream tin) {
-					tin.getProtocol().addListener(session);
-				}
-				return session;
-			} catch (UnknownHostException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			System.exit(0);
-			return null;
-		}
-		//-------------------------------------------------------------------
-		public Builder setCharset(Charset value) { this.charset = value; return this; }
-		//-------------------------------------------------------------------
-		public Builder setConfig(SessionConfig value) { this.sessionData = value; return this; }
-		//-------------------------------------------------------------------
-		public Builder setClientConfig(Config value) { this.clientConfig = value; return this; }
-		//-------------------------------------------------------------------
-		public Builder setTerminalTypes(String...value) { this.terminalTypes = value; return this; }
-	}
+	final static Logger logger = System.getLogger("mud.client");
 
 	private TerminalEmulator console;
-//	private Charset charset;
-//	private ReadFromConsoleTask readFromConsole;
-//	private TerminalCapabilities capabilities;
-//
-//	private TelnetSocket socket;
 	private ANSIOutputStream streamToMUD;
 	private FilteringANSIStream streamFromMUD;
-//	private Thread thread;
-//
-//	private boolean characterMode = false;
-//
-//	private TelnetWindowSize optNAWS;
-//	private MUDSessionGMCPListener gmcpListener;
+	private TelnetProtocol telnet;
+	
+	private MXPOption mxp;
+	private MXPInputStreamFilter mxpFilter;
+	@Setter
+	private Consumer<MUDSession> sessionListener;
 
 	//-------------------------------------------------------------------
-	public static Builder builder(TerminalEmulator terminal) {
-		return new Builder(terminal);
+	public static MUDSessionBuilder builder(TerminalEmulator terminal) {
+		return new MUDSessionBuilder(terminal);
 	}
 
 	//-------------------------------------------------------------------
-	public MUDSession(TerminalEmulator terminal, InputStream in, OutputStream out, Config config) throws IOException {
+	public MUDSession(TerminalEmulator terminal, InputStream in, OutputStream out, Config config, MUDSessionBuilder builder) throws IOException {
 		logger.log(Level.INFO, "ENTER: MUDSession.<init>");
 		this.console = terminal;
+		this.telnet  = builder.telnet;
 		console.setLocalEchoActive(false);
 		console.setMode(TerminalMode.RAW);
 
@@ -154,11 +70,64 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 		
 		streamFromMUD = terminal.connectWith(in, streamToMUD);
 		
+		setupNAWS();
+		setupTTYPE(builder.terminalTypes);
+		
+		if (config.isMXPEnabled()) {
+			setupMXP();
+		}
+		
 		
 //		terminal.connectWith(con.getStreamFromMUD(), con.getStreamToMUD());
 //		readFromConsole.setForwardMode(false);
 //		this.capabilities = new TerminalCapabilities();
 //		learnTerminal(readFromConsole);
+	}
+	
+	//-------------------------------------------------------------------
+	private void fireSessionChanged() {
+		if (sessionListener!=null) sessionListener.accept(this);
+	}
+
+	//-------------------------------------------------------------------
+	private void setupNAWS() {
+		logger.log(Level.INFO, "ENTER: setupNAWS");
+		var naws = new TelnetWindowSize();
+		telnet.add(naws);
+		console.addConsoleSizeListener( size -> {
+			try {
+				logger.log(Level.INFO, "Console size changed to {0}x{1}", size[0],size[1]);
+				naws.update(telnet, size[0], size[1]);
+			} catch (IOException e) {
+				logger.log(Level.ERROR, "Failed sending NAWS update", e);
+			}
+		});
+		logger.log(Level.INFO, "LEAVE: setupNAWS");
+	}
+	
+	//-------------------------------------------------------------------
+	private void setupTTYPE(String[] terminalTypes) {
+		logger.log(Level.INFO, "ENTER: setupTTYPE");
+		telnet.add(new TerminalType(terminalTypes!=null ? terminalTypes: new String[] {"xterm-256color"}));
+	}
+	
+	//-------------------------------------------------------------------
+	private void setupMXP() {
+		logger.log(Level.INFO, "ENTER: setupMXP");
+		mxp = new MXPOption(CommunicationRole.CLIENT,"b");
+		mxp.addListener(new MXPListener() {
+			@Override
+			public void telnetMXPLearned(MXPFeatures data) { }
+			@Override
+			public void mxpDTDChanged(String newDTD) {
+				fireSessionChanged();
+			}
+		});
+		telnet.add(mxp);
+		
+		mxpFilter = new MXPInputStreamFilter(mxp);
+		telnet.addListener(mxpFilter);
+		streamFromMUD.addFilter(mxpFilter);
 	}
 
 //	//-------------------------------------------------------------------
@@ -332,6 +301,7 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 	@Override
 	public void optionStateChanged(TelnetSubnegotiationHandler extension, boolean active) {
 		// TODO Auto-generated method stub
+		logger.log(Level.WARNING, "Option: {0}={1}", extension, active ? " activated" : " deactivated");
 		
 	}
 
@@ -339,32 +309,51 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 	public void telnetCommandReceived(TelnetCommand command) {
 		// TODO Auto-generated method stub
 		logger.log(Level.WARNING, "RCV Telnet command: {0}", command);
+		switch (command.getCode()) {
+		case GA:
+		case EOR:
+			console.releaseInputBuffer();
+			break;
+		}
 	}
 
-	private static void configureTelnetProtocol(MUDSession.Builder builder,TelnetProtocol protocol, Config config) {
-		logger.log(Level.INFO, "ENTER: configureTelnetProtocol");
-		
-		// Prepare NAWS
-		var naws = new TelnetWindowSize();
-		builder.terminal.addConsoleSizeListener( size -> {
-			try {
-				logger.log(Level.INFO, "Console size changed to {0}x{1}", size[0],size[1]);
-				naws.update(protocol, size[0], size[1]);
-			} catch (IOException e) {
-				logger.log(Level.ERROR, "Failed sending NAWS update", e);
-			}
-		});
-		
-		protocol.add(new TerminalType(builder.terminalTypes!=null ? builder.terminalTypes : new String[] {"xterm-256color"}))
-				.add(naws)
-				;
-		
-		// Prepare MXP
-		if (config.isMXPEnabled()) {
-			var mxp = new MXPOption(CommunicationRole.CLIENT,"b");
-			protocol.add(mxp);
-			
+//	//-------------------------------------------------------------------
+//	static void configureTelnetProtocol(MUDSessionBuilder builder,TelnetProtocol protocol, Config config) {
+//		logger.log(Level.INFO, "ENTER: configureTelnetProtocol");
+//		
+//		// Prepare NAWS
+//		var naws = new TelnetWindowSize();
+//		builder.terminal.addConsoleSizeListener( size -> {
+//			try {
+//				logger.log(Level.INFO, "Console size changed to {0}x{1}", size[0],size[1]);
+//				naws.update(protocol, size[0], size[1]);
+//			} catch (IOException e) {
+//				logger.log(Level.ERROR, "Failed sending NAWS update", e);
+//			}
+//		});
+//		
+//		protocol.add(new TerminalType(builder.terminalTypes!=null ? builder.terminalTypes : new String[] {"xterm-256color"}))
+//				.add(naws)
+//				;
+//		
+//		// Prepare MXP
+//		if (config.isMXPEnabled()) {
+//			var mxp = new MXPOption(CommunicationRole.CLIENT,"b");
+//			protocol.add(mxp);
+//			
+//		}
+//		logger.log(Level.INFO, "LEAVE: configureTelnetProtocol");
+//	}
+	
+	//-------------------------------------------------------------------
+	/**
+	 * Return custom MXP tags defined by the MUD server.
+	 */
+	public Optional<String> getMXPDefinitions() {
+		if (mxpFilter!=null) {
+			return Optional.ofNullable(mxpFilter.getDTD());
 		}
-		logger.log(Level.INFO, "LEAVE: configureTelnetProtocol");
+		return Optional.empty();
 	}
+
 }

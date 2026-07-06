@@ -165,6 +165,7 @@ public class MUDSessionUserInterfaceJFX extends VBox implements MUDSessionUserIn
 	@Override
 	public void setSession(MUDSession value) {
 		this.session = value;
+		this.session.setSessionListener( sess -> sessionDetailsChanged(sess) );
 		
 		Optional<String> mxp = value.getMXPDefinitions();
 		if (mxp.isPresent()) {
@@ -174,6 +175,20 @@ public class MUDSessionUserInterfaceJFX extends VBox implements MUDSessionUserIn
 		} else {
 			sessionTabs.getTabs().remove(tabMXP);
 		}
+	}
+
+	//-------------------------------------------------------------------
+	private void sessionDetailsChanged(MUDSession sess) {
+		logger.log(Level.TRACE, "ENTER: sessionDetailsChanged");
+		Optional<String> mxp = sess.getMXPDefinitions();
+		if (mxp.isPresent()) {
+			sessionTabs.getTabs().add(tabMXP);
+			TextArea area = (TextArea) tabMXP.getContent();
+			area.setText(mxp.get());
+		} else {
+			sessionTabs.getTabs().remove(tabMXP);
+		}
+		logger.log(Level.TRACE, "LEAVE: sessionDetailsChanged");
 	}
 
 }
