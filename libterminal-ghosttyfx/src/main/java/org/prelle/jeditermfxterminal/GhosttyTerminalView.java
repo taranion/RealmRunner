@@ -13,8 +13,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.prelle.ansi.AParsedElement;
 import org.prelle.ansi.FilteringANSIStream;
+import org.prelle.ansi.PassOutANSIOutputStream;
 import org.prelle.ansi.PassthroughANSIInputStream;
+import org.prelle.ansi.PrintableFragment;
 import org.prelle.terminal.SwitchableInputStream;
 import org.prelle.terminal.SwitchableOutputStream;
 import org.prelle.terminal.TerminalEmulator;
@@ -22,11 +25,7 @@ import org.prelle.terminal.TerminalMode;
 
 import io.github.vlaaad.ghosttyfx.Terminal;
 import io.github.vlaaad.ghosttyfx.TerminalView;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.input.Clipboard;
 
 /**
  *
@@ -45,6 +44,8 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
     private List<Consumer<int[]>> consoleSizeListeners = new ArrayList<>();
     
     private PassthroughANSIInputStream pin;
+    private boolean localEcho = true;
+    private ContextMenu contextMenu;
 
 	//-------------------------------------------------------------------
 	public GhosttyTerminalView() {
@@ -71,8 +72,8 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	@Override
 	public FilteringANSIStream connectWith(InputStream in, OutputStream out) {
 		pin = new PassthroughANSIInputStream(in);
-//		this.out = out;
-		outPipe.setSink(out);
+		PassOutANSIOutputStream pout = new PassOutANSIOutputStream(out, (fragmentSent) -> handleFragmentSent(fragmentSent));
+		outPipe.setSink(pout);
 		inPipe.setSource(pin);
 		
 		try {
@@ -101,43 +102,47 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 				}
 			}
 		});
-		widget.setOnMouseClicked(ev -> {
-			logger.log(Level.INFO, "Mouse clicked on console {0}", ev);
-			if (ev.getButton()==javafx.scene.input.MouseButton.SECONDARY) {
-				// Copy selection to system clipboard and read from it
-				widget.copySelection();
-				// Read from clipboard
-				String selectedText = Clipboard.getSystemClipboard().getString();
-				logger.log(Level.INFO, "Read "+selectedText);
-				if (selectedText!=null && !selectedText.isEmpty()) {
-					// Show pop up menu 
-					final ContextMenu contextMenu = new ContextMenu();
-					MenuItem copy = new MenuItem("Copy");
-					MenuItem trigger = new MenuItem("Trigger definieren");
-					contextMenu.getItems().addAll(copy, trigger);
-					copy.setOnAction(new EventHandler<ActionEvent>() {
-					    @Override
-					    public void handle(ActionEvent event) {
-					        System.out.println("Cut...");
-					        contextMenu.hide();
-					    }
-					});
-					trigger.setOnAction(new EventHandler<ActionEvent>() {
-					    @Override
-					    public void handle(ActionEvent event) {
-					        System.out.println("trigger...");
-					        contextMenu.hide();
-					    }
-					});
-					contextMenu.show(widget, ev.getScreenX(), ev.getScreenY());
-					
+//		widget.setOnMouseClicked(ev -> {
+//			logger.log(Level.INFO, "Mouse clicked on console {0}", ev);
+//			if (contextMenu!=null && contextMenu.isShowing()) {
+//				contextMenu.hide();
+//			}
+//			
+//			if (ev.getButton()==javafx.scene.input.MouseButton.SECONDARY) {
+//				// Copy selection to system clipboard and read from it
+//				widget.copySelection();
+//				// Read from clipboard
+//				String selectedText = Clipboard.getSystemClipboard().getString();
+//				logger.log(Level.INFO, "Read "+selectedText);
+//				if (selectedText!=null && !selectedText.isEmpty()) {
+//					// Show pop up menu 
+//					contextMenu = new ContextMenu();
+//					MenuItem copy = new MenuItem("Copy");
+//					MenuItem trigger = new MenuItem("Trigger definieren");
+//					contextMenu.getItems().addAll(copy, trigger);
+//					copy.setOnAction(new EventHandler<ActionEvent>() {
+//					    @Override
+//					    public void handle(ActionEvent event) {
+//					        System.out.println("Cut...");
+//					        contextMenu.hide();
+//					    }
+//					});
+//					trigger.setOnAction(new EventHandler<ActionEvent>() {
+//					    @Override
+//					    public void handle(ActionEvent event) {
+//					        System.out.println("trigger...");
+//					        contextMenu.hide();
+//					    }
+//					});
+//					contextMenu.show(widget, ev.getScreenX(), ev.getScreenY());
 //					
-//					Popup popup = new Popup();
-//					popup.getContent().add(contextMenu);
-				}
-			}
-			
-		});
+////					
+////					Popup popup = new Popup();
+////					popup.getContent().add(contextMenu);
+//				}
+//			}
+//			
+//		});
 	}
 
 //	//-------------------------------------------------------------------
@@ -212,7 +217,7 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 
 	@Override
 	public TerminalEmulator setLocalEchoActive(boolean value) {
-		// TODO Auto-generated method stub
+		logger.log(Level.WARNING, "setLocalEchoActive({0}) called but not implemented", value);
 		return null;
 	}
 
@@ -313,4 +318,13 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 		pin.releaseBuffer();
 	}
 
+	//-------------------------------------------------------------------
+	private void handleFragmentSent(AParsedElement fragmentSent) {
+		if (localEcho) {
+			// Local echo for Printable, CO and C1 codes
+			if (fragmentSent instanceof PrintableFragment) {
+				inPipe.inject(fragmentSent.getRaw());
+			}
+		}
+	}
 }

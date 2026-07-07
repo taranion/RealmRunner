@@ -18,6 +18,7 @@ public class Config extends AbstractConfig {
 	private String login;
 	private String password;
 	private String serverEncoding;
+	private Boolean doesNotSendCR;
 
 	//-------------------------------------------------------------------
 	/**

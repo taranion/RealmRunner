@@ -13,12 +13,15 @@ import java.util.function.Consumer;
 
 import org.prelle.ansi.ANSIOutputStream;
 import org.prelle.ansi.FilteringANSIStream;
+import org.prelle.ansi.LinefeedToCRLFFilter;
 import org.prelle.telnet.CommunicationRole;
 import org.prelle.telnet.TelnetCommand;
 import org.prelle.telnet.TelnetListener;
 import org.prelle.telnet.TelnetOptionListener;
 import org.prelle.telnet.TelnetProtocol;
 import org.prelle.telnet.TelnetSubnegotiationHandler;
+import org.prelle.telnet.option.EchoMode;
+import org.prelle.telnet.option.EchoMode.EchoModeListener;
 import org.prelle.telnet.option.MXPOption;
 import org.prelle.telnet.option.MXPOption.MXPFeatures;
 import org.prelle.telnet.option.MXPOption.MXPListener;
@@ -43,6 +46,7 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 	private FilteringANSIStream streamFromMUD;
 	private TelnetProtocol telnet;
 	
+	private EchoMode echo;
 	private MXPOption mxp;
 	private MXPInputStreamFilter mxpFilter;
 	@Setter
@@ -69,24 +73,30 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 		
 		
 		streamFromMUD = terminal.connectWith(in, streamToMUD);
+		// Is this a MUD that only sends LF, insteadt of CR LF
+		if (config.getDoesNotSendCR()!=null && config.getDoesNotSendCR()) {
+			streamFromMUD.addFilter(new LinefeedToCRLFFilter());
+		}
 		
+		setupECHO();
 		setupNAWS();
 		setupTTYPE(builder.terminalTypes);
 		
 		if (config.isMXPEnabled()) {
 			setupMXP();
 		}
-		
-		
-//		terminal.connectWith(con.getStreamFromMUD(), con.getStreamToMUD());
-//		readFromConsole.setForwardMode(false);
-//		this.capabilities = new TerminalCapabilities();
-//		learnTerminal(readFromConsole);
 	}
 	
 	//-------------------------------------------------------------------
 	private void fireSessionChanged() {
 		if (sessionListener!=null) sessionListener.accept(this);
+	}
+	
+	//-------------------------------------------------------------------
+	private void setupECHO() {
+		logger.log(Level.INFO, "ENTER: setupECHO");
+		echo = new EchoMode();
+		telnet.add(echo);
 	}
 
 	//-------------------------------------------------------------------
@@ -302,7 +312,9 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 	public void optionStateChanged(TelnetSubnegotiationHandler extension, boolean active) {
 		// TODO Auto-generated method stub
 		logger.log(Level.WARNING, "Option: {0}={1}", extension, active ? " activated" : " deactivated");
-		
+		if (extension==echo) {
+			console.setLocalEchoActive(!active);
+		}
 	}
 
 	@Override

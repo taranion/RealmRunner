@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.PipedWriter;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
-import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,29 +15,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.prelle.ansi.ANSIInputStream;
 import org.prelle.ansi.AParsedElement;
-import org.prelle.ansi.LinefeedToCRLFFilter;
 import org.prelle.ansi.commands.DeviceAttributes;
 import org.prelle.ansi.commands.DeviceAttributes.Variant;
 import org.prelle.realmrunner.network.Config;
 import org.prelle.realmrunner.network.DataFileManager;
-import org.prelle.realmrunner.network.MUDConnection;
 import org.prelle.realmrunner.network.MUDSession;
-import org.prelle.realmrunner.network.MXPInputStreamFilter;
 import org.prelle.realmrunner.network.MainConfig;
-import org.prelle.realmrunner.network.TCPMUDConnection;
-import org.prelle.telnet.CommunicationRole;
-import org.prelle.telnet.TelnetCommand;
-import org.prelle.telnet.TelnetConstants.ControlCode;
-import org.prelle.telnet.TelnetInputStream;
-import org.prelle.telnet.TelnetListener;
-import org.prelle.telnet.TelnetOutputStream;
-import org.prelle.telnet.TelnetProtocol;
-import org.prelle.telnet.TelnetSubnegotiationHandler;
-import org.prelle.telnet.option.MXPOption;
-import org.prelle.telnet.option.TelnetCharset;
-import org.prelle.telnet.option.TerminalType;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.introspector.Property;
@@ -53,14 +36,18 @@ import com.graphicmud.symbol.SymbolManager;
 import atlantafx.base.theme.PrimerDark;
 import atlantafx.base.theme.PrimerLight;
 import javafx.application.Application;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.HeaderBar;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -85,6 +72,12 @@ public class MUDClientMain extends Application {
 	private List<HistoryEntry> history;
 	private Session session;
 	private Map<MUDSession, Tab> sessionTabs;
+	
+	private BooleanProperty darkMode = new SimpleBooleanProperty(false);
+	private BooleanProperty musicEnabled = new SimpleBooleanProperty(true);
+	private BooleanProperty soundEnabled = new SimpleBooleanProperty(true);
+	private SwitchIconButton btnTheme, btnMusic, btnSound;
+	
 
 	//-------------------------------------------------------------------
 	/**
@@ -118,6 +111,34 @@ public class MUDClientMain extends Application {
 	}
 
 	//-------------------------------------------------------------------
+	private void initComponents() {
+		btnMusic = new SwitchIconButton(musicEnabled, "musical-note.png", "no-music.png", "Toggle game music");
+		btnSound = new SwitchIconButton(soundEnabled, "sound-waves.png", "no-sound.png", "Toggle game sounds");
+		btnTheme = new SwitchIconButton(darkMode, "day-mode.png", "night-mode2.png", "Toggle light/dakr theme");
+	}
+
+	//-------------------------------------------------------------------
+	private void initInteractivity() {
+		darkMode.addListener( (_, _, newVal) -> {
+			if (newVal) {
+				Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
+			} else {
+				Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
+			}
+		});
+		
+		btnTheme.setOnAction( (_) -> {
+			darkMode.set(!darkMode.get());
+		});
+		btnMusic.setOnAction( (_) -> {
+			musicEnabled.set(!musicEnabled.get());
+		});
+		btnSound.setOnAction( (_) -> {
+			soundEnabled.set(!soundEnabled.get());
+		});
+	}
+
+	//-------------------------------------------------------------------
 	/**
 	 * @see javafx.application.Application#start(javafx.stage.Stage)
 	 */
@@ -136,10 +157,14 @@ public class MUDClientMain extends Application {
 		welcome.setData(mainConfig);
 		
 		var button = new Button("My button");
+		initComponents();
+		initInteractivity();
         HeaderBar.setAlignment(button, Pos.CENTER_LEFT);
         HeaderBar.setMargin(button, new Insets(5));
         var headerBar = new HeaderBar();
+        headerBar.setLeading(new Label("RealmRunner"));
         headerBar.setCenter(button);
+        headerBar.setTrailing(new HBox(0,btnSound,btnMusic,btnTheme));
 
         var root = new BorderPane();
         root.setStyle("-fx-background: #afafbf;");

@@ -195,7 +195,7 @@ public class MXPInputStreamFilter implements ANSIInputStreamFilter, TelnetListen
 			processTag(tag);
 			return List.of();
 		}
-		logger.log(Level.WARNING, "Check for MXP in "+event);
+//		logger.log(Level.WARNING, "Check for MXP in "+event);
 		if (event instanceof PrintableFragment print) {
 			String text = print.getText();
 //			if (text.startsWith("<!")) {
