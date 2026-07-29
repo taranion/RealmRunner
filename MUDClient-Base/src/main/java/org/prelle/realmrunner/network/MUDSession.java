@@ -17,14 +17,13 @@ import org.prelle.ansi.LinefeedToCRLFFilter;
 import org.prelle.telnet.CommunicationRole;
 import org.prelle.telnet.TelnetCommand;
 import org.prelle.telnet.TelnetListener;
+import org.prelle.telnet.TelnetOption;
 import org.prelle.telnet.TelnetOptionListener;
 import org.prelle.telnet.TelnetProtocol;
-import org.prelle.telnet.TelnetSubnegotiationHandler;
 import org.prelle.telnet.option.EchoMode;
-import org.prelle.telnet.option.EchoMode.EchoModeListener;
 import org.prelle.telnet.option.MXPOption;
-import org.prelle.telnet.option.MXPOption.MXPFeatures;
 import org.prelle.telnet.option.MXPOption.MXPListener;
+import org.prelle.telnet.option.MxpSupportTable;
 import org.prelle.telnet.option.TelnetWindowSize;
 import org.prelle.telnet.option.TerminalType;
 import org.prelle.terminal.TerminalEmulator;
@@ -127,10 +126,15 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 		mxp = new MXPOption(CommunicationRole.CLIENT,"b");
 		mxp.addListener(new MXPListener() {
 			@Override
-			public void telnetMXPLearned(MXPFeatures data) { }
+			public void telnetMXPLearned(MxpSupportTable data) { }
 			@Override
 			public void mxpDTDChanged(String newDTD) {
 				fireSessionChanged();
+			}
+			@Override
+			public void mxpClientInfo(String client, String version, String mxpVersion, String style) {
+				// TODO Auto-generated method stub
+				
 			}
 		});
 		telnet.add(mxp);
@@ -309,7 +313,7 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 	}
 
 	@Override
-	public void optionStateChanged(TelnetSubnegotiationHandler extension, boolean active) {
+	public void optionStateChanged(TelnetOption extension, boolean active) {
 		// TODO Auto-generated method stub
 		logger.log(Level.WARNING, "Option: {0}={1}", extension, active ? " activated" : " deactivated");
 		if (extension==echo) {
@@ -366,6 +370,12 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 			return Optional.ofNullable(mxpFilter.getDTD());
 		}
 		return Optional.empty();
+	}
+
+	@Override
+	public void telnetReady() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

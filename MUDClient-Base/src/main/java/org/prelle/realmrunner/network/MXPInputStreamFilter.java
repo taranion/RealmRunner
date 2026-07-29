@@ -18,7 +18,7 @@ import org.prelle.ansi.PrintableFragment;
 import org.prelle.ansi.commands.SelectGraphicRendition;
 import org.prelle.telnet.TelnetCommand;
 import org.prelle.telnet.TelnetListener;
-import org.prelle.telnet.TelnetSubnegotiationHandler;
+import org.prelle.telnet.TelnetOption;
 import org.prelle.telnet.option.MXPOption;
 
 /**
@@ -107,7 +107,7 @@ public class MXPInputStreamFilter implements ANSIInputStreamFilter, TelnetListen
 	 */
 	@Override
 	public boolean handles(AParsedElement event) {
-//		logger.log(Level.DEBUG, "call handles("+event+")");
+//		logger.log(Level.WARNING, "call handles("+event+")  mxpActive="+mxpActive);
 		if (!mxpActive) return false;
 		// Handle MXP tags
 		if (event instanceof ControlSequenceFragment csi && csi.getFinalChar()=='z') {
@@ -195,7 +195,7 @@ public class MXPInputStreamFilter implements ANSIInputStreamFilter, TelnetListen
 			processTag(tag);
 			return List.of();
 		}
-//		logger.log(Level.WARNING, "Check for MXP in "+event);
+		logger.log(Level.WARNING, "Check for MXP in "+event);
 		if (event instanceof PrintableFragment print) {
 			String text = print.getText();
 //			if (text.startsWith("<!")) {
@@ -283,10 +283,10 @@ public class MXPInputStreamFilter implements ANSIInputStreamFilter, TelnetListen
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.telnet.TelnetListener#optionStateChanged(org.prelle.telnet.TelnetSubnegotiationHandler, boolean)
+	 * @see org.prelle.telnet.TelnetListener#optionStateChanged(org.prelle.telnet.TelnetOption, boolean)
 	 */
 	@Override
-	public void optionStateChanged(TelnetSubnegotiationHandler extension, boolean active) {
+	public void optionStateChanged(TelnetOption extension, boolean active) {
 		if (extension instanceof MXPOption) {
 			logger.log(Level.INFO, "MXP option state changed: {0}", active);
 			setMXPActive(active);
@@ -299,6 +299,16 @@ public class MXPInputStreamFilter implements ANSIInputStreamFilter, TelnetListen
 	 */
 	@Override
 	public void telnetCommandReceived(TelnetCommand command) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.telnet.TelnetListener#telnetReady()
+	 */
+	@Override
+	public void telnetReady() {
 		// TODO Auto-generated method stub
 		
 	}

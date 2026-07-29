@@ -15,7 +15,7 @@ import org.prelle.telnet.TelnetInputStream;
 import org.prelle.telnet.TelnetListener;
 import org.prelle.telnet.TelnetOutputStream;
 import org.prelle.telnet.TelnetProtocol;
-import org.prelle.telnet.TelnetSubnegotiationHandler;
+import org.prelle.telnet.TelnetOption;
 import org.prelle.terminal.TerminalEmulator;
 
 public class MUDSessionBuilder {
@@ -38,7 +38,6 @@ public class MUDSessionBuilder {
 	
 	//-------------------------------------------------------------------
 	public MUDSession build() throws IOException {
-		try {
 			InetAddress host = InetAddress.getByName(clientConfig.getServer());
 			
 			MUDConnection con = switch (clientConfig.getProtocol()) {
@@ -64,15 +63,6 @@ public class MUDSessionBuilder {
 				tin.getProtocol().addListener(session);
 			}
 			return session;
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		System.exit(0);
-		return null;
 	}
 	//-------------------------------------------------------------------
 	public MUDSessionBuilder setCharset(Charset value) { this.charset = value; return this; }
