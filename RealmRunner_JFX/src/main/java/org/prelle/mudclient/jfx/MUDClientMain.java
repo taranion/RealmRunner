@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PipedWriter;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -42,6 +43,8 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
@@ -149,7 +152,7 @@ public class MUDClientMain extends Application {
         //Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
 		tabs = new TabPane();
 		// Add welcome pane
-		welcome = new WelcomePane( (cfg) -> connectWith(cfg));
+		welcome = new WelcomePane( (cfg) -> connectWith(cfg, stage));
 		var mainTab = new Tab("New", welcome);
 		mainTab.setClosable(false);
 		tabs.getTabs().add(mainTab);
@@ -434,24 +437,33 @@ public class MUDClientMain extends Application {
 	}
 
 	//-------------------------------------------------------------------
-	private void connectWith(Config connectWith) {
+	private void connectWith(Config connectWith, Stage stage) {
 		logger.log(Level.INFO, "Connect with {0}", connectWith);
 		
 		MUDSessionUserInterfaceJFX ui = new MUDSessionUserInterfaceJFX();
-		Tab tab = new Tab("Session", ui);
-		tabs.getTabs().add(tab);
-		
-		tabs.getSelectionModel().select(tab);
 		
 		// Start a new MUDSession
 		try {
 			MUDSession session = MUDSession.builder(ui.getTerminal())
 					.setClientConfig(connectWith)
-					.setTerminalTypes("ghostty","ghostty-xterm","xterm-256color","xterm")
+					.setTerminalTypes("Realm Runner","xterm","MTTS 271")
 					.build();
-			sessionTabs.put(session, tab);
-			ui.setSession(session);
-		} catch (Exception e) {
+			if (session!=null) {
+				Tab tab = new Tab("Session", ui);
+				tabs.getTabs().add(tab);
+				tabs.getSelectionModel().select(tab);
+				sessionTabs.put(session, tab);
+				ui.setSession(session);
+			}
+		} catch (UnknownHostException e) {
+			    var alert = new Alert(AlertType.ERROR);
+			    alert.setTitle("Error Dialog");
+			    alert.setHeaderText("Unknown host");
+			    alert.setContentText("The specified host could not be resolved: "+connectWith.getServer());
+			    alert.initOwner(stage.getOwner());
+			    alert.show();
+
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

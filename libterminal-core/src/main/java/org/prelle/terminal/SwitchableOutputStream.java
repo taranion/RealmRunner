@@ -32,7 +32,7 @@ public class SwitchableOutputStream extends OutputStream {
 
 	@Override
 	public void write(int b) throws IOException {
-//		System.getLogger("ghostty").log(System.Logger.Level.INFO, String.valueOf((char)b)+" to "+sink);
+		System.getLogger("ghostty").log(System.Logger.Level.INFO, String.valueOf((char)b)+" to "+sink);
 		if (sink!=null) sink.write(b);
 	}
 

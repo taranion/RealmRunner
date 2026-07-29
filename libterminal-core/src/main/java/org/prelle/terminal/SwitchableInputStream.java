@@ -19,7 +19,7 @@ public class SwitchableInputStream extends InputStream {
 
 	//-------------------------------------------------------------------
 	public String toString() {
-		return "Switch <-- "+source;
+		return "Switch <-+- "+source;
 	}
 
     //-------------------------------------------------------------------
@@ -58,20 +58,24 @@ public class SwitchableInputStream extends InputStream {
 //			System.err.println("SwitchableInputStream.read(byte[]): waiting for data");
 			waitAMoment();
 			// If there are injected data return as many as possible into the buffer
-			if (injectedData.size() > 0) {
-				int len = Math.min(buf.length, injectedData.size());
-				for (int i=0; i<len; i++) {
-					buf[i] = (byte)(int)injectedData.remove(0);
+			synchronized (injectedData) {
+				if (injectedData.size() > 0) {
+					int len = Math.min(buf.length, injectedData.size());
+					for (int i=0; i<len; i++) {
+						buf[i] = (byte)(int)injectedData.remove(0);
+					}
+					System.err.println("SwitchableInputStream.read(byte[]): reading "+len+" injected");
+					return len;
 				}
-				System.err.println("SwitchableInputStream.read(byte[]): reading "+len+" injected");
-				return len;
 			}
 			if (source==null) {
 				System.err.println("SwitchableInputStream: source is null");
 				System.exit(1);
 				return -1;
 			}
+			//System.err.println("SwitchableInputStream: call available on "+source);
 			int available = source.available();
+			logger.log(Level.INFO,"  available() returned "+available);
 			if (available==-1) {
 				System.err.println("SwitchableInputStream: source is closed");
 				inject("Connection lost\r\n".getBytes());
@@ -79,14 +83,19 @@ public class SwitchableInputStream extends InputStream {
 				return 0;
 			}
 			if (available>0) {
-//				System.err.println("SwitchableInputStream.read(byte[]): reading "+source.available()+" from source");
-				int len = source.read(buf,0,source.available());
-				// Convert read to String
-				if (logger.isLoggable(Level.TRACE)) {
-					String s = new String(buf, 0, len);
-					logger.log(Level.TRACE, "RCV {0} bytes from source = {1}", len, s);
+				System.err.println("SwitchableInputStream.read(byte[]): reading "+available+" from "+source);
+//				int toRead = Math.min(buf.length, available);
+				if (available>100) {
+					System.err.println("SwitchableInputStream:Debug");
 				}
-				if (len>0)
+				int len = source.read(buf);
+				System.err.println("SwitchableInputStream.read(byte[]): done reading with "+len);
+				//Convert read to String
+				if (logger.isLoggable(Level.INFO)) {
+					String s = new String(buf, 0, len);
+					logger.log(Level.INFO, "RCV {0} bytes from source = {1}", len, s);
+				}
+				if (len>0 || source.available()==0) 
 					return len;
 			}
 			} catch (Exception e) {
@@ -102,7 +111,7 @@ public class SwitchableInputStream extends InputStream {
 	 */
 	@Override
 	public int read() throws IOException {
-//		logger.log(Logger.Level.INFO, "ENTER: read()");
+		logger.log(Logger.Level.INFO, "ENTER: read()");
 		do {
 			waitAMoment();
 			if (!injectedData.isEmpty()) {
@@ -123,11 +132,32 @@ public class SwitchableInputStream extends InputStream {
 	//-------------------------------------------------------------------
 	public void inject(byte[] data) {
 		logger.log(Level.WARNING, "Injecting {0} bytes", data.length);
-		for (byte b : data) {
-			injectedData.add((int)b);
+		synchronized (injectedData) {
+			for (byte b : data) {
+				injectedData.add((int)b);
+			}
+			injectedData.notifyAll();
 		}
+	}
+	
+	//-------------------------------------------------------------------
+	public void inject(int data) {
+		logger.log(Level.WARNING, "Injecting single byte {0}", (char)data);
+		synchronized (injectedData) {
+			injectedData.add(data);
+			injectedData.notifyAll();
+		}
+	}
+
+	public void inject(byte[] b, int off, int len) {
+		logger.log(Level.WARNING, "Injecting {0} bytes", b.length);
 		synchronized (this) {
-			notifyAll();
+			int i= 0;
+			int maxLen = Math.min(len, b.length-off);
+			for (; i< maxLen; i++) {
+				injectedData.add((int)b[off+i]);
+			}
+			injectedData.notifyAll();
 		}
 	}
 	

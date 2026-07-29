@@ -18,6 +18,7 @@ import org.prelle.ansi.FilteringANSIStream;
 import org.prelle.ansi.PassOutANSIOutputStream;
 import org.prelle.ansi.PassthroughANSIInputStream;
 import org.prelle.ansi.PrintableFragment;
+import org.prelle.terminal.EchoChamber;
 import org.prelle.terminal.SwitchableInputStream;
 import org.prelle.terminal.SwitchableOutputStream;
 import org.prelle.terminal.TerminalEmulator;
@@ -46,6 +47,7 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
     private PassthroughANSIInputStream pin;
     private boolean localEcho = true;
     private ContextMenu contextMenu;
+    private EchoChamber echoChamber;
 
 	//-------------------------------------------------------------------
 	public GhosttyTerminalView() {
@@ -72,9 +74,11 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	@Override
 	public FilteringANSIStream connectWith(InputStream in, OutputStream out) {
 		pin = new PassthroughANSIInputStream(in);
-		PassOutANSIOutputStream pout = new PassOutANSIOutputStream(out, (fragmentSent) -> handleFragmentSent(fragmentSent));
-		outPipe.setSink(pout);
+		//PassOutANSIOutputStream pout = new PassOutANSIOutputStream(out, (fragmentSent) -> handleFragmentSent(fragmentSent));
+		echoChamber = new EchoChamber(out, inPipe);
+		outPipe.setSink(echoChamber);
 		inPipe.setSource(pin);
+		
 		
 		try {
 			logger.log(Level.WARNING, "Output: "+this.outPipe);
@@ -218,6 +222,10 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	@Override
 	public TerminalEmulator setLocalEchoActive(boolean value) {
 		logger.log(Level.WARNING, "setLocalEchoActive({0}) called but not implemented", value);
+		if (echoChamber!=null)
+			echoChamber.setEchoEnabled(value);
+		else
+			logger.log(Level.WARNING, "setLocalEchoActive({0}) called but echoChamber is null", value);
 		return null;
 	}
 
@@ -267,6 +275,11 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 
 	//-------------------------------------------------------------------
 	/**
+     * The terminal view reads this stream and writes the received bytes to the
+     * terminal emulator.
+     *
+     * @return the stream that produces terminal output
+     * @throws Exception if the output stream cannot be opened
 	 * @see io.github.vlaaad.ghosttyfx.Terminal#input()
 	 */
 	@Override
@@ -275,10 +288,14 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 		return outPipe;
 	}
 
+	//-------------------------------------------------------------------
+	/**
+	 * @see io.github.vlaaad.ghosttyfx.Terminal#resize(int, int, int, int)
+	 */
 	@Override
-	public void resize(int columns, int rows) throws Exception {
+	public void resize(int columns, int rows, int widthPx, int heightPx) throws Exception {
 		// TODO Auto-generated method stub
-		
+		logger.log(Level.INFO, "resize({0},{1},{2},{3}) called", columns, rows, widthPx, heightPx);
 	}
 
 	@Override
@@ -293,8 +310,9 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	 */
 	@Override
 	public void sendUserInput(String text) {
+		logger.log(Level.INFO, "sendUserInput");
 		byte[] data = ("\u001B[1;33m"+text+"\u001B[0m\r\n").getBytes(Charset.defaultCharset());
-		inPipe.inject(data);
+//		inPipe.inject(data);
 		widget.sendText(text+"\r\n");
 	}
 
