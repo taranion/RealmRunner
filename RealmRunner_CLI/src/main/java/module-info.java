@@ -14,6 +14,7 @@ module org.prelle.realmrunner_cli {
 	requires graphicmud.core;
 	requires graphicmud.tiles.jfx;
 	requires org.graalvm.nativeimage;
+	requires org.prelle.libmxp;
 	
 	uses java.lang.System.LoggerFinder;
 }

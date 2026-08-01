@@ -20,6 +20,7 @@
     	<Logger name="telnet.lvl1.in" level="WARN"/>
         <Logger name="telnet.lvl1.out" level="DEBUG"/>
      	<Logger name="org.prelle.ansi" level="INFO"/>
+        <Logger name="org.prelle.mxp" level="INFO"/>
     	<Logger name="mud.world" level="INFO"/>
 	</Loggers>
 </Configuration>

@@ -3,6 +3,7 @@
  */
 package org.prelle.jeditermfxterminal;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -14,10 +15,13 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import org.prelle.ansi.AParsedElement;
+import org.prelle.ansi.ControlSequenceFragment;
 import org.prelle.ansi.FilteringANSIStream;
-import org.prelle.ansi.PassOutANSIOutputStream;
-import org.prelle.ansi.PassthroughANSIInputStream;
+import org.prelle.ansi.NewANSIInputStream;
 import org.prelle.ansi.PrintableFragment;
+import org.prelle.ansi.commands.ResetMode;
+import org.prelle.ansi.commands.SetMode;
+import org.prelle.ansi.commands.SetMode.ANSIMode;
 import org.prelle.terminal.EchoChamber;
 import org.prelle.terminal.SwitchableInputStream;
 import org.prelle.terminal.SwitchableOutputStream;
@@ -44,7 +48,8 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
     private int terminalHeight = -1;
     private List<Consumer<int[]>> consoleSizeListeners = new ArrayList<>();
     
-    private PassthroughANSIInputStream pin;
+    //private PassthroughANSIInputStream pin;
+    private NewANSIInputStream pin;
     private boolean localEcho = true;
     private ContextMenu contextMenu;
     private EchoChamber echoChamber;
@@ -73,10 +78,13 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	 */
 	@Override
 	public FilteringANSIStream connectWith(InputStream in, OutputStream out) {
-		pin = new PassthroughANSIInputStream(in);
+		//pin = new PassthroughANSIInputStream(in);
+		pin = new NewANSIInputStream(in);
+		outPipe.setSink(out);
 		//PassOutANSIOutputStream pout = new PassOutANSIOutputStream(out, (fragmentSent) -> handleFragmentSent(fragmentSent));
-		echoChamber = new EchoChamber(out, inPipe);
-		outPipe.setSink(echoChamber);
+//		echoChamber = new EchoChamber(out, inPipe);
+//		echoChamber.setEchoEnabled(this.localEcho);
+//		outPipe.setSink(echoChamber);
 		inPipe.setSource(pin);
 		
 		
@@ -88,6 +96,15 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 			e.printStackTrace();
 		}
 		return pin;
+	}
+	
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.terminal.TerminalEmulator#start()
+	 */
+	@Override
+	public void start() {
+		logger.log(Level.INFO, "start() called");
 	}
 	
 	//-------------------------------------------------------------------
@@ -215,18 +232,30 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 
 	@Override
 	public boolean isLocalEchoActive() {
-		// TODO Auto-generated method stub
-		return false;
+		return localEcho;
 	}
 
 	@Override
 	public TerminalEmulator setLocalEchoActive(boolean value) {
-		logger.log(Level.WARNING, "setLocalEchoActive({0}) called but not implemented", value);
-		if (echoChamber!=null)
+		logger.log(Level.INFO, "setLocalEchoActive({0}) called", value);
+		this.localEcho = value;
+		if (echoChamber != null) {
 			echoChamber.setEchoEnabled(value);
-		else
-			logger.log(Level.WARNING, "setLocalEchoActive({0}) called but echoChamber is null", value);
-		return null;
+		} else {
+			logger.log(Level.INFO, "setLocalEchoActive({0}) called before echoChamber was initialized", value);
+		}
+		
+        // Inject ANSI SRM (SendReceiveMode) control sequence into terminal input stream
+        ControlSequenceFragment srmSequence = value
+            ? new ResetMode(ANSIMode.SRM_SEND_RECEIVE_MODE)  // ESC [ 1 2 l -> Local Echo ON
+            : new SetMode(ANSIMode.SRM_SEND_RECEIVE_MODE);   // ESC [ 1 2 h -> Local Echo OFF
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        srmSequence.encode(baos, true);
+        if (inPipe != null) {
+            inPipe.inject(baos.toByteArray());
+        }
+		return this;
 	}
 
 //	//-------------------------------------------------------------------
@@ -295,7 +324,7 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	@Override
 	public void resize(int columns, int rows, int widthPx, int heightPx) throws Exception {
 		// TODO Auto-generated method stub
-		logger.log(Level.INFO, "resize({0},{1},{2},{3}) called", columns, rows, widthPx, heightPx);
+		logger.log(Level.INFO, "resize({0}x{1} cells, {2}x{3} pixel) called", columns, rows, widthPx, heightPx);
 	}
 
 	@Override
@@ -310,10 +339,14 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	 */
 	@Override
 	public void sendUserInput(String text) {
-		logger.log(Level.INFO, "sendUserInput");
-		byte[] data = ("\u001B[1;33m"+text+"\u001B[0m\r\n").getBytes(Charset.defaultCharset());
-//		inPipe.inject(data);
-		widget.sendText(text+"\r\n");
+		logger.log(Level.INFO, "sendUserInput: {0}", text);
+		byte[] data = (text + "\r\n").getBytes(StandardCharsets.UTF_8);
+		try {
+			outPipe.write(data);
+			outPipe.flush();
+		} catch (IOException e) {
+			logger.log(Level.ERROR, "Error sending user input to outPipe", e);
+		}
 	}
 
 	//-------------------------------------------------------------------
@@ -333,7 +366,7 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	 */
 	@Override
 	public void releaseInputBuffer() {
-		pin.releaseBuffer();
+		//pin.releaseBuffer();
 	}
 
 	//-------------------------------------------------------------------

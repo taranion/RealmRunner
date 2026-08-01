@@ -1,80 +1,95 @@
 package org.prelle.jeditermfxterminal;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.io.PipedReader;
+import java.io.PipedWriter;
 import java.lang.System.Logger.Level;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import com.techsenger.jeditermfx.core.TtyConnector;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
- *
+ * This class maps read requests from the terminal to either
  */
-public class JediTtyConnector implements TtyConnector {
+class JediTtyConnector implements TtyConnector {
 
 	private final static System.Logger logger = System.getLogger("jedi.terminal");
-
-	public static class ConnectorOutputStream extends OutputStream {
-		private JediTtyConnector connector;
-
-		public ConnectorOutputStream(JediTtyConnector value) {
-			this.connector=value;
-		}
-
-		@Override public void write(int b) throws IOException {
-			connector.write(new byte[] {(byte)b});
-		}
-		@Override public void write(byte[] b) throws IOException {
-	      connector.write(b);
-	    }
-	}
-
-	public static class ConnectorInputStream extends InputStream {
-		private JediTtyConnector connector;
-
-		public ConnectorInputStream(JediTtyConnector value) {
-			this.connector=value;
-		}
-
-		@Override
-		public int read() throws IOException {
-			char[] buf = new char[1];
-			return connector.read(buf, 0, 1);
-		}
-		public int readNBytes(byte[] b, int off, int len) throws IOException {
-			char[] buf = new char[b.length];
-			return connector.read(buf, off, len);
-		}
-	}
-
-	private PipedInputStream pipeIn;
+	/**
+	 * Input from the MUD (read in an extra thread) is converted into the expected encoding 
+	 * and written to this pipe, which is read by the terminal.
+	 * When the client wants to directly write to the terminal, it can write into this writer too.
+	 */
+	private PipedWriter writeToTerminal;
+	/**
+	 * Used to access the data written to the pipe by the MUD or by the client. Called from 
+	 * within the read method of the TtyConnector interface.
+	 */
+	private PipedReader readByTerminal;
+	
+	/**
+	 * When the terminal emulator wants to respond to the server, it writes to this pipe, which is read by the MUD client.
+	 */
+	private PipedOutputStream writeToServer;
+	/**
+	 * Used to access the data written to the pipe by the terminal emulator. Called from 
+	 * within the read method of the MUD client.
+	 */
+	private PipedInputStream readByServer;
+	private Charset encoding = StandardCharsets.UTF_8;
+	
+	@Getter @Setter
+	private boolean localEcho = true;
 
 	//-------------------------------------------------------------------
 	/**
+	 * @throws IOException 
 	 */
-	public JediTtyConnector() {
-		// TODO Auto-generated constructor stub
+	public JediTtyConnector(Charset encoding) throws IOException {
+		writeToTerminal = new PipedWriter();
+		readByTerminal = new PipedReader(writeToTerminal);
+		
+		writeToServer = new PipedOutputStream();
+		readByServer = new PipedInputStream(writeToServer);
+		this.encoding = encoding;
 	}
 
 	@Override
 	public int read(char[] buf, int offset, int length) throws IOException {
-		logger.log(Level.INFO, "read");
-		return 0;
+		logger.log(Level.TRACE, "read");
+		return readByTerminal.read(buf, offset, length);
 	}
 
 	@Override
 	public void write(byte[] bytes) throws IOException {
-		logger.log(Level.INFO, "write "+Arrays.toString(bytes));
-
+		logger.log(Level.TRACE, "write "+Arrays.toString(bytes));
+		writeToServer.write(bytes);
+		
+//		if (localEcho) {
+//			// Convert bytes to string using the specified encoding and write to terminal
+//			String str = new String(bytes, encoding);
+//			writeToTerminal.write(str);
+//		}
 	}
 
 	// Write to terminal
 	@Override
 	public void write(String value) throws IOException {
-		logger.log(Level.INFO, "write "+value);
-
+//		logger.log(Level.INFO, "write "+value);
+		// Convert string to bytes using the specified encoding
+		writeToServer.write(value.getBytes(encoding));
+		
+		if (localEcho) {
+			writeToTerminal.write(value);
+		} else {
+			writeToTerminal.write('*');;
+		}
 	}
 
 	@Override
@@ -91,20 +106,36 @@ public class JediTtyConnector implements TtyConnector {
 
 	@Override
 	public boolean ready() throws IOException {
-		logger.log(Level.INFO, "ready ");
-		return true;
+		logger.log(Level.TRACE, "ready ");
+		return readByTerminal.ready();
 	}
 
 	@Override
 	public String getName() {
 		logger.log(Level.INFO, "getName ");
-		return null;
+		return "MUD";
 	}
 
 	@Override
 	public void close() {
 		logger.log(Level.INFO, "close ");
 
+	}
+
+	//-------------------------------------------------------------------
+	/**
+	 * @return the writeToTerminal
+	 */
+	public PipedWriter getWriteToTerminal() {
+		return writeToTerminal;
+	}
+
+	//-------------------------------------------------------------------
+	/**
+	 * @return the readByServer
+	 */
+	public PipedInputStream getReadByServer() {
+		return readByServer;
 	}
 
 }

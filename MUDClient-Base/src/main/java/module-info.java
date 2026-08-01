@@ -11,5 +11,6 @@ module org.prelle.mud.client.base {
 	requires lombok;
 	requires org.prelle.mudansi;
 	requires jakarta.websocket.client;
+	requires org.prelle.libmxp;
 
 }

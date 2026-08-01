@@ -70,6 +70,7 @@
           <artifactId>libterminal-ghosttyfx</artifactId>
           <version>0.0.1</version>
       </dependency>
+      <!-- Alternative to libterminal-ghosttyfx -->
       <dependency>
          <groupId>org.prelle</groupId>
           <artifactId>libterminal-jeditermfx</artifactId>

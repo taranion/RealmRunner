@@ -46,6 +46,12 @@ public interface TerminalEmulator {
 	public void sendUserInput(String text) ;
 
 	//-------------------------------------------------------------------
+	/** 
+	 * Setup streams, but do not start transmitting/receiving yet.
+	 */
 	FilteringANSIStream connectWith(InputStream in, OutputStream out);
+
+	//-------------------------------------------------------------------
+	void start();
 	
 }

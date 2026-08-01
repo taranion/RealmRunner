@@ -1,39 +1,56 @@
 package org.prelle.terminal;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.StringBufferInputStream;
 
 /**
- * 
+ * Switchable output stream wrapper forwarding writes to a dynamic sink OutputStream.
  */
 public class SwitchableOutputStream extends OutputStream {
-	
+
 	private OutputStream sink;
 
 	//-------------------------------------------------------------------
 	public SwitchableOutputStream() {
-		
 	}
 
 	//-------------------------------------------------------------------
+	@Override
 	public String toString() {
-		return "Switch --> "+sink;
+		return "Switch --> " + sink;
 	}
 
 	//-------------------------------------------------------------------
-	/**
-	 * @param sink the sink to set
-	 */
 	public void setSink(OutputStream sink) {
 		this.sink = sink;
 	}
 
-	@Override
-	public void write(int b) throws IOException {
-		System.getLogger("ghostty").log(System.Logger.Level.INFO, String.valueOf((char)b)+" to "+sink);
-		if (sink!=null) sink.write(b);
+	//-------------------------------------------------------------------
+	public OutputStream getSink() {
+		return sink;
 	}
 
+	//-------------------------------------------------------------------
+	@Override
+	public void write(int b) throws IOException {
+		if (sink != null) {
+			sink.write(b);
+		}
+	}
+
+	//-------------------------------------------------------------------
+	@Override
+	public void write(byte[] b, int off, int len) throws IOException {
+		if (sink != null) {
+			sink.write(b, off, len);
+		}
+	}
+
+	//-------------------------------------------------------------------
+	@Override
+	public void write(byte[] b) throws IOException {
+		if (sink != null) {
+			sink.write(b, 0, b.length);
+		}
+	}
 }

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.prelle.jeditermfxterminal.GhosttyTerminalView;
+import org.prelle.jeditermfxterminal.JediTerminalView;
 import org.prelle.mudclient.jfx.MUDClientMain.HistoryEntry;
 import org.prelle.realmrunner.network.MUDSession;
 import org.prelle.realmrunner.network.MUDSessionUserInterface;
@@ -77,7 +78,7 @@ public class MUDSessionUserInterfaceJFX extends VBox implements MUDSessionUserIn
 		scroll.setFitToWidth(true);
 
 		console = new GhosttyTerminalView();
-		//console = new JediTerminalView();
+//		console = new JediTerminalView();
 		// console is already on MAX_VALUE
 		
 //		ScrollPane scroll3 = new ScrollPane(console.getPane());

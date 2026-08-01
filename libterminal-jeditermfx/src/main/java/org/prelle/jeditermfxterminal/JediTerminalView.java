@@ -15,12 +15,14 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.function.Consumer;
 
+import org.prelle.ansi.ANSIOutputStream;
+import org.prelle.ansi.C0Code;
 import org.prelle.ansi.FilteringANSIStream;
-import org.prelle.terminal.SwitchableInputStream;
-import org.prelle.terminal.SwitchableOutputStream;
+import org.prelle.ansi.NewANSIInputStream;
 import org.prelle.terminal.TerminalEmulator;
 import org.prelle.terminal.TerminalMode;
 
+import com.techsenger.jeditermfx.core.util.TermSize;
 import com.techsenger.jeditermfx.ui.JediTermFxWidget;
 import com.techsenger.jeditermfx.ui.settings.DefaultSettingsProvider;
 
@@ -31,30 +33,33 @@ import javafx.scene.layout.Pane;
  */
 public class JediTerminalView implements TerminalEmulator {
 
-	private final static System.Logger logger = System.getLogger("jedi.terminal");
-	
-	private SwitchableInputStream inPipe;
-	private SwitchableOutputStream outPipe;
+	final static System.Logger logger = System.getLogger("jedi.terminal");
+
+	private Charset encoding = StandardCharsets.UTF_8;
 
 	private JediTermFxWidget widget;
 	private JediTtyConnector connector;
-//    private ANSIOutputStream out;
-//    private ANSIInputStream in;
+    private ANSIOutputStream out;
+    private NewANSIInputStream pin;
     
     private int terminalWidth = -1;
     private int terminalHeight = -1;
     private List<Consumer<int[]>> consoleSizeListeners = new ArrayList<>();
-
+     
 	//-------------------------------------------------------------------
 	public JediTerminalView() {
-		inPipe = new SwitchableInputStream();
-		outPipe = new SwitchableOutputStream();
-		connector = new JediTtyConnector();
 
-		widget = new JediTermFxWidget(80, 24, new DefaultSettingsProvider());
+		widget = new JediTermFxWidget(80, 24, new DefaultSettingsProvider() {
+			
+		});
 		widget.getPane().setMinSize(640, 400);
-		widget.setTtyConnector(connector);
-
+		try {
+			connector = new JediTtyConnector(encoding);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 //		out = new ANSIOutputStream(new JediTtyConnector.ConnectorOutputStream(connector));
 //		in  = new ANSIInputStream(new JediTtyConnector.ConnectorInputStream(connector));
 
@@ -75,7 +80,7 @@ public class JediTerminalView implements TerminalEmulator {
 						terminalHeight= size[1];
 					}
 					if (changed ) {
-						logger.log(Level.DEBUG, "Window size changed");
+						logger.log(Level.INFO, "Window size changed to {0}x{1}", terminalWidth, terminalHeight);
 						for (Consumer<int[]> listener : consoleSizeListeners) {
 							try {
 								listener.accept(size);
@@ -163,6 +168,7 @@ public class JediTerminalView implements TerminalEmulator {
 ////			}
 //			calculateWindowSize();
 //		});
+	
 	}
 
 	@Override
@@ -177,34 +183,34 @@ public class JediTerminalView implements TerminalEmulator {
 		return null;
 	}
 
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.terminal.TerminalEmulator#isLocalEchoActive()
+	 */
 	@Override
 	public boolean isLocalEchoActive() {
-		// TODO Auto-generated method stub
-		return false;
+		return connector.isLocalEcho();
 	}
 
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.terminal.TerminalEmulator#setLocalEchoActive(boolean)
+	 */
 	@Override
 	public TerminalEmulator setLocalEchoActive(boolean value) {
-		// TODO Auto-generated method stub
-		return null;
+		logger.log(Level.INFO, "{0} local echo", value ? "Enable" : "Disable");
+		connector.setLocalEcho(value);
+		return this;
 	}
-
-//	@Override
-//	public ANSIOutputStream getOutputStream() {
-//		// TODO Auto-generated method stub
-//		return out;
-//	}
-//
-//	@Override
-//	public ANSIInputStream getInputStream() {
-//		// TODO Auto-generated method stub
-//		return in;
-//	}
 
 	@Override
 	public int[] getConsoleSize() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		TermSize size = widget.getTerminalPanel().getTerminalSizeFromComponent();
+		if (size==null) {
+			logger.log(Level.WARNING, "getConsoleSize: size is null");
+			return null;
+		}
+		return new int[] {size.getColumns(), size.getRows()};
 	}
 
 	@Override
@@ -266,31 +272,59 @@ public class JediTerminalView implements TerminalEmulator {
 
 	@Override
 	public FilteringANSIStream connectWith(InputStream in, OutputStream out) {
-//		this.in = in;
-//		this.out = out;
-		outPipe.setSink(out);
-		inPipe.setSource(in);
-		
-		try {
-			logger.log(Level.WARNING, "Output: "+this.outPipe);
-			logger.log(Level.WARNING, "Input : "+this.inPipe);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
+		logger.log(Level.INFO, "ENTER: connectWith");
+		pin = new NewANSIInputStream(in);
+		this.out = new ANSIOutputStream(out);
+
+		return pin;
 	}
 
 	@Override
 	public void sendUserInput(String text) {
-		// TODO Auto-generated method stub
-		
+		try {
+			out.write(text);
+			out.write(C0Code.CR);
+			out.write(C0Code.LF);
+			out.flush();
+			
+			if (isLocalEchoActive()) {
+				connector.getWriteToTerminal().write(text+"\r\n");
+				connector.getWriteToTerminal().flush();
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void releaseInputBuffer() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public void start() {
+		// Start a thread that reads from the MUD and writes to the terminal
+		FromServerToTerminal fromServer = new FromServerToTerminal(pin, connector.getWriteToTerminal(), encoding);
+		FromTerminalToServer fromTerminal = new FromTerminalToServer(connector.getReadByServer(), out);
+		
+		try {
+			widget.setTtyConnector(connector);
+			logger.log(Level.WARNING, "Output: "+pin);
+			logger.log(Level.WARNING, "Input : "+out);
+			Thread t = new Thread(fromServer, "FromServerToTerminal");
+			t.start();
+			Thread t2 = new Thread(fromTerminal, "FromTerminalToServer");
+			t2.start();
+			widget.start();
+			
+			Thread.sleep(200);
+			connector.getWriteToTerminal().write("Welcome to the JediTermFX Terminal Emulator!\r\n");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

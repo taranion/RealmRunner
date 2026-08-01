@@ -14,6 +14,10 @@ import java.util.function.Consumer;
 import org.prelle.ansi.ANSIOutputStream;
 import org.prelle.ansi.FilteringANSIStream;
 import org.prelle.ansi.LinefeedToCRLFFilter;
+import org.prelle.mxp.MXPInputStreamFilter;
+import org.prelle.mxp.MXPOption;
+import org.prelle.mxp.MXPOption.MXPListener;
+import org.prelle.mxp.MxpSupportTable;
 import org.prelle.telnet.CommunicationRole;
 import org.prelle.telnet.TelnetCommand;
 import org.prelle.telnet.TelnetListener;
@@ -21,13 +25,9 @@ import org.prelle.telnet.TelnetOption;
 import org.prelle.telnet.TelnetOptionListener;
 import org.prelle.telnet.TelnetProtocol;
 import org.prelle.telnet.option.EchoMode;
-import org.prelle.telnet.option.MXPOption;
-import org.prelle.telnet.option.MXPOption.MXPListener;
-import org.prelle.telnet.option.MxpSupportTable;
 import org.prelle.telnet.option.TelnetWindowSize;
 import org.prelle.telnet.option.TerminalType;
 import org.prelle.terminal.TerminalEmulator;
-import org.prelle.terminal.TerminalMode;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -61,8 +61,10 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 		logger.log(Level.INFO, "ENTER: MUDSession.<init>");
 		this.console = terminal;
 		this.telnet  = builder.telnet;
-		console.setLocalEchoActive(false);
-		console.setMode(TerminalMode.RAW);
+//		console.setLocalEchoActive(false);
+//		console.setMode(TerminalMode.RAW);
+		
+		telnet.getInputStream().setSendGoAheadAsANSISepator(true);
 
 //		console.getOutputStream().write(new SetConformanceLevel(OperatingLevel.LEVEL4_VT520, true));
 		
@@ -70,12 +72,7 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 //		streamFromMUD.setLoggingListener( (k,v) -> logger.log(Level.ERROR, "GhosttyTerminalView<init> input: {0}={1}", k, v));
 //		streamToMUD.setLoggingListener( (k,v) -> logger.log(Level.ERROR, "GhosttyTerminalView<init> output: {0}={1}", k, v));
 		
-		
 		streamFromMUD = terminal.connectWith(in, streamToMUD);
-		// Is this a MUD that only sends LF, insteadt of CR LF
-		if (config.getDoesNotSendCR()!=null && config.getDoesNotSendCR()) {
-			streamFromMUD.addFilter(new LinefeedToCRLFFilter());
-		}
 		
 		setupECHO();
 		setupNAWS();
@@ -84,6 +81,13 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 		if (config.isMXPEnabled()) {
 			setupMXP();
 		}
+		
+		// Is this a MUD that only sends LF, insteadt of CR LF
+		if (config.getDoesNotSendCR()!=null && config.getDoesNotSendCR()) {
+			streamFromMUD.addFilter(new LinefeedToCRLFFilter());
+		}
+		
+		terminal.start();
 	}
 	
 	//-------------------------------------------------------------------
@@ -140,7 +144,7 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 		telnet.add(mxp);
 		
 		mxpFilter = new MXPInputStreamFilter(mxp);
-		telnet.addListener(mxpFilter);
+		telnet.addListener( (TelnetListener)mxpFilter);
 		streamFromMUD.addFilter(mxpFilter);
 	}
 

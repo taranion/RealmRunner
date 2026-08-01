@@ -29,7 +29,7 @@ public class EchoChamber extends FilterOutputStream {
 	 */
 	@Override
     public void write(int value) throws IOException {
-		System.out.println("EchoChamber.write(int) called with "+value);
+		System.out.println("EchoChamber.write(int) called with "+value+" - echo enabled: "+echoEnabled);
 		if (echoEnabled)
 			echoOut.inject(value);
 		out.write(value);
@@ -41,7 +41,7 @@ public class EchoChamber extends FilterOutputStream {
 	 */
 	@Override
     public void write(byte[] b, int off, int len) throws IOException {
-		System.out.println("EchoChamber.write(byte[], int, int) called with "+len+" bytes");
+		System.out.println("EchoChamber.write(byte[], int, int) called with "+len+" bytes - echo enabled: "+echoEnabled);
          if (echoEnabled)
         	echoOut.inject(b, off, len);
         out.write(b, off, len);
@@ -53,7 +53,7 @@ public class EchoChamber extends FilterOutputStream {
      */
     @Override
     public void write(byte[] b) throws IOException {
-    	System.out.println("EchoChamber.write(byte[]) called with "+b.length+" bytes");
+    	System.out.println("EchoChamber.write(byte[]) called with "+b.length+" bytes - echo enabled: "+echoEnabled);
     	 if (echoEnabled)
     		 echoOut.inject(b);
     	 out.write(b, 0, b.length);

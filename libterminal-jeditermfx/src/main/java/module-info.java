@@ -8,4 +8,6 @@ module org.prelle.jeditermfxterminal {
 	requires org.prelle.libterminal;
 	requires com.techsenger.jeditermfx.ui;
 	requires com.techsenger.jeditermfx.core;
+	requires org.prelle.libansi;
+	requires lombok;
 }

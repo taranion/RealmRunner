@@ -387,6 +387,10 @@ public class UnixConsoleFFM implements TerminalEmulator {
 		return null;
 	}
 
+	@Override
+	public void start() {
+		// TODO Auto-generated method stub
+	}
 
 	@Override
 	public void sendUserInput(String text) {

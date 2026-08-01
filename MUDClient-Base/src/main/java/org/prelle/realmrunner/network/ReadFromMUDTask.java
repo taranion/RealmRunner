@@ -14,6 +14,8 @@ import org.prelle.ansi.C0Code;
 import org.prelle.ansi.C0Fragment;
 import org.prelle.ansi.PrintableFragment;
 import org.prelle.ansi.control.AreaControls;
+import org.prelle.mxp.MXPInputStream;
+import org.prelle.mxp.MXPStartTag;
 import org.prelle.telnet.TelnetCommand;
 import org.prelle.telnet.TelnetInputStream;
 import org.prelle.telnet.TelnetSocket;
