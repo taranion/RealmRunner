@@ -133,6 +133,7 @@ public class MUDSessionUserInterfaceJFX extends VBox implements MUDSessionUserIn
         	tfInput.clear();
         });
 		
+
 	}
 
 	//-------------------------------------------------------------------

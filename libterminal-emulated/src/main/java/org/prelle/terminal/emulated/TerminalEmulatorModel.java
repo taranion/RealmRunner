@@ -3,10 +3,12 @@ package org.prelle.terminal.emulated;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.System.Logger.Level;
 import java.nio.charset.Charset;
 import java.util.function.Consumer;
 
 import org.prelle.ansi.FilteringANSIStream;
+import org.prelle.terminal.ReadBuffer;
 import org.prelle.terminal.TerminalEmulator;
 import org.prelle.terminal.TerminalMode;
 
@@ -88,6 +90,20 @@ public class TerminalEmulatorModel implements TerminalEmulator {
 	public void start() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.terminal.TerminalEmulator#close()
+	 */
+	@Override
+	public void close() {
+	}
+
+	@Override
+	public ReadBuffer getReadBuffer() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

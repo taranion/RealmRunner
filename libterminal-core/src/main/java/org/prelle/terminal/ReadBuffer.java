@@ -25,7 +25,7 @@ public class ReadBuffer {
 		 * @param line User input line, without the trailing CR/LF
 		 * @return Text to send to server. If NULL is returned, nothing is sent to the server.
 		 */
-		String onLineReceived(String line);
+		String onLineReceived(String line, List<String> history);
 		void onConnectionList();
 	}
 	
@@ -35,8 +35,7 @@ public class ReadBuffer {
 	private DataToTerminalInputStream terminal;
 	private Thread readFromServerThread;
 	private ANSIOutputStream out;
-	@Setter
-	private ReadBufferHandler readBufferHandler;
+	private List<ReadBufferHandler> readBufferHandler = new ArrayList<>();
 	
 	private ANSIInputStream source;
 
@@ -53,6 +52,12 @@ public class ReadBuffer {
 		
 		history = new ArrayList<>();
 	}
+	
+	//-------------------------------------------------------------------
+	public void addReadBufferHandler(ReadBufferHandler handler) {
+		if (!readBufferHandler.contains(handler))
+			readBufferHandler.add(handler);
+	}
 
 	//-------------------------------------------------------------------
 	public void setSource(ANSIInputStream source) {
@@ -66,14 +71,15 @@ public class ReadBuffer {
 			while (true) {
 				try {
 					AParsedElement frag = source.readFragment();
-					logger.log(Level.DEBUG, "read fragment: " + frag);
+					logger.log(Level.DEBUG, "read fragment: " + frag+" ");
 					if (frag==null) {
 						logger.log(Level.WARNING, "Connection lost");
-						if (readBufferHandler!=null) {
-							readBufferHandler.onConnectionList();
+						for (ReadBufferHandler handler : readBufferHandler) {
+							handler.onConnectionList();
 						}
 						return;
 					}
+					boolean lineSwallowed = false;
 					switch (frag) {
 					case C0Fragment c0 when c0.getCode()==C0Code.RS -> releaseBuffer();
 					case C0Fragment c0 when c0.getCode()==C0Code.CR -> receivedLineEnded();
@@ -92,8 +98,8 @@ public class ReadBuffer {
 					}
 				} catch (IOException e) {
 					logger.log(Level.WARNING, "IOException reading from server", e);
-					if (readBufferHandler!=null) {
-						readBufferHandler.onConnectionList();
+					for (ReadBufferHandler handler : readBufferHandler) {
+						handler.onConnectionList();
 					}
 					return;
 				}
@@ -103,13 +109,23 @@ public class ReadBuffer {
 		}
 	}
 	
-	private void receivedLineEnded() {
+	/**
+	 * @return true if the line was swallowed by a handler, false if it should be sent to the server
+	 */
+	private boolean receivedLineEnded() {
 		String line = text.toString();
 		text.setLength(0);
 		logger.log(Level.DEBUG, "RCV: "+line);
-		if (readBufferHandler!=null) {
-			readBufferHandler.onLineReceived(line);
+//		logger.log(Level.DEBUG, "Find {0} listeners", readBufferHandler.size());
+		for (ReadBufferHandler handler : readBufferHandler) {
+//			logger.log(Level.DEBUG, "Consult handler {0}", handler.getClass());
+			line = handler.onLineReceived(line, history.subList(0, Math.min(5, history.size())));
+			if (line==null) {
+				return true;
+			}
 		}
+
+		return false;
 	}
 
 	public void releaseBuffer() {

@@ -30,6 +30,7 @@ import java.util.function.Consumer;
 import org.prelle.ansi.ANSIInputStream;
 import org.prelle.ansi.ANSIOutputStream;
 import org.prelle.ansi.FilteringANSIStream;
+import org.prelle.terminal.ReadBuffer;
 import org.prelle.terminal.TerminalEmulator;
 import org.prelle.terminal.TerminalMode;
 
@@ -403,6 +404,20 @@ public class UnixConsoleFFM implements TerminalEmulator {
 	public void releaseInputBuffer() {
 		// TODO Auto-generated method stub
 		
+	}
+
+
+	@Override
+	public void close() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public ReadBuffer getReadBuffer() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

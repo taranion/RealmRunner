@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
-import java.net.URI;
 import java.nio.file.Path;
 
 import javax.sound.sampled.AudioFormat;
@@ -17,15 +16,12 @@ import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-import org.prelle.mud4j.gmcp.Client.ClientMediaPlay;
-import org.prelle.telnet.mud.MUDSoundProtocolListener;
-
 /**
  *
  */
-public abstract class SoundManager implements MUDSoundProtocolListener {
+public abstract class SoundManager {
 
-	private final static Logger logger = System.getLogger("mud.sound");
+	protected final static Logger logger = System.getLogger("mud.sound");
 
 	public static enum SoundType {
 		SOUND,
@@ -50,90 +46,59 @@ public abstract class SoundManager implements MUDSoundProtocolListener {
 		private Path path;
 		private int loops;
 	}
+	
+	private static SoundManager instance;
 
 	//-------------------------------------------------------------------
 	/**
 	 */
 	public SoundManager() {
+		SoundManager.instance = this;
+	}
+	
+	public static SoundManager getInstance() { 
+		return instance;
 	}
 
-	//-------------------------------------------------------------------
-	/**
-	 * @see org.prelle.telnet.mud.MUDSoundProtocolListener#mspReceivedCommand(java.lang.String)
-	 */
-	@Override
-	public void mspReceivedCommand(String mspCommand) {
-		logger.log(Level.WARNING, "TODO: "+mspCommand);
-		PlayCommand com = convertMSP(mspCommand);
-		logger.log(Level.WARNING, "com = "+com);
-		try {
-			if (com.url!=null) {
-				logger.log(Level.WARNING, "URI ="+com.url);
-				URI uri = URI.create(com.url);
-				Path result = DataFileManager.downloadFileTo(com.filename, uri);
-				if (result.getFileName().toString().endsWith(".mp3"))
-					playMP3(result, com.volume);
-				else
-					playWav(result, com.volume);
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+//	//-------------------------------------------------------------------
+//	/**
+//	 * @see org.prelle.telnet.mud.MUDSoundProtocolListener#mspReceivedCommand(java.lang.String)
+//	 */
+//	@Override
+//	public void mspReceivedCommand(String mspCommand) {
+//		logger.log(Level.WARNING, "TODO: "+mspCommand);
+//		PlayCommand com = convertMSP(mspCommand);
+//		logger.log(Level.WARNING, "com = "+com);
+//		try {
+//			if (com.url!=null) {
+//				logger.log(Level.WARNING, "URI ="+com.url);
+//				URI uri = URI.create(com.url);
+//				Path result = DataFileManager.downloadFileTo(com.filename, uri);
+//				if (result.getFileName().toString().endsWith(".mp3"))
+//					playMP3(result, com.volume);
+//				else
+//					playWav(result, com.volume);
+//			}
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	}
 
 	//-------------------------------------------------------------------
 	public static PlayCommand convertMSP(String mspLine) {
-		PlayCommand com = new PlayCommand();
+		if (mspLine == null) return null;
+		SoundType type;
 		if (mspLine.startsWith("!!SOUND(")) {
-			com.soundType=SoundType.SOUND;
+			type = SoundType.SOUND;
 		} else if (mspLine.startsWith("!!MUSIC(")) {
-			com.soundType=SoundType.MUSIC;
+			type = SoundType.MUSIC;
 		} else
 			throw new IllegalArgumentException("Not a valid MSP line: "+mspLine);
-		String data = mspLine.substring(8, mspLine.length()-2);
-
-		Character enclosedBy = null;
-		StringBuffer collect = new StringBuffer();
-		Character currentType = null;
-		for (int i=0; i<data.length(); i++) {
-			char c=data.charAt(i);
-			switch (c) {
-			case '\'': case '"':
-				if (enclosedBy==null) {
-					enclosedBy=c;
-					continue;
-				} else if (enclosedBy==c) {
-					// Ends
-					enclosedBy=null;
-					assignTo(com, currentType, collect);
-					currentType=null;
-					collect.delete(0, collect.length());
-				}
-				break;
-			case ')':
-				break;
-			case ' ':
-				if (collect.length()==0)
-					continue;
-				logger.log(Level.DEBUG, "Parse type {0} = {1}", currentType, collect);
-				assignTo(com, currentType, collect);
-				currentType=null;
-				collect.delete(0, collect.length());
-				break;
-			case '=':
-				currentType=collect.charAt(0);
-				collect.delete(0, collect.length());
-				break;
-			default:
-				collect.append(c);
-			}
-		}
-		if (collect.length()>0) {
-			assignTo(com, currentType, collect);
-		}
-
-		return com;
+		int openParen = mspLine.indexOf('(');
+		int closeParen = mspLine.lastIndexOf(')');
+		String data = (openParen != -1 && closeParen > openParen) ? mspLine.substring(openParen + 1, closeParen) : "";
+		return MSPHandler.parse(type, data);
 	}
 
 	//-------------------------------------------------------------------

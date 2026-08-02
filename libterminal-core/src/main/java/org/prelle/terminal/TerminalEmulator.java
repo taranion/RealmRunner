@@ -30,6 +30,12 @@ public interface TerminalEmulator {
 //	public ANSIInputStream getInputStream();
 
 	//-------------------------------------------------------------------
+	/**
+	 * Return the buffer that receives data from the server. You can register trigger or MSP handler here.
+	 */
+	public ReadBuffer getReadBuffer();
+	
+	//-------------------------------------------------------------------
 	public int[] getConsoleSize() throws IOException;
 	public void addConsoleSizeListener(Consumer<int[]> listener);
 
@@ -53,5 +59,8 @@ public interface TerminalEmulator {
 
 	//-------------------------------------------------------------------
 	void start();
+
+	//-------------------------------------------------------------------
+	void close();
 	
 }

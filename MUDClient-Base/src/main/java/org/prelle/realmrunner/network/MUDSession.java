@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -24,9 +25,11 @@ import org.prelle.telnet.TelnetListener;
 import org.prelle.telnet.TelnetOption;
 import org.prelle.telnet.TelnetOptionListener;
 import org.prelle.telnet.TelnetProtocol;
+import org.prelle.telnet.mud.MUDSoundProtocolOption;
 import org.prelle.telnet.option.EchoMode;
 import org.prelle.telnet.option.TelnetWindowSize;
 import org.prelle.telnet.option.TerminalType;
+import org.prelle.terminal.ReadBuffer.ReadBufferHandler;
 import org.prelle.terminal.TerminalEmulator;
 
 import lombok.Getter;
@@ -77,6 +80,7 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 		setupECHO();
 		setupNAWS();
 		setupTTYPE(builder.terminalTypes);
+		setupMSP();
 		
 		if (config.isMXPEnabled()) {
 			setupMXP();
@@ -87,6 +91,7 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 			streamFromMUD.addFilter(new LinefeedToCRLFFilter());
 		}
 		
+		DataFileManager.setActiveMUD("test", config);
 		terminal.start();
 	}
 	
@@ -146,6 +151,12 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 		mxpFilter = new MXPInputStreamFilter(mxp);
 		telnet.addListener( (TelnetListener)mxpFilter);
 		streamFromMUD.addFilter(mxpFilter);
+	}
+	
+	//-------------------------------------------------------------------
+	private void setupMSP() {
+		telnet.add(new MUDSoundProtocolOption(CommunicationRole.CLIENT));
+		console.getReadBuffer().addReadBufferHandler(new MSPHandler());
 	}
 
 //	//-------------------------------------------------------------------
@@ -306,14 +317,15 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 	//-------------------------------------------------------------------
 	public void close() {
 		logger.log(Level.WARNING, "closing session");
-//		try {
-//			streamToMUD.close();
+		try {
+			streamToMUD.close();
 //			streamFromMUD.close();
 //			socket.close();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+			getConsole().close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override

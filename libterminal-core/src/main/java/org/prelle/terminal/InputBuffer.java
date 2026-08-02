@@ -82,7 +82,7 @@ public class InputBuffer {
 		while (true) {
 			try {
 				AParsedElement frag = in.readFragment();
-				logger.log(Level.INFO,"InputBuffer: read fragment: " + frag+" - mode is " + mode+"  echoListener is " + echoListener);
+				logger.log(Level.INFO,"InputBuffer: read fragment: " + frag+" - mode is " + mode);
 				if (mode==TerminalMode.RAW) {
 					// In RAW mode don't filter anything, just pass it to the sink
 					sink.write(frag);
@@ -104,6 +104,7 @@ public class InputBuffer {
 					}
 					default -> {
 						
+						sink.write(frag);
 					}
 					}
 				}
@@ -150,7 +151,7 @@ public class InputBuffer {
 		if (toSend != null) {
 			logger.log(Level.INFO, "InputBuffer: sending to server: {0}", toSend);
 			try {
-				sink.write(toSend.getBytes());
+				sink.write(new PrintableFragment(toSend).getRaw());
 				sink.write(C0Code.CR.code());
 				sink.flush();
 			} catch (IOException e) {

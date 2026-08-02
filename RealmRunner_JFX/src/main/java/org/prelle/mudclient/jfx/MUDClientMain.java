@@ -23,6 +23,7 @@ import org.prelle.realmrunner.network.Config;
 import org.prelle.realmrunner.network.DataFileManager;
 import org.prelle.realmrunner.network.MUDSession;
 import org.prelle.realmrunner.network.MainConfig;
+import org.prelle.realmrunner.network.SoundManager;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.introspector.Property;
@@ -82,6 +83,7 @@ public class MUDClientMain extends Application {
 	private BooleanProperty soundEnabled = new SimpleBooleanProperty(true);
 	private SwitchIconButton btnTheme, btnMusic, btnSound;
 	
+	private SoundManager soundManager;
 
 	//-------------------------------------------------------------------
 	/**
@@ -106,6 +108,7 @@ public class MUDClientMain extends Application {
 		try {
 			readConfig();
 			DataFileManager.configure(mainConfig);
+			soundManager = new JavaFXSoundManager();
 			
 			Localization.addPropertiesFrom("Localization");
 		} catch (IOException e) {
@@ -249,25 +252,6 @@ public class MUDClientMain extends Application {
 //		}
 //	}
 
-	private static final char ESC = 27;
-	private static void writeTerminalCommands(PipedWriter writer) throws IOException {
-        writer.write(ESC + "%G");
-        writer.write(ESC + "[31m");
-        writer.write("Hello\r\n");
-        writer.write(ESC + "[32;43m");
-        writer.write("World\r\n");
-        AParsedElement csi = new DeviceAttributes(Variant.Primary);
-		ByteArrayOutputStream baos = new ByteArrayOutputStream(16);
-		csi.encode(baos, true);
-		byte[] data = baos.toByteArray();
-		char[] cata = new char[data.length];
-		for (int i=0; i<data.length; i++) {
-			cata[i]=(char)(data[i]&0xff);
-		}
-		writer.write(cata);
-        writer.write(ESC + "[0m");
-        writer.write("und Welt\r\n");
-     }
 
 //	private MUDSession startReadingFromMUD(SessionConfig config, Config activeConfig) throws IOException, InterruptedException {
 //		Charset useCharset = StandardCharsets.UTF_8;
@@ -451,7 +435,12 @@ public class MUDClientMain extends Application {
 					.setTerminalTypes("Realm Runner","xterm","MTTS 271")
 					.build();
 			if (session!=null) {
-				Tab tab = new Tab("Session", ui);
+				Tab tab = new Tab(connectWith.getServer(), ui);
+				tab.setOnClosed(_ -> {
+					logger.log(Level.INFO, "User is closing tab for session {0}", session);
+					session.close();
+					sessionTabs.remove(session);
+				});
 				tabs.getTabs().add(tab);
 				tabs.getSelectionModel().select(tab);
 				sessionTabs.put(session, tab);
