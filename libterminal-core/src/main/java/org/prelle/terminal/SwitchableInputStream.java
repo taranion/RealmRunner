@@ -58,6 +58,7 @@ public class SwitchableInputStream extends InputStream {
 	//-------------------------------------------------------------------
 	@Override
 	public int read(byte[] buf, int off, int len) throws IOException {
+		System.err.println("SwitchableInputStream.read(byte[],int,int) called");
 		if (buf == null) throw new NullPointerException("Buffer cannot be null");
 		if (off < 0 || len < 0 || len > buf.length - off) throw new IndexOutOfBoundsException();
 		if (len == 0) return 0;
@@ -96,16 +97,17 @@ public class SwitchableInputStream extends InputStream {
 				return 0;
 			}
 
+			System.err.println("SwitchableInputStream: RCV2.avail="+available);
 			if (available > 0) {
 				int bytesRead = src.read(buf, off, Math.min(len, available));
-				if (bytesRead > 0 && logger.isLoggable(Level.TRACE)) {
+				if (bytesRead > 0 && logger.isLoggable(Level.INFO)) {
 					String s = new String(buf, off, bytesRead);
-					logger.log(Level.TRACE, "RCV {0} bytes from source = {1}", bytesRead, s);
+					logger.log(Level.INFO, "RCV {0} bytes from source = {1}", bytesRead, s);
 				}
 				// Print out the injected byte for debugging
-				if (logger.isLoggable(Level.TRACE)) {
+				if (logger.isLoggable(Level.INFO)) {
 					String s = new String(buf, off, bytesRead);
-					System.err.println("SwitchableInputStream: RCV2"+s);
+					System.err.println("SwitchableInputStream: RCV2: "+s);
 				}
 				return bytesRead;
 			}
@@ -115,11 +117,11 @@ public class SwitchableInputStream extends InputStream {
 	//-------------------------------------------------------------------
 	@Override
 	public int read(byte[] buf) throws IOException {
-//		System.err.println("SwitchableInputStream.read(byte[]) called");
+		System.err.println("SwitchableInputStream.read(byte[]) called");
 		int t =  read(buf, 0, buf.length);
 		// Debug string
 		String s = new String(buf, 0, t);
-//		System.err.println("SwitchableInputStream.read(byte[]) returned "+s);
+		System.err.println("SwitchableInputStream.read(byte[]) returned "+s);
 		return t;
 	}
 

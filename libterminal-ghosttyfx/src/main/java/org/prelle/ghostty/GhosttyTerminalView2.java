@@ -15,58 +15,52 @@ import java.util.function.Consumer;
 
 import org.prelle.ansi.ANSIInputStream;
 import org.prelle.ansi.ANSIOutputStream;
-import org.prelle.ansi.AParsedElement;
+import org.prelle.ansi.C0Code;
 import org.prelle.ansi.FilteringANSIStream;
-import org.prelle.ansi.PrintableFragment;
-import org.prelle.ansi.commands.ResetMode;
-import org.prelle.ansi.commands.SetMode;
-import org.prelle.ansi.commands.SetMode.ANSIMode;
-import org.prelle.terminal.DataFromTerminalOutputStream;
-import org.prelle.terminal.DataToTerminalInputStream;
-import org.prelle.terminal.InputBuffer;
-import org.prelle.terminal.InputBuffer.InputBufferHandler;
-import org.prelle.terminal.ReadBuffer;
+import org.prelle.terminal.FromServerToTerminal;
+import org.prelle.terminal.FromTerminalToServer;
 import org.prelle.terminal.TerminalEmulator;
 import org.prelle.terminal.TerminalMode;
 
-import io.github.vlaaad.ghosttyfx.Terminal;
 import io.github.vlaaad.ghosttyfx.TerminalView;
+import javafx.scene.control.ContextMenu;
 
 /**
  *
  */
-public class GhosttyTerminalView implements TerminalEmulator, Terminal {
+public class GhosttyTerminalView2 implements TerminalEmulator {
 
 	private final static System.Logger logger = System.getLogger("ghostty");
-	
-	private DataToTerminalInputStream inPipe;
-	private DataFromTerminalOutputStream outPipe;
-	private InputBuffer inputBuffer;
-	private ReadBuffer readBuffer;
 
+	private Charset encoding = StandardCharsets.UTF_8;
+
+	private GhosttyTerminalConnector connector;
 	private TerminalView widget;
-    
+	   
+    private FromServerToTerminal fromServer;
+	private FromTerminalToServer fromTerminal;
+   
     private int terminalWidth = -1;
     private int terminalHeight = -1;
     private List<Consumer<int[]>> consoleSizeListeners = new ArrayList<>();
     
-    //private PassthroughANSIInputStream pin;
-    private ANSIInputStream pin;
     private ANSIOutputStream out;
-    private boolean localEcho = true;
+    private ANSIInputStream pin;
+    private ContextMenu contextMenu;
 
 	//-------------------------------------------------------------------
-	public GhosttyTerminalView() {
-		inPipe = new DataToTerminalInputStream();
-		outPipe = new DataFromTerminalOutputStream();
-		inputBuffer = new InputBuffer(outPipe);
-		readBuffer = new ReadBuffer(inPipe);
-
+	public GhosttyTerminalView2() {
+		try {
+			connector = new GhosttyTerminalConnector(StandardCharsets.UTF_8);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		widget = new TerminalView( (columns,rows) -> {
 			logger.log(Level.DEBUG, "TerminalView<init> create terminal with {0}x{1}", columns, rows);
 			terminalWidth = columns-3;
 			terminalHeight = rows;
-			return this;
+			return connector;
 		});
 		widget.setMaxHeight(Double.MAX_VALUE);
 		widget.setMaxWidth(Double.MAX_VALUE);
@@ -81,14 +75,13 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	 */
 	@Override
 	public FilteringANSIStream connectWith(InputStream in, OutputStream out) {
-		this.out = new ANSIOutputStream(out);
+		logger.log(Level.INFO, "ENTER: connectWith");
 		pin = new ANSIInputStream(in);
-		inputBuffer.setSink(this.out);
-		readBuffer.setSource(pin);
+		this.out = new ANSIOutputStream(out);
 		
 		try {
-			logger.log(Level.WARNING, "Output: "+this.outPipe);
-			logger.log(Level.WARNING, "Input : "+this.inPipe);
+			logger.log(Level.WARNING, "Output: "+this.out);
+			logger.log(Level.WARNING, "Input : "+this.pin);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -103,15 +96,24 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	@Override
 	public void start() {
 		logger.log(Level.INFO, "start() called");
+		// Start a thread that reads from the MUD and writes to the terminal
+		fromServer = new FromServerToTerminal(pin, connector.getWriteToTerminal(), encoding);
+		fromTerminal = new FromTerminalToServer(connector.getReadByServer(), out);
+		fromTerminal.setEchoStream(connector.getWriteToTerminal());
+		fromTerminal.setLocalEcho(true);
+		
 		try {
-			if (localEcho) {
-				logger.log(Level.DEBUG, "Clear SendReceiveMode");
-				out.write(new ResetMode(ANSIMode.SRM_SEND_RECEIVE_MODE));
-			} else {
-				logger.log(Level.DEBUG, "Set SendReceiveMode");
-				out.write(new SetMode(ANSIMode.SRM_SEND_RECEIVE_MODE));
-			}
-		} catch (IOException e) {
+//			widget.setTtyConnector(connector);
+			logger.log(Level.WARNING, "Output: "+pin);
+			logger.log(Level.WARNING, "Input : "+out);
+			Thread t = new Thread(fromServer, "FromServerToTerminal");
+			t.start();
+			Thread t2 = new Thread(fromTerminal, "FromTerminalToServer");
+			t2.start();
+			
+			Thread.sleep(200);
+			connector.getWriteToTerminal().write("Welcome to the JediTermFX Terminal Emulator!\r\n".getBytes(encoding));
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -119,23 +121,6 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	
 	//-------------------------------------------------------------------
 	private void initInteractivity() {
-		inputBuffer.setEchoListener( bytes -> {
-			logger.log(Level.INFO, "eventually echo ''{0}'' - localEcho is {1}", bytes.length, localEcho);
-			if (localEcho) {
-				// Local echo for Printable, CO and C1 codes
-				logger.log(Level.WARNING, "TODO: generate echo for {0} bytes", bytes.length);
-				inPipe.writeToTerminal(bytes);
-			}
-		});
-		inputBuffer.setInputHandler(new InputBufferHandler() {
-			
-			@Override
-			public String onInputBufferLine(String line) {
-				logger.log(Level.INFO, "User typed {0}", line);
-				return line;
-			}
-		});
-
 		widget.terminalSizeProperty().addListener( (_,_,n) -> {
 			if (n!=null) {
 				int w = n.columns();
@@ -245,69 +230,29 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 //		refresh();
 //	}
 
-	//-------------------------------------------------------------------
-	/**
-	 * @see org.prelle.terminal.TerminalEmulator#getMode()
-	 */
 	@Override
 	public TerminalMode getMode() {
-		return inputBuffer.getMode();
+		// TODO Auto-generated method stub
+		return null;
 	}
 
-	//-------------------------------------------------------------------
-	/**
-	 * @see org.prelle.terminal.TerminalEmulator#setMode(org.prelle.terminal.TerminalMode)
-	 */
 	@Override
 	public TerminalEmulator setMode(TerminalMode mode) {
-		inputBuffer.setMode(mode);
-		return this;
+		// TODO Auto-generated method stub
+		return null;
 	}
 
-	//-------------------------------------------------------------------
-	/**
-	 * @see org.prelle.terminal.TerminalEmulator#isLocalEchoActive()
-	 */
 	@Override
 	public boolean isLocalEchoActive() {
-		return localEcho;
+		return fromTerminal.isLocalEcho();
 	}
 
 	@Override
 	public TerminalEmulator setLocalEchoActive(boolean value) {
-		logger.log(Level.INFO, "setLocalEchoActive({0}) called", value);
-		this.localEcho = value;
-		
-        // Inject ANSI SRM (SendReceiveMode) control sequence into terminal input stream
-//        ControlSequenceFragment srmSequence = value
-//            ? new ResetMode(ANSIMode.SRM_SEND_RECEIVE_MODE)  // ESC [ 1 2 l -> Local Echo ON
-//            : new SetMode(ANSIMode.SRM_SEND_RECEIVE_MODE);   // ESC [ 1 2 h -> Local Echo OFF
-//
-//        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//        srmSequence.encode(baos, true);
-//        if (inPipe != null) {
-//            inPipe.inject(baos.toByteArray());
-//        }
+		logger.log(Level.INFO, "{0} local echo", value ? "Enable" : "Disable");
+		fromTerminal.setLocalEcho(value);
 		return this;
 	}
-
-//	//-------------------------------------------------------------------
-//	/**
-//	 * @see org.prelle.terminal.TerminalEmulator#getOutputStream()
-//	 */
-//	@Override
-//	public ANSIOutputStream getOutputStream() {
-//		return out;
-//	}
-//
-//	//-------------------------------------------------------------------
-//	/**
-//	 * @see org.prelle.terminal.TerminalEmulator#getInputStream()
-//	 */
-//	@Override
-//	public ANSIInputStream getInputStream() {
-//		return in;
-//	}
 
 	@Override
 	public int[] getConsoleSize() throws IOException {
@@ -321,49 +266,9 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 		return new Charset[] {StandardCharsets.UTF_8, StandardCharsets.ISO_8859_1, StandardCharsets.US_ASCII};
 	}
 
+	//-------------------------------------------------------------------
 	public TerminalView getPane() {
 		return widget;
-	}
-
-	//-------------------------------------------------------------------
-	/**
-	 * @see io.github.vlaaad.ghosttyfx.Terminal#output()
-	 */
-	@Override
-	public InputStream output() throws Exception {
-		System.err.println("GhosttyTerminalView.output() called and returns "+inPipe);
-		return inPipe;
-	}
-
-	//-------------------------------------------------------------------
-	/**
-     * The terminal view reads this stream and writes the received bytes to the
-     * terminal emulator.
-     *
-     * @return the stream that produces terminal output
-     * @throws Exception if the output stream cannot be opened
-	 * @see io.github.vlaaad.ghosttyfx.Terminal#input()
-	 */
-	@Override
-	public OutputStream input() throws Exception {
-		System.err.println("GhosttyTerminalView.input() called and returns "+outPipe);
-		return outPipe;
-	}
-
-	//-------------------------------------------------------------------
-	/**
-	 * @see io.github.vlaaad.ghosttyfx.Terminal#resize(int, int, int, int)
-	 */
-	@Override
-	public void resize(int columns, int rows, int widthPx, int heightPx) throws Exception {
-		// TODO Auto-generated method stub
-		logger.log(Level.INFO, "resize({0}x{1} cells, {2}x{3} pixel) called", columns, rows, widthPx, heightPx);
-	}
-
-	@Override
-	public void close() throws Exception {
-		// TODO Auto-generated method stub
-		
 	}
 
 	//-------------------------------------------------------------------
@@ -375,10 +280,18 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 		logger.log(Level.INFO, "sendUserInput: {0}", text);
 		byte[] data = (text + "\r\n").getBytes(StandardCharsets.UTF_8);
 		try {
-			inPipe.writeToTerminal(data);
-			outPipe.flush();
+			out.write(text);
+			out.write(C0Code.CR);
+			out.write(C0Code.LF);
+			out.flush();
+			
+			if (isLocalEchoActive()) {
+				connector.getWriteToTerminal().write(data);
+				connector.getWriteToTerminal().flush();
+			}
 		} catch (IOException e) {
-			logger.log(Level.ERROR, "Error sending user input to outPipe", e);
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -402,13 +315,4 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 		//pin.releaseBuffer();
 	}
 
-	//-------------------------------------------------------------------
-	private void handleFragmentSent(AParsedElement fragmentSent) {
-		if (localEcho) {
-			// Local echo for Printable, CO and C1 codes
-			if (fragmentSent instanceof PrintableFragment) {
-				inPipe.writeToTerminal(fragmentSent.getRaw());
-			}
-		}
-	}
 }

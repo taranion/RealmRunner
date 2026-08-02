@@ -15,10 +15,12 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.function.Consumer;
 
+import org.prelle.ansi.ANSIInputStream;
 import org.prelle.ansi.ANSIOutputStream;
 import org.prelle.ansi.C0Code;
 import org.prelle.ansi.FilteringANSIStream;
-import org.prelle.ansi.ANSIInputStream;
+import org.prelle.terminal.FromServerToTerminal;
+import org.prelle.terminal.FromTerminalToServer;
 import org.prelle.terminal.TerminalEmulator;
 import org.prelle.terminal.TerminalMode;
 
@@ -41,6 +43,9 @@ public class JediTerminalView implements TerminalEmulator {
 	private JediTtyConnector connector;
     private ANSIOutputStream out;
     private ANSIInputStream pin;
+   
+    private FromServerToTerminal fromServer;
+	private FromTerminalToServer fromTerminal;
     
     private int terminalWidth = -1;
     private int terminalHeight = -1;
@@ -306,8 +311,9 @@ public class JediTerminalView implements TerminalEmulator {
 	@Override
 	public void start() {
 		// Start a thread that reads from the MUD and writes to the terminal
-		FromServerToTerminal fromServer = new FromServerToTerminal(pin, connector.getWriteToTerminal(), encoding);
-		FromTerminalToServer fromTerminal = new FromTerminalToServer(connector.getReadByServer(), out);
+		fromServer = new FromServerToTerminal(pin, connector.getWriteToTerminal(), encoding);
+		fromTerminal = new FromTerminalToServer(connector.getReadByServer(), out);
+		fromTerminal.setEchoStream(connector.getWriteToTerminal());
 		
 		try {
 			widget.setTtyConnector(connector);

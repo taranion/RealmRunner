@@ -5,7 +5,8 @@ module org.prelle.jeditermfxterminal {
 	requires javafx.controls;
 	requires transitive javafx.graphics;
 	requires java.desktop;
-	requires org.prelle.libterminal;
+	requires transitive org.prelle.libterminal;
 	requires ghosttyfx;
-	requires org.prelle.libansi;
+	requires transitive  org.prelle.libansi;
+	requires lombok;
 }

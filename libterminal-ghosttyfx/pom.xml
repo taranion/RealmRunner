@@ -1,14 +1,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.prelle</groupId>
+    <parent>
+        <groupId>org.prelle</groupId>
+        <artifactId>realmrunner</artifactId>
+        <version>0.0.1</version>
+    </parent>
+
   <artifactId>libterminal-ghosttyfx</artifactId>
-  <version>0.0.1</version>
   <name>LibTerminal-GhosttyFX</name>
   <description>A pure native JavaFX Terminal component</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<javafx.version>25.0.1</javafx.version>
+		<javafx.version>26.0.2</javafx.version>
 		<maven.compiler.target>25</maven.compiler.target>
 		<maven.compiler.source>25</maven.compiler.source>
         <jeditermfx.version>1.1.0</jeditermfx.version>
@@ -18,7 +22,6 @@
            <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>1.18.46</version>
             </dependency>
 		<dependency>
 			<groupId>org.prelle</groupId>
