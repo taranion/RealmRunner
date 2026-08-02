@@ -97,7 +97,7 @@ public class DataFromTerminalOutputStream extends OutputStream {
 
 	//-------------------------------------------------------------------
 	private int read() throws IOException {
-		logger.log(Logger.Level.INFO, "ENTER: read");
+//		logger.log(Logger.Level.INFO, "ENTER: read");
 		synchronized (ringBuffer) {
 			while (available == 0) {
 				try {
@@ -112,7 +112,7 @@ public class DataFromTerminalOutputStream extends OutputStream {
 			capacity++;
 			
 			ringBuffer.notifyAll();
-			logger.log(Logger.Level.INFO, "LEAVE: read");
+//			logger.log(Logger.Level.INFO, "LEAVE: read");
 			return b;
 		}
 	}

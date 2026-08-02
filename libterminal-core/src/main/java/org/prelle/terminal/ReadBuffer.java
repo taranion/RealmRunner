@@ -5,7 +5,6 @@ import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 import org.prelle.ansi.ANSIInputStream;
 import org.prelle.ansi.ANSIOutputStream;
@@ -14,7 +13,6 @@ import org.prelle.ansi.C0Code;
 import org.prelle.ansi.C0Fragment;
 import org.prelle.ansi.PrintableFragment;
 
-import lombok.Getter;
 import lombok.Setter;
 
 /**
@@ -28,6 +26,7 @@ public class ReadBuffer {
 		 * @return Text to send to server. If NULL is returned, nothing is sent to the server.
 		 */
 		String onLineReceived(String line);
+		void onConnectionList();
 	}
 	
 	private final static Logger logger = System.getLogger("terminal");
@@ -63,26 +62,56 @@ public class ReadBuffer {
 
 	//-------------------------------------------------------------------
 	private void run() {
-		while (true) {
-			try {
-				AParsedElement frag = source.readFragment();
-				System.err.println("ReadBuffer: read fragment: " + frag);
-				switch (frag) {
-				case C0Fragment c0 when c0.getCode()==C0Code.RS -> releaseBuffer();
-				default -> {}
+		try {
+			while (true) {
+				try {
+					AParsedElement frag = source.readFragment();
+					logger.log(Level.DEBUG, "read fragment: " + frag);
+					if (frag==null) {
+						logger.log(Level.WARNING, "Connection lost");
+						if (readBufferHandler!=null) {
+							readBufferHandler.onConnectionList();
+						}
+						return;
+					}
+					switch (frag) {
+					case C0Fragment c0 when c0.getCode()==C0Code.RS -> releaseBuffer();
+					case C0Fragment c0 when c0.getCode()==C0Code.CR -> receivedLineEnded();
+					case C0Fragment c0 when c0.getCode()==C0Code.LF -> receivedLineEnded();
+					case PrintableFragment print -> {
+						text.append(print.getText());
+					}
+					default -> {
+						
+						}
+					}
+					
+					synchronized (out) {
+						out.write(frag);
+						out.flush();
+					}
+				} catch (IOException e) {
+					logger.log(Level.WARNING, "IOException reading from server", e);
+					if (readBufferHandler!=null) {
+						readBufferHandler.onConnectionList();
+					}
+					return;
 				}
-				
-				synchronized (out) {
-					out.write(frag);
-					out.flush();
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
+		} finally {
+			logger.log(Level.INFO, "ReadBuffer thread exiting");
 		}
 	}
 	
+	private void receivedLineEnded() {
+		String line = text.toString();
+		text.setLength(0);
+		logger.log(Level.DEBUG, "RCV: "+line);
+		if (readBufferHandler!=null) {
+			readBufferHandler.onLineReceived(line);
+		}
+	}
+
 	public void releaseBuffer() {
 		terminal.releaseBuffer();
 	}

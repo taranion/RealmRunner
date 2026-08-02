@@ -1,9 +1,11 @@
 package org.prelle.terminal;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -13,6 +15,7 @@ import org.prelle.ansi.AParsedElement;
 import org.prelle.ansi.C0Code;
 import org.prelle.ansi.C0Fragment;
 import org.prelle.ansi.PrintableFragment;
+import org.prelle.ansi.commands.CursorBackward;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -70,11 +73,16 @@ public class InputBuffer {
 	}
 
 	//-------------------------------------------------------------------
+	public void stop() {
+		readFromTerminalThread.interrupt();
+	}
+	
+	//-------------------------------------------------------------------
 	private void run() {
 		while (true) {
 			try {
 				AParsedElement frag = in.readFragment();
-				System.err.println("InputBuffer: read fragment: " + frag+" - mode is " + mode+"  echoListener is " + echoListener);
+				logger.log(Level.INFO,"InputBuffer: read fragment: " + frag+" - mode is " + mode+"  echoListener is " + echoListener);
 				if (mode==TerminalMode.RAW) {
 					// In RAW mode don't filter anything, just pass it to the sink
 					sink.write(frag);
@@ -85,8 +93,18 @@ public class InputBuffer {
 				
 				// If an EchoListener has been defined, echo all Printable and C0 fragments
 				if (echoListener != null) {
-					if (frag instanceof PrintableFragment || frag instanceof C0Fragment) {
+					switch (frag) {
+					case PrintableFragment _ -> echoListener.accept(frag.getRaw());
+					case C0Fragment c0 when c0.getCode()==C0Code.DEL -> echoDelete();
+					case C0Fragment c0 ->  {
 						echoListener.accept(frag.getRaw());
+						if (c0.getCode()==C0Code.CR) {
+							echoListener.accept("\r\n".getBytes());
+						}
+					}
+					default -> {
+						
+					}
 					}
 				}
 			} catch (IOException e) {
@@ -100,6 +118,7 @@ public class InputBuffer {
 		switch (frag) {
 		case PrintableFragment pf -> {
 				text.append(pf.getText());
+				logger.log(Level.INFO, "InputBuffer now: {0}", text);
 		}
 		case C0Fragment c0 -> {
 			switch (c0.getCode()) {
@@ -129,6 +148,7 @@ public class InputBuffer {
 		// Clear the buffer
 		text.setLength(0);
 		if (toSend != null) {
+			logger.log(Level.INFO, "InputBuffer: sending to server: {0}", toSend);
 			try {
 				sink.write(toSend.getBytes());
 				sink.write(C0Code.CR.code());
@@ -144,6 +164,34 @@ public class InputBuffer {
 	private void deleteLast() {
 		if (text.length() > 0) {
 			text.deleteCharAt(text.length() - 1);
+			logger.log(Level.INFO, "DEL: InputBuffer now: {0}", text);
+//			try {
+//				sink.write(new CursorBackward(2).getRaw());
+//				sink.write((int)' '); // Overwrite with space
+//				sink.write(new CursorBackward(1).getRaw());
+//				sink.flush();
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+		}
+	}
+	
+	//-------------------------------------------------------------------
+	private void echoDelete() {
+		logger.log(Level.INFO, "echoDelete");
+		try {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			baos.write(C0Code.BS.code());
+			baos.write((int)' '); // Overwrite with space
+			baos.write(C0Code.BS.code());
+			if (echoListener != null) {
+				echoListener.accept(baos.toByteArray());
+			}
+			baos.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 }

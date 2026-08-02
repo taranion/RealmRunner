@@ -75,7 +75,7 @@ public class DataToTerminalInputStream extends InputStream {
 	
 	//-------------------------------------------------------------------
 	public void writeToTerminal(byte[] data) {
-		logger.log(Logger.Level.INFO, "ENTER: write: b={0}", data);
+//		logger.log(Logger.Level.INFO, "ENTER: write: b={0}", data);
 		synchronized (ringBuffer) {
 			// Wait until there is space in the buffer
 			waitForCapacity(data.length);
@@ -93,7 +93,7 @@ public class DataToTerminalInputStream extends InputStream {
 			
 			ringBuffer.notifyAll();
 		}
-		logger.log(Logger.Level.INFO, "LEAVE: write: b={0}", data);
+//		logger.log(Logger.Level.INFO, "LEAVE: write: b={0}", data);
 	}
 
 	//-------------------------------------------------------------------
@@ -129,37 +129,40 @@ public class DataToTerminalInputStream extends InputStream {
 			capacity++;
 			
 			ringBuffer.notifyAll();
-//			logger.log(Logger.Level.INFO, "LEAVE: read={0}", (char)b);
+			logger.log(Logger.Level.INFO, "LEAVE: read={0} / {1}", b&0xff,(char)b);
 			return b;
 		}
 	}
 	
 	@Override
 	public int read(byte[] buf) throws IOException {
-		logger.log(Logger.Level.INFO, "ENTER: read(byte[])");
+//		logger.log(Logger.Level.INFO, "ENTER: read(byte[])");
 		int len = 0;
-		synchronized (ringBuffer) {
-			// If we have read data, but there is none left at the moment, return
-			if (available==0 && len>0) {
+		try {
+			synchronized (ringBuffer) {
+				// If we have read data, but there is none left at the moment, return
+				if (available==0 && len>0) {
+					return len;
+				}
+				while (available == 0) {
+					try {
+						ringBuffer.wait(100);
+					} catch (InterruptedException e) {
+					}
+				}
+				
+				while (available>0 && len<buf.length) {
+					buf[len++] = ringBuffer[ readPos ]; // Convert to unsigned
+					readPos = (readPos + 1) % BUFFER_SIZE; // Eventually wrap around
+					available--;
+					capacity++;
+				}
+				
+				ringBuffer.notifyAll();
 				return len;
 			}
-			while (available == 0) {
-				try {
-					ringBuffer.wait(100);
-				} catch (InterruptedException e) {
-				}
-			}
-			
-			while (available>0 && len<buf.length) {
-				buf[len++] = ringBuffer[ readPos ]; // Convert to unsigned
-				readPos = (readPos + 1) % BUFFER_SIZE; // Eventually wrap around
-				available--;
-				capacity++;
-			}
-			
-			ringBuffer.notifyAll();
-//			logger.log(Logger.Level.INFO, "LEAVE: read={0}", (char)b);
-			return len;
+		} finally {
+			logger.log(Logger.Level.TRACE, "LEAVE: read(byte[]) returned {0} bytes", len);
 		}
     }
 

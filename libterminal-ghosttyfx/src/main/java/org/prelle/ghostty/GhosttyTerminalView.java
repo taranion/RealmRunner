@@ -26,6 +26,7 @@ import org.prelle.terminal.DataToTerminalInputStream;
 import org.prelle.terminal.InputBuffer;
 import org.prelle.terminal.InputBuffer.InputBufferHandler;
 import org.prelle.terminal.ReadBuffer;
+import org.prelle.terminal.ReadBuffer.ReadBufferHandler;
 import org.prelle.terminal.TerminalEmulator;
 import org.prelle.terminal.TerminalMode;
 
@@ -120,19 +121,40 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	//-------------------------------------------------------------------
 	private void initInteractivity() {
 		inputBuffer.setEchoListener( bytes -> {
-			logger.log(Level.INFO, "eventually echo ''{0}'' - localEcho is {1}", bytes.length, localEcho);
 			if (localEcho) {
 				// Local echo for Printable, CO and C1 codes
-				logger.log(Level.WARNING, "TODO: generate echo for {0} bytes", bytes.length);
+				logger.log(Level.DEBUG, "generate echo for {0} bytes", bytes.length);
 				inPipe.writeToTerminal(bytes);
-			}
+			} else
+				try {
+					inPipe.write((byte)'*');
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		});
 		inputBuffer.setInputHandler(new InputBufferHandler() {
 			
 			@Override
 			public String onInputBufferLine(String line) {
-				logger.log(Level.INFO, "User typed {0}", line);
+				logger.log(Level.INFO, "User typed ''{0}''", line);
 				return line;
+			}
+		});
+		// Listen to events from server
+		readBuffer.setReadBufferHandler(new ReadBufferHandler() {
+			@Override
+			public String onLineReceived(String line) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			
+			@Override
+			public void onConnectionList() {
+				// TODO Auto-generated method stub
+				logger.log(Level.WARNING, "Connection lost");
+				inPipe.writeToTerminal("\r\n\nConnection lost to server.\r\n".getBytes());
+				inputBuffer.stop();
 			}
 		});
 
@@ -360,6 +382,10 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 		logger.log(Level.INFO, "resize({0}x{1} cells, {2}x{3} pixel) called", columns, rows, widthPx, heightPx);
 	}
 
+	//-------------------------------------------------------------------
+	/**
+	 * @see io.github.vlaaad.ghosttyfx.Terminal#close()
+	 */
 	@Override
 	public void close() throws Exception {
 		// TODO Auto-generated method stub
