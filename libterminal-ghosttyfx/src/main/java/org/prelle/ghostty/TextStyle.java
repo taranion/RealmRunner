@@ -1,4 +1,4 @@
-package org.prelle.jeditermfxterminal;
+package org.prelle.ghostty;
 
 /**
  * 

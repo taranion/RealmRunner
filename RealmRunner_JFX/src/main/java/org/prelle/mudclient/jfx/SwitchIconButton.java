@@ -24,11 +24,13 @@ public class SwitchIconButton extends Button {
 		ivOn  = new ImageView(imgOn);
 		ivOff = new ImageView(imgOff);
 		setGraphic(prop.get() ? ivOn : ivOff);
-		setStyle("-fx-background-color: transparent; -fx-border: 0px;");
+		//setStyle("-fx-background-color: transparent; -fx-border: 0px;");
 		this.setTooltip(new Tooltip(tooltip));
 		prop.addListener( (_, _, newVal) -> {
 			setGraphic(newVal ? ivOn : ivOff);
 		});
+		
+		this.setAccessibleText(tooltip);
 	}
 
 }

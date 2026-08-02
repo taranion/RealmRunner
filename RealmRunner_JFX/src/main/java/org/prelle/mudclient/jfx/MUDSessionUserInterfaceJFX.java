@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.prelle.jeditermfxterminal.GhosttyTerminalView;
+import org.prelle.ghostty.GhosttyTerminalView;
 import org.prelle.jeditermfxterminal.JediTerminalView;
 import org.prelle.mudclient.jfx.MUDClientMain.HistoryEntry;
 import org.prelle.realmrunner.network.MUDSession;

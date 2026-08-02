@@ -1,4 +1,4 @@
-package org.prelle.jeditermfxterminal.impl;
+package org.prelle.ghostty.impl;
 
 import javafx.scene.canvas.Canvas;
 

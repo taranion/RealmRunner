@@ -1,5 +1,5 @@
 module org.prelle.jeditermfxterminal {
-	exports org.prelle.jeditermfxterminal;
+	exports org.prelle.ghostty;
 
 	requires javafx.base;
 	requires javafx.controls;

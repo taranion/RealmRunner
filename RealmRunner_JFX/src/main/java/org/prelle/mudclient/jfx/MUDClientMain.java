@@ -37,6 +37,7 @@ import com.graphicmud.symbol.SymbolManager;
 import atlantafx.base.theme.PrimerDark;
 import atlantafx.base.theme.PrimerLight;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Insets;
@@ -197,6 +198,7 @@ public class MUDClientMain extends Application {
 //		Config connectWith = mainConfig.getWorld().get("eden");
 //		connectWith(connectWith);
 		
+		System.err.println("Accessibility is "+(Platform.accessibilityActiveProperty().get()?"active":"inactive"));
 	}
 
 //	//-------------------------------------------------------------------

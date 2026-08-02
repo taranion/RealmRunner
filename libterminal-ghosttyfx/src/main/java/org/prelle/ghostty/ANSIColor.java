@@ -1,4 +1,4 @@
-package org.prelle.jeditermfxterminal;
+package org.prelle.ghostty;
 
 /**
  * @see https://strasis.com/documentation/limelight-xe/reference/ecma-48-sgr-codes

@@ -1,4 +1,4 @@
-package org.prelle.jeditermfxterminal.impl;
+package org.prelle.ghostty.impl;
 
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;

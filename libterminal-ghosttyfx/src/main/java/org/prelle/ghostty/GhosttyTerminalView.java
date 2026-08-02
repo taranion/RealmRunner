@@ -1,7 +1,7 @@
 /**
  *
  */
-package org.prelle.jeditermfxterminal;
+package org.prelle.ghostty;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
