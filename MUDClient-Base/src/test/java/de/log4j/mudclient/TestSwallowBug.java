@@ -8,7 +8,7 @@ import java.nio.charset.Charset;
 import java.util.function.Consumer;
 
 import org.prelle.ansi.FilteringANSIStream;
-import org.prelle.ansi.PassthroughANSIInputStream;
+import org.prelle.ansi.ANSIInputStream;
 import org.prelle.realmrunner.network.Config;
 import org.prelle.realmrunner.network.MUDSession;
 import org.prelle.terminal.EchoChamber;
@@ -71,7 +71,7 @@ public class TestSwallowBug {
 		@Getter
 		private SwitchableOutputStream outPipe= new SwitchableOutputStream();
 		@Getter
-	   private PassthroughANSIInputStream pin;
+	   private ANSIInputStream pin;
 		    private boolean localEcho = true;
 		    private EchoChamber echoChamber;
 
@@ -132,7 +132,7 @@ public class TestSwallowBug {
 
 		@Override
 		public FilteringANSIStream connectWith(InputStream in, OutputStream out) {
-			pin = new PassthroughANSIInputStream(in);
+			pin = new ANSIInputStream(in);
 			//PassOutANSIOutputStream pout = new PassOutANSIOutputStream(out, (fragmentSent) -> handleFragmentSent(fragmentSent));
 			echoChamber = new EchoChamber(out, inPipe);
 			outPipe.setSink(echoChamber);

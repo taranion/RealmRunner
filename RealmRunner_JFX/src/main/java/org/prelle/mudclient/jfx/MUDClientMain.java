@@ -166,9 +166,9 @@ public class MUDClientMain extends Application {
         HeaderBar.setAlignment(button, Pos.CENTER_LEFT);
         HeaderBar.setMargin(button, new Insets(5));
         var headerBar = new HeaderBar();
-        headerBar.setLeading(new Label("RealmRunner"));
+        headerBar.setLeft(new Label("RealmRunner"));
         headerBar.setCenter(button);
-        headerBar.setTrailing(new HBox(0,btnSound,btnMusic,btnTheme));
+        headerBar.setRight(new HBox(0,btnSound,btnMusic,btnTheme));
 
         var root = new BorderPane();
         root.setStyle("-fx-background: #afafbf;");

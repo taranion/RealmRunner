@@ -11,9 +11,9 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.prelle.ansi.ANSIInputStream;
 import org.prelle.ansi.ANSIInputStreamFilter;
 import org.prelle.ansi.AParsedElement;
-import org.prelle.ansi.PassthroughANSIInputStream;
 import org.prelle.ansi.commands.SelectGraphicRendition;
 import org.prelle.mxp.MXPInputStreamFilter;
 
@@ -74,7 +74,7 @@ class MXPInputStreamTest {
 		mxpFilter.setMXPActive(true);
 		
 		List<AParsedElement> parsedElements = new ArrayList<>();
-		PassthroughANSIInputStream in = new PassthroughANSIInputStream(bais);
+		ANSIInputStream in = new ANSIInputStream(bais);
 		in.addFilter(mxpFilter);
 		in.addFilter(new CSIFilter( pe -> parsedElements.add(pe)));
 		byte[] tmp  = new byte[100];

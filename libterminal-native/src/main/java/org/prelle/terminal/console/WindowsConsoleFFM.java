@@ -490,7 +490,7 @@ public class WindowsConsoleFFM implements TerminalEmulator {
 //	 * @see org.prelle.terminal.TerminalEmulator#getInputStream()
 //	 */
 //	@Override
-//	public ANSIInputStream getInputStream() {
+//	public NewANSIInputStream getInputStream() {
 //		return in;
 //	}
 

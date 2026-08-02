@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 import org.prelle.ansi.AParsedElement;
 import org.prelle.ansi.ControlSequenceFragment;
 import org.prelle.ansi.FilteringANSIStream;
-import org.prelle.ansi.NewANSIInputStream;
+import org.prelle.ansi.ANSIInputStream;
 import org.prelle.ansi.PrintableFragment;
 import org.prelle.ansi.commands.ResetMode;
 import org.prelle.ansi.commands.SetMode;
@@ -49,7 +49,7 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
     private List<Consumer<int[]>> consoleSizeListeners = new ArrayList<>();
     
     //private PassthroughANSIInputStream pin;
-    private NewANSIInputStream pin;
+    private ANSIInputStream pin;
     private boolean localEcho = true;
     private ContextMenu contextMenu;
     private EchoChamber echoChamber;
@@ -79,7 +79,7 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	@Override
 	public FilteringANSIStream connectWith(InputStream in, OutputStream out) {
 		//pin = new PassthroughANSIInputStream(in);
-		pin = new NewANSIInputStream(in);
+		pin = new ANSIInputStream(in);
 		outPipe.setSink(out);
 		//PassOutANSIOutputStream pout = new PassOutANSIOutputStream(out, (fragmentSent) -> handleFragmentSent(fragmentSent));
 //		echoChamber = new EchoChamber(out, inPipe);

@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 import org.prelle.ansi.ANSIOutputStream;
 import org.prelle.ansi.C0Code;
 import org.prelle.ansi.FilteringANSIStream;
-import org.prelle.ansi.NewANSIInputStream;
+import org.prelle.ansi.ANSIInputStream;
 import org.prelle.terminal.TerminalEmulator;
 import org.prelle.terminal.TerminalMode;
 
@@ -40,7 +40,7 @@ public class JediTerminalView implements TerminalEmulator {
 	private JediTermFxWidget widget;
 	private JediTtyConnector connector;
     private ANSIOutputStream out;
-    private NewANSIInputStream pin;
+    private ANSIInputStream pin;
     
     private int terminalWidth = -1;
     private int terminalHeight = -1;
@@ -273,7 +273,7 @@ public class JediTerminalView implements TerminalEmulator {
 	@Override
 	public FilteringANSIStream connectWith(InputStream in, OutputStream out) {
 		logger.log(Level.INFO, "ENTER: connectWith");
-		pin = new NewANSIInputStream(in);
+		pin = new ANSIInputStream(in);
 		this.out = new ANSIOutputStream(out);
 
 		return pin;
