@@ -485,7 +485,7 @@ public class LLMAutoTranslate implements ReadBufferHandler {
 				"CRITICAL FORMATTING INSTRUCTIONS:\n" +
 				"1. The text contains formatting tags like <a0/>, <a1/>, etc. Maintain ALL tags intact in your translation and place them around the translated words corresponding to the original text.\n" +
 				"2. Do NOT translate, alter, or remove any tag names or tag syntax (keep <a0/> exactly as <a0/>).\n" +
-				"3. Return ONLY the translated line. Do NOT include markdown blocks, quotes, or explanations.\n" +
+				"3. Return ONLY the translated line. Do NOT include markdown blocks, quotes, reasoning, or /think tags.\n" +
 				"%s",
 				langName,
 				contextBuilder.length() > 0 ? "Recent conversation context:\n" + contextBuilder : ""
@@ -558,6 +558,22 @@ public class LLMAutoTranslate implements ReadBufferHandler {
 	private String cleanLLMOutput(String raw) {
 		if (raw == null) return "";
 		String str = raw.trim();
+
+		// 1. Remove <think>...</think> reasoning blocks from thinking models
+		int thinkEnd = str.lastIndexOf("</think>");
+		if (thinkEnd != -1) {
+			str = str.substring(thinkEnd + 8).trim();
+		}
+		if (str.startsWith("<think>")) {
+			int thinkClose = str.indexOf("</think>");
+			if (thinkClose != -1) {
+				str = str.substring(thinkClose + 8).trim();
+			} else {
+				str = str.replace("<think>", "").trim();
+			}
+		}
+
+		// 2. Remove markdown code blocks
 		if (str.startsWith("```")) {
 			int firstNewline = str.indexOf('\n');
 			int lastBackticks = str.lastIndexOf("```");
@@ -570,6 +586,12 @@ public class LLMAutoTranslate implements ReadBufferHandler {
 		if (str.startsWith("\"") && str.endsWith("\"") && str.length() > 1) {
 			str = str.substring(1, str.length() - 1);
 		}
+
+		// 3. Remove trailing /think, \think, /denken or standalone think tags
+		str = str.replaceAll("(?i)\\b(/think|\\\\think|/denken|\\\\denken|<think>|</think>)\\b", "").trim();
+		str = str.replaceAll("(?i)[/\\\\](think|denken)$", "").trim();
+		str = str.replaceAll("(?i)/$", "").trim();
+
 		return str;
 	}
 
