@@ -201,7 +201,9 @@ public class MUDClientMain extends Application {
 //		Config connectWith = mainConfig.getWorld().get("eden");
 //		connectWith(connectWith);
 		
-		System.err.println("Accessibility is "+(Platform.accessibilityActiveProperty().get()?"active":"inactive"));
+		Platform.accessibilityActiveProperty().addListener( (_,_,n ) -> {
+			logger.log(Level.INFO, "Accessibility is now {0}", n?"active":"inactive");
+		});
 	}
 
 //	//-------------------------------------------------------------------

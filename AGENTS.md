@@ -26,6 +26,10 @@ from the GraphicMUD project and LangChain4j for LLM translation.
     - ASCII art detection via alphanumeric-to-character ratio checking (`isAsciiArt`) to prevent corrupting visual diagrams/borders.
     - SHA-256 digest hashing for compact cache keys.
     - LRU eviction policy with bounded memory cache (`maxCacheSize`).
+  - **`AutoTTS`**: Real-time Text-To-Speech handler in `libterminal-core`. Features:
+    - Pluggable `TTSEngine` interface (compatible with Gemini Expressive TTS, OS TTS, etc.).
+    - ASCII art detection to prevent synthesizing drawing / border noise.
+    - Individual audio file disk persistence (`<digest>.wav`) and LRU caching (`TTSEntry` with `LocalDateTime` timestamps).
 - **libterminal-native**: API implementation for a native VT100 compatible terminal emulator.
 - **libterminal-emulated**: Terminal emulator managing screens and cells without visual coupling.
 - **libterminal-jfx**: JavaFX visualization building on `libterminal-emulated`.

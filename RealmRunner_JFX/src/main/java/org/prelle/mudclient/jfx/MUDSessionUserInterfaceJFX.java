@@ -90,6 +90,7 @@ public class MUDSessionUserInterfaceJFX extends VBox implements MUDSessionUserIn
 //
         tfInput  = new TextField();
         tfInput.setPromptText("Your input here...");
+        tfInput.setAccessibleText("Enter command here");
         
         
         sessionTabs = new TabPane();

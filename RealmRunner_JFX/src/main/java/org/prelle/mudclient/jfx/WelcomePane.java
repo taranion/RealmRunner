@@ -80,12 +80,23 @@ public class WelcomePane extends VBox {
 
 		var tfHost = new TextField();
 		tfHost.setPromptText("server");
+		tfHost.setAccessibleText("Server Name or Address");
 		HBox.setHgrow(tfHost, Priority.ALWAYS);
 
 		var tfPort = new TextField();
 		tfPort.setPromptText("4000");
 		tfPort.setPrefColumnCount(4);
+		tfPort.setFocusTraversable(true);
+		tfPort.setAccessibleText("Port number");
+		tfPort.setAccessibleRoleDescription("Eingabefeld für die Portnummer");
 		HBox.setHgrow(tfHost, Priority.ALWAYS);
+		
+		var lblPort = new Label("Port number");
+		lblPort.setLabelFor(tfPort);
+
+		// Falls das Label auf der UI nicht sichtbar sein soll:
+		lblPort.setVisible(false);
+		lblPort.setManaged(false);
 		
 		tfPort.disableProperty().bind(cbProto.valueProperty().isEqualTo(SessionProtocol.WEBSOCKET.name()));
 
