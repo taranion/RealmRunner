@@ -6,7 +6,7 @@ import java.io.OutputStream;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -19,6 +19,8 @@ import org.prelle.mxp.MXPInputStreamFilter;
 import org.prelle.mxp.MXPOption;
 import org.prelle.mxp.MXPOption.MXPListener;
 import org.prelle.mxp.MxpSupportTable;
+import org.prelle.realmrunner.feature.translate.LLMAutoTranslate;
+import org.prelle.realmrunner.feature.tts.AutoTTS;
 import org.prelle.telnet.CommunicationRole;
 import org.prelle.telnet.TelnetCommand;
 import org.prelle.telnet.TelnetListener;
@@ -26,11 +28,10 @@ import org.prelle.telnet.TelnetOption;
 import org.prelle.telnet.TelnetOptionListener;
 import org.prelle.telnet.TelnetProtocol;
 import org.prelle.telnet.mud.MUDSoundProtocolOption;
+import org.prelle.realmrunner.feature.translate.LLMAutoTranslate;
 import org.prelle.telnet.option.EchoMode;
 import org.prelle.telnet.option.TelnetWindowSize;
 import org.prelle.telnet.option.TerminalType;
-import org.prelle.terminal.LLMAutoTranslate;
-import org.prelle.terminal.ReceiveBuffer.ReadBufferHandler;
 import org.prelle.terminal.TerminalEmulator;
 
 import lombok.Getter;
@@ -44,6 +45,7 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 
 	final static Logger logger = System.getLogger("mud.client");
 
+	private String world;
 	private TerminalEmulator console;
 	private ANSIOutputStream streamToMUD;
 	private FilteringANSIStream streamFromMUD;
@@ -51,6 +53,8 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 	
 	private EchoMode echo;
 	private MXPOption mxp;
+	private LLMAutoTranslate translator;
+	private AutoTTS tts;
 	private MXPInputStreamFilter mxpFilter;
 	@Setter
 	private Consumer<MUDSession> sessionListener;
@@ -65,6 +69,7 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 		logger.log(Level.INFO, "ENTER: MUDSession.<init>");
 		this.console = terminal;
 		this.telnet  = builder.telnet;
+		this.world   = config.getServer().replaceAll("[^a-zA-Z0-9]", "_");
 //		console.setLocalEchoActive(false);
 //		console.setMode(TerminalMode.RAW);
 		
@@ -86,14 +91,13 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 		if (config.isMXPEnabled()) {
 			setupMXP();
 		}
-		setupTranslator();
+		setupTranslator(config);
 		
 		// Is this a MUD that only sends LF, insteadt of CR LF
 		if (config.getDoesNotSendCR()!=null && config.getDoesNotSendCR()) {
 			streamFromMUD.addFilter(new LinefeedToCRLFFilter());
 		}
 		
-		DataFileManager.setActiveMUD("test", config);
 		terminal.start();
 	}
 	
@@ -162,8 +166,15 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 	}
 	
 	//-------------------------------------------------------------------
-	private void setupTranslator() {		
-		console.getReadBuffer().addReadBufferHandler(new LLMAutoTranslate());
+	private void setupTranslator(Config config) {	
+		translator = new LLMAutoTranslate(this, Locale.ENGLISH);
+		console.getReadBuffer().addReadBufferHandler(translator);
+	}
+	
+	//-------------------------------------------------------------------
+	private void setupTextToSpeech(Config config) {	
+		tts = new AutoTTS(this);
+		console.getReadBuffer().addReadBufferHandler(tts);
 	}
 
 //	//-------------------------------------------------------------------
@@ -329,6 +340,9 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 //			streamFromMUD.close();
 //			socket.close();
 			getConsole().close();
+			
+			if (translator!=null) translator.onConnectionLost();
+			if (tts!=null) tts.onConnectionLost();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

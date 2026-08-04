@@ -44,23 +44,7 @@ Decodes incoming ANSI stream fragments (`AParsedElement`) and passes full lines 
 * **`ReceivedLine`**: Contains `originalAnsi` (raw incoming elements), `originalAsText` (plain text), `raw` (`byte[]` array of concatenated raw fragment bytes via `AParsedElement.getRaw()`), and `finalAnsi` (elements sent to the terminal).
 * **Handler Contract**: Handlers implement `boolean onLineReceived(ReceivedLine line, List<ReceivedLine> history)`. Returning `false` allows line processing to continue. If `finalAnsi` is empty when unconsumed, `ReceiveBuffer` populates `finalAnsi` with `originalAnsi`.
 
-### `AutoTTS` & `TTSEngine` (`org.prelle.terminal.AutoTTS`, `org.prelle.terminal.TTSEngine`)
-`ReadBufferHandler` implementation that filters incoming terminal text and routes non-ASCII-art text to a pluggable Text-To-Speech synthesis engine (`TTSEngine`).
-
-* **`TTSEngine` Interface**: Pluggable interface for TTS engines (`speak(text, language, voice)`, `synthesize`, `playAudio`, `stop`, `isSpeaking`, `close`). Built-in `NoOpTTSEngine` provided as default. Compatible with external SDKs (e.g. Gemini Expressive TTS, native OS TTS).
-* **Language & Voice Config**: Supports configuring target output language (`Locale language`, default `Locale.getDefault()`) and voice identifier (`String voice`).
-* **ASCII Art Filtering**: Uses `isAsciiArt(text)` with `minAlphanumericRatio` check to skip drawing/border text and prevent audio noise.
-* **Audio File Persistence & Caching**: Supports individual audio file persistence under `storageDirectory` keyed by SHA-256 digest (`<digest>.wav`) computed directly from text. Language and voice scoping can be handled via distinct storage directories. Manages an LRU `TTSEntry` cache with `LocalDateTime` timestamps, automatically purging evicted audio files from disk.
-* **Async Execution**: Synthesizes and plays audio asynchronously on a single-thread executor to keep stream decoding in `ReceiveBuffer` unblocked.
-
-### `LLMAutoTranslate` (`org.prelle.terminal.LLMAutoTranslate`)
-Translates MUD line text in real time using LangChain4j `ChatModel` (e.g., Ollama `qwen3:8b`).
-
-* **ANSI Preservation**: Replaces non-printable `AParsedElement` fragments (colors, SGR styling) with index tags (`<a0/>`, `<a1/>`, ...). Translates only printable text while preserving tags in position, then reconstructs `finalAnsi` with original styling objects intact.
-* **ASCII Art & Decoration Filter**: `isAsciiArt(String text)` calculates the ratio of alphanumeric characters (`Character.isLetterOrDigit`) to non-whitespace characters. Lines below `minAlphanumericRatio` (default `0.4`) are identified as ASCII art/borders and bypass LLM translation to avoid corrupting terminal visuals.
-* **SHA-256 Digest Caching**: Computes SHA-256 hashes of tagged strings to serve as compact cache keys, reducing memory overhead.
-* **Timestamp Aging & LRU Retention**: Cache stores `TranslationEntry` instances containing `translation` and `LocalDateTime lastAccessed` timestamp. Backed by a synchronized access-order `LinkedHashMap` bounded by `maxCacheSize` (default: 10,000 entries) to evict oldest entries upon reaching capacity.
-* **Disk Persistence**: `loadTranslations(Path)` and `saveTranslations(Path)` persist cache entries to disk in Java Properties format (`DIGEST=TIMESTAMP|TRANSLATION`) with single line per entry and newline escaping (`\n`), preserving access ordering.
+*(Note: `LLMAutoTranslate` is in `org.prelle.realmrunner.feature.translate`, and `AutoTTS`, `TTSEngine`, `NoOpTTSEngine` are in `org.prelle.realmrunner.feature.tts`).*
 
 ---
 

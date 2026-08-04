@@ -60,22 +60,16 @@ public class DataFileManager {
 	}
 
 	//-------------------------------------------------------------------
-	public static void setActiveMUD(String worldId, Config worldConfig) throws IOException {
-		currentDataDir = mainDataDir.resolve(worldId);
-		logger.log(Level.INFO, "World data directory: {0}", currentDataDir.toAbsolutePath());
-		// Ensure a data directory exists
-		if (!Files.exists(currentDataDir)) {
-			Files.createDirectories(currentDataDir);
+	public static Path getCurrentDataDir(MUDSession session) throws IOException {
+		Path dir = mainDataDir.resolve(session.getWorld());
+		if (!Files.exists(dir)) {
+			Files.createDirectories(dir);
 		}
+		return dir;
 	}
 
 	//-------------------------------------------------------------------
-	public static Path getCurrentDataDir() {
-		return currentDataDir;
-	}
-
-	//-------------------------------------------------------------------
-	public static Path downloadFileTo(String filePath, URI uri) throws IOException {
+	public static Path downloadFileTo(MUDSession session, String filePath, URI uri) throws IOException {
 		logger.log(Level.DEBUG, "ENTER: downloadFileTo({0}, {1})", filePath, uri);
 		try {
 			StringTokenizer tok = new StringTokenizer(filePath, "/");

@@ -1,4 +1,4 @@
-package org.prelle.terminal;
+package org.prelle.realmrunner.feature.tts;
 
 import java.util.Locale;
 
@@ -74,6 +74,24 @@ public interface TTSEngine {
 	 */
 	default boolean isSpeaking() {
 		return false;
+	}
+
+	/**
+	 * Returns whether the engine can synthesize plain text into raw audio data (e.g. WAV, MP3).
+	 *
+	 * @return true if byte synthesis is supported, false otherwise
+	 */
+	default boolean canSynthesize() {
+		return false;
+	}
+
+	/**
+	 * Returns whether the engine can speak plain text directly.
+	 *
+	 * @return true if direct speech output is supported, false otherwise
+	 */
+	default boolean canSpeak() {
+		return true;
 	}
 
 	/**

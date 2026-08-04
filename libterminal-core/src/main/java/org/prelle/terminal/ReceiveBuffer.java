@@ -14,6 +14,8 @@ import org.prelle.ansi.AParsedElement;
 import org.prelle.ansi.C0Code;
 import org.prelle.ansi.C0Fragment;
 import org.prelle.ansi.PrintableFragment;
+import org.prelle.ansi.commands.CursorUp;
+import org.prelle.ansi.commands.EraseInLine;
 
 import lombok.Getter;
 
@@ -31,12 +33,8 @@ public class ReceiveBuffer {
 		private List<AParsedElement> originalAnsi = new ArrayList<>();
 		private String originalAsText;
 		private byte[] raw;
-		/** 
-		 * The final output
-		 */
-		private List<AParsedElement> finalAnsi = new ArrayList<>();
 
-		public byte[] getFinalRaw() {
+		public static byte[] getFinalRaw(List<AParsedElement> finalAnsi) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			for (AParsedElement elem : finalAnsi) {
 				byte[] b = elem.getRaw();
@@ -48,6 +46,9 @@ public class ReceiveBuffer {
 		}
 	}
 	
+	public static record HandlerResult(boolean stopProcessing, boolean deletePrevious, List<AParsedElement> replaceWith) { }
+	
+	public final static HandlerResult NO_CHANGE = new HandlerResult(false, false, null);
 
 	public static interface ReadBufferHandler {
 		/**
@@ -55,7 +56,7 @@ public class ReceiveBuffer {
 		 * @param line User input line, without the trailing CR/LF
 		 * @return Text to send to server. If TRUE is returned, the line is considered "consumed" and processing of this line should stop and the line not being sent to the server.
 		 */
-		boolean onLineReceived(ReceivedLine line, List<ReceivedLine> history);
+		HandlerResult onLineReceived(ReceivedLine line, List<ReceivedLine> history);
 		void onConnectionLost();
 	}
 	
@@ -114,9 +115,9 @@ public class ReceiveBuffer {
 					}
 					ReceivedLine toSend = 
 					switch (frag) {
-					case C0Fragment c0 when c0.getCode()==C0Code.RS -> releaseBuffer();
-					case C0Fragment c0 when c0.getCode()==C0Code.CR -> releaseBuffer();
-					case C0Fragment c0 when c0.getCode()==C0Code.LF -> releaseBuffer();
+					case C0Fragment c0 when c0.getCode()==C0Code.RS -> releaseBuffer(c0);
+					case C0Fragment c0 when c0.getCode()==C0Code.CR -> releaseBuffer(c0);
+					case C0Fragment c0 when c0.getCode()==C0Code.LF -> releaseBuffer(c0);
 					case PrintableFragment print -> {
 						collectANSI.add(print);
 						collectText.append(print.getText());
@@ -147,7 +148,7 @@ public class ReceiveBuffer {
 	}
 
 	//-------------------------------------------------------------------
-	public ReceivedLine releaseBuffer() {
+	public ReceivedLine releaseBuffer(C0Fragment code) {
 		currentLine.originalAnsi = collectANSI;
 		currentLine.originalAsText = collectText.toString();
 
@@ -165,24 +166,26 @@ public class ReceiveBuffer {
 		
 //		logger.log(Level.DEBUG, "Find {0} listeners", readBufferHandler.size());
 		
-		boolean consumed = false;
+		boolean deletePrevious = false;
+		List<AParsedElement> reallySend = null; //currentLine.originalAnsi;
 		for (ReadBufferHandler handler : readBufferHandler) {
 //			logger.log(Level.DEBUG, "Consult handler {0}", handler.getClass());
-			consumed = handler.onLineReceived(currentLine, history.subList(0, Math.min(5, history.size())));
-			if (consumed) {
+			HandlerResult result = handler.onLineReceived(currentLine, history.subList(0, Math.min(5, history.size())));
+			if (!deletePrevious) deletePrevious = result.deletePrevious();
+			if (result.replaceWith()!=null) reallySend = result.replaceWith();
+			if (result.stopProcessing()) {
 				break;
 			}
 		}
 		// Is there something left to send to the terminal? 
-		// Send all the ANSI fragments if so
-		if (!consumed && currentLine.finalAnsi.isEmpty()) {
-			currentLine.finalAnsi.addAll(currentLine.originalAnsi);
-		} else if (!consumed) {
-			// The line has been consumed, so we don't send it to the terminal
-			logger.log(Level.DEBUG, "Line consumed by handler");
-			// The line so far needs to be replaced with the final line, which may have been modified by a handler
-			// TODO: Go up  one line, delete line, write translation
-			terminal.writeToTerminal(currentLine.getFinalRaw());
+		if (deletePrevious) {
+			// Move the cursor up one line and clear it
+			terminal.writeToTerminal( (new EraseInLine(EraseInLine.Mode.LINE)).getRaw() );
+			terminal.writeToTerminal("\r".getBytes());
+		}
+		
+		if (reallySend!=null) {
+			terminal.writeToTerminal(currentLine.getFinalRaw(reallySend));
 		}
 
 		history.add(currentLine);

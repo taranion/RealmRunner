@@ -1,5 +1,7 @@
 module org.prelle.mud.client.base {
 	exports org.prelle.realmrunner.network;
+	exports org.prelle.realmrunner.feature.translate;
+	exports org.prelle.realmrunner.feature.tts;
 
 	requires java.desktop;
 	requires java.net.http;
@@ -12,5 +14,7 @@ module org.prelle.mud.client.base {
 	requires org.prelle.mudansi;
 	requires jakarta.websocket.client;
 	requires org.prelle.libmxp;
+	requires langchain4j.core;
+	requires langchain4j.ollama;
 
 }

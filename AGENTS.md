@@ -19,17 +19,19 @@ The dependency on external libraries should be reduced to a minimum. Exceptions 
 from the GraphicMUD project and LangChain4j for LLM translation.
 
 ## Architecture
-- **MUDClient-Base**: Connection handling, session management (`MUDSession`), and storing MUD server profiles.
-- **libterminal-core / libterminal-api**: Abstract API to the terminal emulation layer, input multiplexing (`SwitchableInputStream`), and stream buffer filtering (`ReceiveBuffer`, `ReadBufferHandler`).
-  - **`LLMAutoTranslate`**: Real-time translation handler in `libterminal-core` powered by LangChain4j. Features:
+- **MUDClient-Base**: Connection handling, session management (`MUDSession`), storing MUD server profiles, translation, and TTS.
+  - **`LLMAutoTranslate`** (`org.prelle.realmrunner.feature.translate`): Real-time translation handler powered by LangChain4j. Features:
     - ANSI styling preservation by mapping non-printable `AParsedElement` fragments to index tags (`<a0/>`, `<a1/>`, ...).
     - ASCII art detection via alphanumeric-to-character ratio checking (`isAsciiArt`) to prevent corrupting visual diagrams/borders.
     - SHA-256 digest hashing for compact cache keys.
     - LRU eviction policy with bounded memory cache (`maxCacheSize`).
-  - **`AutoTTS`**: Real-time Text-To-Speech handler in `libterminal-core`. Features:
-    - Pluggable `TTSEngine` interface (compatible with Gemini Expressive TTS, OS TTS, etc.).
+    - 5-minute scheduled auto-save timer writing modified cache entries to disk.
+  - **`AutoTTS`** (`org.prelle.realmrunner.feature.tts`): Real-time Text-To-Speech handler. Features:
+    - Pluggable `TTSEngine` interface with capability detection (`canSynthesize()`, `canSpeak()`).
+    - 3-step playback strategy using `SoundManager` for cached/synthesized files and direct speech fallback.
     - ASCII art detection to prevent synthesizing drawing / border noise.
     - Individual audio file disk persistence (`<digest>.wav`) and LRU caching (`TTSEntry` with `LocalDateTime` timestamps).
+- **libterminal-core / libterminal-api**: Abstract API to the terminal emulation layer, input multiplexing (`SwitchableInputStream`), and stream buffer filtering (`ReceiveBuffer`, `ReadBufferHandler`).
 - **libterminal-native**: API implementation for a native VT100 compatible terminal emulator.
 - **libterminal-emulated**: Terminal emulator managing screens and cells without visual coupling.
 - **libterminal-jfx**: JavaFX visualization building on `libterminal-emulated`.

@@ -1,10 +1,12 @@
-package org.prelle.realmrunner.network;
+package org.prelle.realmrunner.feature.tts;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+
+import org.prelle.realmrunner.network.MUDConnection;
 
 import lombok.Getter;
 

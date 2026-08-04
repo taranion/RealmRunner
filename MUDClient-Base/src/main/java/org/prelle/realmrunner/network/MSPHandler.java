@@ -10,6 +10,7 @@ import java.util.List;
 import org.prelle.realmrunner.network.SoundManager.PlayCommand;
 import org.prelle.realmrunner.network.SoundManager.SoundType;
 import org.prelle.terminal.ReceiveBuffer;
+import org.prelle.terminal.ReceiveBuffer.HandlerResult;
 import org.prelle.terminal.ReceiveBuffer.ReadBufferHandler;
 import org.prelle.terminal.ReceiveBuffer.ReceivedLine;
 
@@ -21,10 +22,18 @@ public class MSPHandler implements ReadBufferHandler {
 	private final static Logger logger = System.getLogger("mud.client.msp");
 	
 	private MUDSession session;
+	private Path soundPath;
+	private Path musicPath;
 
 	//-------------------------------------------------------------------
 	public MSPHandler(MUDSession session) {
 		this.session = session;
+		try {
+			soundPath = DataFileManager.getCurrentDataDir(session).resolve("sounds");
+			musicPath = DataFileManager.getCurrentDataDir(session).resolve("music");
+		} catch (IOException e) {
+			logger.log(Level.ERROR, "Failed accessing directories for sound/music: {0}", e);
+		}
 	}
 
 	//-------------------------------------------------------------------
@@ -32,7 +41,7 @@ public class MSPHandler implements ReadBufferHandler {
 	 * @see org.prelle.terminal.ReceiveBuffer.ReadBufferHandler#onLineReceived(java.lang.String, java.util.List)
 	 */
 	@Override
-	public boolean onLineReceived(ReceivedLine rcvLine, List<ReceivedLine> history) {
+	public HandlerResult onLineReceived(ReceivedLine rcvLine, List<ReceivedLine> history) {
 		String line = rcvLine.getOriginalAsText();
 		logger.log(Level.ERROR, "Check "+line);
 		if (line.startsWith("!!MUSIC") || line.startsWith("!!SOUND")) {
@@ -49,7 +58,7 @@ public class MSPHandler implements ReadBufferHandler {
 			
 			if (command.filename.equalsIgnoreCase("off")) {
 				SoundManager.getInstance().stop(session, command);
-				return true;
+				return new HandlerResult(true, true, null); // line has been consumed
 			}
 			
 			// Convert to URL
@@ -57,16 +66,17 @@ public class MSPHandler implements ReadBufferHandler {
 			fullUrl += command.filename;
 			
 			try {
-				command.path = DataFileManager.downloadFileTo(command.filename, URI.create(fullUrl));
+				
+				command.path = DataFileManager.downloadFileTo(session,command.filename, URI.create(fullUrl));
 				SoundManager.getInstance().play(session, command);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
-			return true; // line has been consumed
+			return new HandlerResult(true, true, null); // line has been consumed
 		}
-		return false;
+		return new HandlerResult(false, false, null); // line has been consumed
 	}
 
 	//-------------------------------------------------------------------

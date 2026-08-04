@@ -650,7 +650,7 @@ public class MUDClientTerminal implements LineBufferListener,
 //				.header("User-Agent", "MUDClient")
 //				.build();
 		try {
-			Path filePath = DataFileManager.downloadFileTo(play.name, uri);
+			Path filePath = DataFileManager.downloadFileTo(session,play.name, uri);
 			logger.log(Level.INFO, "Filepath = "+filePath);
 			if (player!=null && !player.isComplete()) {
 				player.close();
@@ -1135,7 +1135,7 @@ public class MUDClientTerminal implements LineBufferListener,
 
 			try {
 				URI uri = URI.create(entry.getValue().tileUrl);
-				set.setFile( DataFileManager.downloadFileTo("tilesets/"+uri.getPath(), uri) );
+				set.setFile( DataFileManager.downloadFileTo(session,"tilesets/"+uri.getPath(), uri) );
 				set.setTileSize(entry.getValue().getTileWidth());
 				set.setTitle(entry.getKey());
 				setsByID.put(entry.getKey(), set);

@@ -9,6 +9,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 
+import org.prelle.realmrunner.feature.tts.TCPMUDConnection;
 import org.prelle.telnet.CommunicationRole;
 import org.prelle.telnet.TelnetCommand;
 import org.prelle.telnet.TelnetInputStream;

@@ -1,4 +1,4 @@
-package org.prelle.terminal;
+package org.prelle.realmrunner.feature.translate;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -19,13 +19,20 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.prelle.ansi.AParsedElement;
 import org.prelle.ansi.PrintableFragment;
+import org.prelle.realmrunner.network.DataFileManager;
+import org.prelle.realmrunner.network.MUDSession;
+import org.prelle.terminal.ReceiveBuffer.HandlerResult;
 import org.prelle.terminal.ReceiveBuffer.ReadBufferHandler;
 import org.prelle.terminal.ReceiveBuffer.ReceivedLine;
+import static org.prelle.terminal.ReceiveBuffer.NO_CHANGE;
 
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
@@ -47,7 +54,7 @@ public class LLMAutoTranslate implements ReadBufferHandler {
 	private final static Pattern TAG_PATTERN = Pattern.compile("<a(\\d+)/>");
 
 	private static final String DEFAULT_BASE_URL = "http://localhost:11434"; 
-	private static final int DEFAULT_MAX_CACHE_SIZE = 10000;
+	private static final int DEFAULT_MAX_CACHE_SIZE = 5000;
 
 	/**
 	 * Value object representing a cached translation along with its last access timestamp.
@@ -73,6 +80,9 @@ public class LLMAutoTranslate implements ReadBufferHandler {
 	}
 
 	@Getter
+	private final MUDSession session;
+
+	@Getter
 	private String targetLanguage = "de"; 
 
 	@Getter @Setter
@@ -84,31 +94,39 @@ public class LLMAutoTranslate implements ReadBufferHandler {
 	@Getter @Setter
 	private double minAlphanumericRatio = 0.4;
 
-	@Getter
 	private final Map<String, TranslationEntry> cache;
+	
+	@Setter
+	private Path cacheDirectory;
+
+	@Getter @Setter
+	private Path cacheFilePath;
+
+	private volatile boolean modified = false;
+	private final ScheduledExecutorService saveScheduler;
 
 	//-------------------------------------------------------------------
 	/**
 	 * Default constructor using Ollama default endpoint (http://localhost:11434) and qwen3:8b model.
 	 */
-	public LLMAutoTranslate() {
-		this("de", DEFAULT_BASE_URL, "qwen3:8b", DEFAULT_MAX_CACHE_SIZE);
+	public LLMAutoTranslate(MUDSession session, Locale locale) {
+		this(session, locale, DEFAULT_BASE_URL, "qwen3:8b", DEFAULT_MAX_CACHE_SIZE);
 	}
 
 	//-------------------------------------------------------------------
 	/**
 	 * Constructor specifying target language, Ollama URL, and model name.
 	 */
-	public LLMAutoTranslate(String targetLanguage, String baseUrl, String modelName) {
-		this(targetLanguage, baseUrl, modelName, DEFAULT_MAX_CACHE_SIZE);
+	public LLMAutoTranslate(MUDSession session, Locale targetLanguage, String baseUrl, String modelName) {
+		this(session, targetLanguage, baseUrl, modelName, DEFAULT_MAX_CACHE_SIZE);
 	}
 
 	//-------------------------------------------------------------------
 	/**
 	 * Constructor specifying target language, Ollama URL, model name, and max cache size.
 	 */
-	public LLMAutoTranslate(String targetLanguage, String baseUrl, String modelName, int maxCacheSize) {
-		this(OllamaChatModel.builder()
+	public LLMAutoTranslate(MUDSession session, Locale targetLanguage, String baseUrl, String modelName, int maxCacheSize) {
+		this(session, OllamaChatModel.builder()
 				.baseUrl(baseUrl)
 				.modelName(modelName)
 				.temperature(0.3)
@@ -119,17 +137,21 @@ public class LLMAutoTranslate implements ReadBufferHandler {
 	/**
 	 * Constructor with pre-configured ChatModel and target language.
 	 */
-	public LLMAutoTranslate(ChatModel chatModel, String targetLanguage) {
-		this(chatModel, targetLanguage, DEFAULT_MAX_CACHE_SIZE);
+	public LLMAutoTranslate(MUDSession session, ChatModel chatModel, Locale targetLanguage) {
+		this(session, chatModel, targetLanguage, DEFAULT_MAX_CACHE_SIZE);
 	}
 
 	//-------------------------------------------------------------------
 	/**
 	 * Constructor with pre-configured ChatModel, target language, and max cache size.
 	 */
-	public LLMAutoTranslate(ChatModel chatModel, String targetLanguage, int maxCacheSize) {
+	public LLMAutoTranslate(MUDSession session, ChatModel chatModel, Locale locale, int maxCacheSize) {
+		if (session == null) {
+			throw new IllegalArgumentException("session cannot be null");
+		}
+		this.session = session;
 		this.chatModel = chatModel;
-		this.targetLanguage = targetLanguage;
+		this.targetLanguage = locale != null ? locale.getLanguage() : "de";
 		this.maxCacheSize = maxCacheSize;
 		this.cache = Collections.synchronizedMap(
 			new LinkedHashMap<String, TranslationEntry>(16, 0.75f, true) {
@@ -139,6 +161,38 @@ public class LLMAutoTranslate implements ReadBufferHandler {
 				}
 			}
 		);
+		
+		try {
+			this.cacheDirectory = DataFileManager.getCurrentDataDir(session);
+			this.cacheFilePath  = cacheDirectory.resolve("translation_cache_" + this.targetLanguage + ".properties");
+			if (Files.exists(this.cacheFilePath)) {
+				loadTranslations(this.cacheFilePath);
+			}
+		} catch (IOException e) {
+			logger.log(Level.WARNING, "Failed resolving cache directory for session: " + session, e);
+		}
+
+		this.saveScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
+			Thread t = new Thread(r, "LLMAutoTranslate-SaveThread");
+			t.setDaemon(true);
+			return t;
+		});
+		this.saveScheduler.scheduleAtFixedRate(this::checkAndSaveCache, 5, 5, TimeUnit.MINUTES);
+	}
+
+	//-------------------------------------------------------------------
+	/**
+	 * Checks if the translation cache has been modified and saves it to cacheFilePath if dirty.
+	 */
+	public synchronized void checkAndSaveCache() {
+		if (modified && cacheFilePath != null) {
+			try {
+				logger.log(Level.INFO, "Auto-saving modified translation cache to {0}", cacheFilePath);
+				saveTranslations(cacheFilePath);
+			} catch (IOException e) {
+				logger.log(Level.WARNING, "Failed auto-saving translation cache to " + cacheFilePath, e);
+			}
+		}
 	}
 
 	//-------------------------------------------------------------------
@@ -216,6 +270,10 @@ public class LLMAutoTranslate implements ReadBufferHandler {
 			}
 		}
 
+		if (path != null && path.equals(cacheFilePath)) {
+			modified = false;
+		}
+
 		logger.log(Level.INFO, "Loaded {0} translations from {1}", loadedList.size(), path);
 	}
 
@@ -257,6 +315,10 @@ public class LLMAutoTranslate implements ReadBufferHandler {
 				writer.write(key + "=" + timeStr + "|" + escapedTranslation);
 				writer.newLine();
 			}
+		}
+
+		if (path != null && path.equals(cacheFilePath)) {
+			modified = false;
 		}
 
 		logger.log(Level.INFO, "Saved {0} translations to {1}", entries.size(), path);
@@ -354,26 +416,24 @@ public class LLMAutoTranslate implements ReadBufferHandler {
 	 * @see org.prelle.terminal.ReceiveBuffer.ReadBufferHandler#onLineReceived(org.prelle.terminal.ReceiveBuffer.ReceivedLine, java.util.List)
 	 */
 	@Override
-	public boolean onLineReceived(ReceivedLine line, List<ReceivedLine> history) {
+	public HandlerResult onLineReceived(ReceivedLine line, List<ReceivedLine> history) {
+		List<AParsedElement> finalAnsi = new ArrayList<>();
+
 		if (line == null || line.getOriginalAnsi() == null || line.getOriginalAnsi().isEmpty()) {
-			return false;
+			return NO_CHANGE;
 		}
 
 		String plainText = line.getOriginalAsText();
 
 		// If line has no printable text (only whitespace or control codes), keep original ANSI and don't call LLM
 		if (plainText == null || plainText.trim().isEmpty()) {
-			line.getFinalAnsi().clear();
-			line.getFinalAnsi().addAll(line.getOriginalAnsi());
-			return false;
+			return NO_CHANGE;
 		}
 
 		// Detect ASCII art / line graphics to prevent destroying visual drawings
 		if (isAsciiArt(plainText)) {
 			logger.log(Level.DEBUG, "Skipping ASCII art line: {0}", plainText);
-			line.getFinalAnsi().clear();
-			line.getFinalAnsi().addAll(line.getOriginalAnsi());
-			return false;
+			return NO_CHANGE;
 		}
 
 		// 1. Build a tagged representation separating printable text from non-printable ANSI fragments
@@ -398,8 +458,8 @@ public class LLMAutoTranslate implements ReadBufferHandler {
 			TranslationEntry entry = cache.get(cacheKey);
 			if (entry != null) {
 				entry.touch();
-				reconstructFinalAnsi(line, entry.getTranslation(), nonPrintable);
-				return false;
+				var list = reconstructFinalAnsi(line, entry.getTranslation(), nonPrintable);
+				return new HandlerResult(false, true, list);
 			}
 		}
 
@@ -443,23 +503,22 @@ public class LLMAutoTranslate implements ReadBufferHandler {
 
 			// 4. Store translation in cache with current timestamp
 			cache.put(cacheKey, new TranslationEntry(translatedTaggedText));
+			modified = true;
 
 			// 5. Reconstruct final ANSI list and set on line
-			reconstructFinalAnsi(line, translatedTaggedText, nonPrintable);
+			var list = reconstructFinalAnsi(line, translatedTaggedText, nonPrintable);
+			return new HandlerResult(false, true, list);
 
 		} catch (Exception e) {
 			logger.log(Level.WARNING, "LLM translation failed for line: " + textToTranslate, e);
-			// Fallback to original ANSI fragments on error
-			line.getFinalAnsi().clear();
-			line.getFinalAnsi().addAll(line.getOriginalAnsi());
 		}
 
-		return false;
+		return NO_CHANGE;
 	}
 
 	//-------------------------------------------------------------------
-	private void reconstructFinalAnsi(ReceivedLine line, String taggedText, List<AParsedElement> nonPrintable) {
-		line.getFinalAnsi().clear();
+	private List<AParsedElement> reconstructFinalAnsi(ReceivedLine line, String taggedText, List<AParsedElement> nonPrintable) {
+		List<AParsedElement> replacementAnsi = new ArrayList<>();
 		Matcher matcher = TAG_PATTERN.matcher(taggedText);
 		int lastEnd = 0;
 
@@ -470,14 +529,14 @@ public class LLMAutoTranslate implements ReadBufferHandler {
 			if (start > lastEnd) {
 				String textSegment = taggedText.substring(lastEnd, start);
 				if (!textSegment.isEmpty()) {
-					line.getFinalAnsi().add(new PrintableFragment(textSegment));
+					replacementAnsi.add(new PrintableFragment(textSegment));
 				}
 			}
 
 			try {
 				int tagIndex = Integer.parseInt(matcher.group(1));
 				if (tagIndex >= 0 && tagIndex < nonPrintable.size()) {
-					line.getFinalAnsi().add(nonPrintable.get(tagIndex));
+					replacementAnsi.add(nonPrintable.get(tagIndex));
 				}
 			} catch (NumberFormatException nfe) {
 				logger.log(Level.WARNING, "Invalid tag index in translation: " + matcher.group(0));
@@ -489,9 +548,10 @@ public class LLMAutoTranslate implements ReadBufferHandler {
 		if (lastEnd < taggedText.length()) {
 			String remainingText = taggedText.substring(lastEnd);
 			if (!remainingText.isEmpty()) {
-				line.getFinalAnsi().add(new PrintableFragment(remainingText));
+				replacementAnsi.add(new PrintableFragment(remainingText));
 			}
 		}
+		return replacementAnsi;
 	}
 
 	//-------------------------------------------------------------------
@@ -527,7 +587,10 @@ public class LLMAutoTranslate implements ReadBufferHandler {
 	 */
 	@Override
 	public void onConnectionLost() {
-		// Nothing to clean up
+		checkAndSaveCache();
+		if (saveScheduler != null) {
+			saveScheduler.shutdown();
+		}
 	}
 
 }

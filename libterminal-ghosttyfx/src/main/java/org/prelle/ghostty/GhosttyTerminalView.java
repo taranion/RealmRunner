@@ -27,6 +27,7 @@ import org.prelle.terminal.InputBuffer;
 import org.prelle.terminal.InputBuffer.InputBufferHandler;
 import org.prelle.terminal.MessageLog;
 import org.prelle.terminal.ReceiveBuffer;
+import org.prelle.terminal.ReceiveBuffer.HandlerResult;
 import org.prelle.terminal.ReceiveBuffer.ReadBufferHandler;
 import org.prelle.terminal.ReceiveBuffer.ReceivedLine;
 import org.prelle.terminal.TerminalEmulator;
@@ -159,8 +160,8 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 		// Listen to events from server
 		readBuffer.addReadBufferHandler(new ReadBufferHandler() {
 			@Override
-			public boolean onLineReceived(ReceivedLine line, List<ReceivedLine> history) {
-				return false;
+			public HandlerResult onLineReceived(ReceivedLine line, List<ReceivedLine> history) {
+				return new HandlerResult(false, false, null);
 			}
 			
 			@Override
