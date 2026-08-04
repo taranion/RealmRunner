@@ -44,6 +44,15 @@ Decodes incoming ANSI stream fragments (`AParsedElement`) and passes full lines 
 * **`ReceivedLine`**: Contains `originalAnsi` (raw incoming elements), `originalAsText` (plain text), `raw` (`byte[]` array of concatenated raw fragment bytes via `AParsedElement.getRaw()`), and `finalAnsi` (elements sent to the terminal).
 * **Handler Contract**: Handlers implement `boolean onLineReceived(ReceivedLine line, List<ReceivedLine> history)`. Returning `false` allows line processing to continue. If `finalAnsi` is empty when unconsumed, `ReceiveBuffer` populates `finalAnsi` with `originalAnsi`.
 
+### `AutoTTS` & `TTSEngine` (`org.prelle.terminal.AutoTTS`, `org.prelle.terminal.TTSEngine`)
+`ReadBufferHandler` implementation that filters incoming terminal text and routes non-ASCII-art text to a pluggable Text-To-Speech synthesis engine (`TTSEngine`).
+
+* **`TTSEngine` Interface**: Pluggable interface for TTS engines (`speak(text, language, voice)`, `synthesize`, `playAudio`, `stop`, `isSpeaking`, `close`). Built-in `NoOpTTSEngine` provided as default. Compatible with external SDKs (e.g. Gemini Expressive TTS, native OS TTS).
+* **Language & Voice Config**: Supports configuring target output language (`Locale language`, default `Locale.getDefault()`) and voice identifier (`String voice`).
+* **ASCII Art Filtering**: Uses `isAsciiArt(text)` with `minAlphanumericRatio` check to skip drawing/border text and prevent audio noise.
+* **Audio File Persistence & Caching**: Supports individual audio file persistence under `storageDirectory` keyed by SHA-256 digest (`<digest>.wav`) computed directly from text. Language and voice scoping can be handled via distinct storage directories. Manages an LRU `TTSEntry` cache with `LocalDateTime` timestamps, automatically purging evicted audio files from disk.
+* **Async Execution**: Synthesizes and plays audio asynchronously on a single-thread executor to keep stream decoding in `ReceiveBuffer` unblocked.
+
 ### `LLMAutoTranslate` (`org.prelle.terminal.LLMAutoTranslate`)
 Translates MUD line text in real time using LangChain4j `ChatModel` (e.g., Ollama `qwen3:8b`).
 
