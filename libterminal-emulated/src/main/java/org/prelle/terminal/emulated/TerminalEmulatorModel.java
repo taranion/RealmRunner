@@ -8,7 +8,7 @@ import java.nio.charset.Charset;
 import java.util.function.Consumer;
 
 import org.prelle.ansi.FilteringANSIStream;
-import org.prelle.terminal.ReadBuffer;
+import org.prelle.terminal.ReceiveBuffer;
 import org.prelle.terminal.TerminalEmulator;
 import org.prelle.terminal.TerminalMode;
 
@@ -101,7 +101,7 @@ public class TerminalEmulatorModel implements TerminalEmulator {
 	}
 
 	@Override
-	public ReadBuffer getReadBuffer() {
+	public ReceiveBuffer getReadBuffer() {
 		// TODO Auto-generated method stub
 		return null;
 	}

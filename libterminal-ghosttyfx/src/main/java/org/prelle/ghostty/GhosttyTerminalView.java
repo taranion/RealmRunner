@@ -26,8 +26,9 @@ import org.prelle.terminal.DataToTerminalInputStream;
 import org.prelle.terminal.InputBuffer;
 import org.prelle.terminal.InputBuffer.InputBufferHandler;
 import org.prelle.terminal.MessageLog;
-import org.prelle.terminal.ReadBuffer;
-import org.prelle.terminal.ReadBuffer.ReadBufferHandler;
+import org.prelle.terminal.ReceiveBuffer;
+import org.prelle.terminal.ReceiveBuffer.ReadBufferHandler;
+import org.prelle.terminal.ReceiveBuffer.ReceivedLine;
 import org.prelle.terminal.TerminalEmulator;
 import org.prelle.terminal.TerminalMode;
 
@@ -44,7 +45,7 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	private DataToTerminalInputStream toTerminal;
 	private DataFromTerminalOutputStream fromTerminal;
 	private InputBuffer inputBuffer;
-	private ReadBuffer readBuffer;
+	private ReceiveBuffer readBuffer;
 
 	private TerminalView widget;
     
@@ -63,7 +64,7 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 		toTerminal = new DataToTerminalInputStream();
 		fromTerminal = new DataFromTerminalOutputStream();
 		inputBuffer = new InputBuffer(fromTerminal);
-		readBuffer = new ReadBuffer(toTerminal);
+		readBuffer = new ReceiveBuffer(toTerminal);
 
 		widget = new TerminalView( (columns,rows) -> {
 			logger.log(Level.DEBUG, "TerminalView<init> create terminal with {0}x{1}", columns, rows);
@@ -83,7 +84,7 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	 * @see org.prelle.terminal.TerminalEmulator#getReadBuffer()
 	 */
 	@Override
-	public ReadBuffer getReadBuffer() {
+	public ReceiveBuffer getReadBuffer() {
 		return readBuffer;
 	}
 
@@ -158,12 +159,12 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 		// Listen to events from server
 		readBuffer.addReadBufferHandler(new ReadBufferHandler() {
 			@Override
-			public String onLineReceived(String line, List<String> history) {
-				return line;
+			public boolean onLineReceived(ReceivedLine line, List<ReceivedLine> history) {
+				return false;
 			}
 			
 			@Override
-			public void onConnectionList() {
+			public void onConnectionLost() {
 				// TODO Auto-generated method stub
 				logger.log(Level.WARNING, "Connection lost");
 				toTerminal.writeToTerminal("\r\n\nConnection lost to server.\r\n".getBytes());

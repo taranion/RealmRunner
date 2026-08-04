@@ -33,7 +33,7 @@ public interface TerminalEmulator {
 	/**
 	 * Return the buffer that receives data from the server. You can register trigger or MSP handler here.
 	 */
-	public ReadBuffer getReadBuffer();
+	public ReceiveBuffer getReadBuffer();
 	
 	//-------------------------------------------------------------------
 	public int[] getConsoleSize() throws IOException;

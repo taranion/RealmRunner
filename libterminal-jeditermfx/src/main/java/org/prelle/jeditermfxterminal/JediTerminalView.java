@@ -21,7 +21,7 @@ import org.prelle.ansi.C0Code;
 import org.prelle.ansi.FilteringANSIStream;
 import org.prelle.terminal.FromServerToTerminal;
 import org.prelle.terminal.FromTerminalToServer;
-import org.prelle.terminal.ReadBuffer;
+import org.prelle.terminal.ReceiveBuffer;
 import org.prelle.terminal.TerminalEmulator;
 import org.prelle.terminal.TerminalMode;
 
@@ -344,7 +344,7 @@ public class JediTerminalView implements TerminalEmulator {
 	}
 
 	@Override
-	public ReadBuffer getReadBuffer() {
+	public ReceiveBuffer getReadBuffer() {
 		// TODO Auto-generated method stub
 		return null;
 	}

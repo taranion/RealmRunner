@@ -9,7 +9,9 @@ import java.util.List;
 
 import org.prelle.realmrunner.network.SoundManager.PlayCommand;
 import org.prelle.realmrunner.network.SoundManager.SoundType;
-import org.prelle.terminal.ReadBuffer.ReadBufferHandler;
+import org.prelle.terminal.ReceiveBuffer;
+import org.prelle.terminal.ReceiveBuffer.ReadBufferHandler;
+import org.prelle.terminal.ReceiveBuffer.ReceivedLine;
 
 /**
  * 
@@ -17,20 +19,21 @@ import org.prelle.terminal.ReadBuffer.ReadBufferHandler;
 public class MSPHandler implements ReadBufferHandler {
 
 	private final static Logger logger = System.getLogger("mud.client.msp");
+	
+	private MUDSession session;
 
 	//-------------------------------------------------------------------
-	/**
-	 */
-	public MSPHandler() {
-		// TODO Auto-generated constructor stub
+	public MSPHandler(MUDSession session) {
+		this.session = session;
 	}
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.terminal.ReadBuffer.ReadBufferHandler#onLineReceived(java.lang.String, java.util.List)
+	 * @see org.prelle.terminal.ReceiveBuffer.ReadBufferHandler#onLineReceived(java.lang.String, java.util.List)
 	 */
 	@Override
-	public String onLineReceived(String line, List<String> history) {
+	public boolean onLineReceived(ReceivedLine rcvLine, List<ReceivedLine> history) {
+		String line = rcvLine.getOriginalAsText();
 		logger.log(Level.ERROR, "Check "+line);
 		if (line.startsWith("!!MUSIC") || line.startsWith("!!SOUND")) {
 			logger.log(Level.INFO, "MSP command: {0}", line);
@@ -44,21 +47,26 @@ public class MSPHandler implements ReadBufferHandler {
 					));
 			// ToDo: COnsult a session directory for cached files
 			
+			if (command.filename.equalsIgnoreCase("off")) {
+				SoundManager.getInstance().stop(session, command);
+				return true;
+			}
+			
 			// Convert to URL
-			String fullUrl = command.url.endsWith("/")?command.url:(command.url+"/");
+			String fullUrl = command.fullUrl.endsWith("/")?command.fullUrl:(command.fullUrl+"/");
 			fullUrl += command.filename;
 			
 			try {
-				Path filePath = DataFileManager.downloadFileTo(command.filename, URI.create(fullUrl));
-				SoundManager.getInstance().playMP3(filePath, command.volume);
+				command.path = DataFileManager.downloadFileTo(command.filename, URI.create(fullUrl));
+				SoundManager.getInstance().play(session, command);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
-			return null;
+			return true; // line has been consumed
 		}
-		return line;
+		return false;
 	}
 
 	//-------------------------------------------------------------------
@@ -168,7 +176,7 @@ public class MSPHandler implements ReadBufferHandler {
 					command.type = val;
 					break;
 				case 'U':
-					command.url = val;
+					command.fullUrl = val;
 					break;
 				}
 			}
@@ -180,10 +188,10 @@ public class MSPHandler implements ReadBufferHandler {
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.terminal.ReadBuffer.ReadBufferHandler#onConnectionList()
+	 * @see org.prelle.terminal.ReceiveBuffer.ReadBufferHandler#onConnectionLost()
 	 */
 	@Override
-	public void onConnectionList() {
+	public void onConnectionLost() {
 		// TODO Auto-generated method stub
 
 	}

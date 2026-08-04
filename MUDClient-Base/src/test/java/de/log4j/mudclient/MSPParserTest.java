@@ -27,7 +27,7 @@ public class MSPParserTest {
 		for (String ex : examples) {
 			PlayCommand cmd = MSPHandler.parse(SoundType.SOUND, ex);
 			System.out.println("Line: " + ex);
-			System.out.println(" -> fn=" + cmd.filename + ", V=" + cmd.volume + ", L=" + cmd.loops + ", P=" + cmd.priority + ", C=" + cmd.cont + ", T=" + cmd.type + ", U=" + cmd.url);
+			System.out.println(" -> fn=" + cmd.filename + ", V=" + cmd.volume + ", L=" + cmd.loops + ", P=" + cmd.priority + ", C=" + cmd.cont + ", T=" + cmd.type + ", U=" + cmd.fullUrl);
 		}
 	}
 

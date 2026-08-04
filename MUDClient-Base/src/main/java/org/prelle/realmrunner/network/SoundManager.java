@@ -1,20 +1,14 @@
 package org.prelle.realmrunner.network;
 
-import java.io.File;
-import java.io.IOException;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.DataLine;
-import javax.sound.sampled.FloatControl;
-import javax.sound.sampled.LineEvent;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  *
@@ -37,17 +31,24 @@ public abstract class SoundManager {
 		public int priority;
 		public boolean cont;
 		public String type;
-		public String url;
-		private transient Path path;
+		public String fullUrl;
+		public Path path;
 	}
 
+	@Getter @Setter
 	public static class NowPlaying {
-		private String file;
+		private SoundType soundType;
+		private String id;
 		private Path path;
-		private int loops;
+		private int remainingLoops;
+		private int originalVolume;
+		/** The item which the underlying player implementation uses to handle the object */
+		private Object mediaPlayerObject;
 	}
 	
 	private static SoundManager instance;
+	
+	private static Map<MUDSession, List<NowPlaying>> nowPlaying = new HashMap<>();
 
 	//-------------------------------------------------------------------
 	/**
@@ -86,6 +87,12 @@ public abstract class SoundManager {
 //	}
 
 	//-------------------------------------------------------------------
+	protected static NowPlaying isPlaying(MUDSession session, String id) {
+		if (!nowPlaying.containsKey(session)) return null;
+		return nowPlaying.get(session).stream().filter(item -> item.getId().equals(id)).findFirst().orElse(null);
+	}
+
+	//-------------------------------------------------------------------
 	public static PlayCommand convertMSP(String mspLine) {
 		if (mspLine == null) return null;
 		SoundType type;
@@ -115,54 +122,88 @@ public abstract class SoundManager {
 			case 'p': com.priority=Integer.parseInt(collect.toString()); break;
 			case 'c': com.cont  = Boolean.parseBoolean( collect.toString()); break;
 			case 't': com.type=collect.toString(); break;
-			case 'u': com.url =collect.toString(); break;
+			case 'u': com.fullUrl =collect.toString(); break;
 			}
 		}
 	}
 
 	//-------------------------------------------------------------------
-	public abstract void playMP3(Path file, int volume);
+	public abstract void stopInternal(MUDSession session, PlayCommand command, NowPlaying playing);
 
 	//-------------------------------------------------------------------
-	public void playWav(Path file, int volume) {
-		logger.log(Level.INFO, "playWAV "+file.toAbsolutePath());
-		try {
-            // Lade die Audio-Datei
-            File soundFile = file.toFile();
-            AudioInputStream audioStream = AudioSystem.getAudioInputStream(soundFile);
-
-            // Bereite den Clip vor
-            AudioFormat format = audioStream.getFormat();
-            DataLine.Info info = new DataLine.Info(Clip.class, format);
-            Clip audioClip = (Clip) AudioSystem.getLine(info);
-
-            // Öffne den Clip
-            audioClip.open(audioStream);
-
-            // Control volume
-            FloatControl gainControl = (FloatControl) audioClip.getControl(FloatControl.Type.MASTER_GAIN);
-            float min = gainControl.getMinimum();
-            float max = gainControl.getMaximum();
-            int percent = Math.min(volume, 100);
-            float clampedVolume = (((max-min)*percent) / 100) + min;
-             gainControl.setValue(clampedVolume);
-
-            // Füge einen Listener hinzu, um das Ende der Wiedergabe zu erkennen
-               audioClip.addLineListener(event -> {
-                   if (event.getType() == LineEvent.Type.STOP) {
-                       audioClip.close();
-                   }
-               });
-
-            // Play sound
-            audioClip.start();
-
-        } catch (UnsupportedAudioFileException e) {
-            logger.log(Level.ERROR, "Unsupported audiofile "+file.toAbsolutePath(),e);
-        } catch (LineUnavailableException e) {
-            logger.log(Level.ERROR, "Line unavailable "+file.toAbsolutePath(),e);
-        } catch (IOException e) {
-            logger.log(Level.ERROR, "Error loading file "+file.toAbsolutePath(),e);
-        }
+	public void stop(MUDSession session, PlayCommand command) {
+		if (command==null) return;
+		if (command.path==null) {
+			logger.log(Level.WARNING, "SoundManager.stop: No path for {0}", command.filename);
+			return;
+		}
+		NowPlaying nowPlayingItem = isPlaying(session, command.filename);
+		if (nowPlayingItem != null) {
+			stopInternal(session, command, nowPlayingItem);
+			nowPlaying.get(session).remove(nowPlayingItem);
+		}
 	}
+
+	//-------------------------------------------------------------------
+	protected abstract NowPlaying startInternal(MUDSession session, PlayCommand command);
+
+	//-------------------------------------------------------------------
+	public void play(MUDSession session, PlayCommand command) {
+		if (command==null) return;
+		if (command.path==null) {
+			logger.log(Level.WARNING, "SoundManager.play: No path for {0}", command.filename);
+			return;
+		}
+		NowPlaying nowPlayingItem = isPlaying(session, command.filename);
+		if (nowPlayingItem != null) {
+			// File is already playing
+			if (command.cont) {
+				// But continuation is requested, so we are done
+				return;
+			} else {
+				// But since it should not be continued, we stop it and start it again
+				stop(session, command);
+			}
+		}
+		
+		// Okay, we now know that the media must be started.
+		NowPlaying started = startInternal(session, command);
+		if (started!=null) {
+			started.setSoundType(command.soundType);
+			if (!nowPlaying.containsKey(session)) {
+				nowPlaying.put(session, new java.util.ArrayList<>());
+			}
+			nowPlaying.get(session).add(started);
+		}
+	}
+
+	//-------------------------------------------------------------------
+	public abstract void muteInternal(NowPlaying item);
+	public abstract void unmuteInternal(NowPlaying item);
+
+	//-------------------------------------------------------------------
+	public void mute(MUDSession session) {
+		if (!nowPlaying.containsKey(session)) return;
+		for (NowPlaying item : nowPlaying.get(session)) {
+			muteInternal(item);
+		}
+	}
+
+	//-------------------------------------------------------------------
+	public void unmute(MUDSession session) {
+		if (!nowPlaying.containsKey(session)) return;
+		for (NowPlaying item : nowPlaying.get(session)) {
+			unmuteInternal(item);
+		}
+	}
+
+	//-------------------------------------------------------------------
+	public void close(MUDSession session) {
+		if (!nowPlaying.containsKey(session)) return;
+		for (NowPlaying item : nowPlaying.get(session)) {
+			stopInternal(session, null, item);
+		}
+		nowPlaying.remove(session);
+	}
+
 }

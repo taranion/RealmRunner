@@ -29,7 +29,8 @@ import org.prelle.telnet.mud.MUDSoundProtocolOption;
 import org.prelle.telnet.option.EchoMode;
 import org.prelle.telnet.option.TelnetWindowSize;
 import org.prelle.telnet.option.TerminalType;
-import org.prelle.terminal.ReadBuffer.ReadBufferHandler;
+import org.prelle.terminal.LLMAutoTranslate;
+import org.prelle.terminal.ReceiveBuffer.ReadBufferHandler;
 import org.prelle.terminal.TerminalEmulator;
 
 import lombok.Getter;
@@ -85,6 +86,7 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 		if (config.isMXPEnabled()) {
 			setupMXP();
 		}
+		setupTranslator();
 		
 		// Is this a MUD that only sends LF, insteadt of CR LF
 		if (config.getDoesNotSendCR()!=null && config.getDoesNotSendCR()) {
@@ -156,7 +158,12 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 	//-------------------------------------------------------------------
 	private void setupMSP() {
 		telnet.add(new MUDSoundProtocolOption(CommunicationRole.CLIENT));
-		console.getReadBuffer().addReadBufferHandler(new MSPHandler());
+		console.getReadBuffer().addReadBufferHandler(new MSPHandler(this));
+	}
+	
+	//-------------------------------------------------------------------
+	private void setupTranslator() {		
+		console.getReadBuffer().addReadBufferHandler(new LLMAutoTranslate());
 	}
 
 //	//-------------------------------------------------------------------

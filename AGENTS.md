@@ -7,7 +7,7 @@ It comes in three "flavors":
 - a version with a webfrontend (RealmRunner_Web)
 All three versions share a common backend (MUDClient-Base, libterminal-*)
 
-A key feature of this client compared to user MUD clients is the out-of-the-box support for GMCP extensions and mapping.
+Key features compared to standard MUD clients include out-of-the-box support for GMCP extensions, mapping, and real-time LLM-assisted line translation with ANSI styling preservation.
 
 ## Technology
 The used programming language is Java (Java 23 and newer). Supported operating systems are Windows, Linux and OS X,
@@ -15,16 +15,19 @@ while mobile versions are expected to use a Webfrontend provided by RealmRunner_
 For the graphical version, the JavaFX UI framework is used.
 Project compilation is done using Maven.
 
-The dependency on external libraries should be reduced to a minimum. Exceptions are all depencies
-from the GraphicMUD project.
+The dependency on external libraries should be reduced to a minimum. Exceptions are all dependencies
+from the GraphicMUD project and LangChain4j for LLM translation.
 
 ## Architecture
-- MUDClient-Base does connection handling and storing MUD server the user wants to remember.
-- libterminal-core/libterminl-api provides an abstract API to the terminal emulation layer
-- libterminal-native implements the API for a native VT100 compatible terminal emulator
-- libterminal-emulated is an attempt to write an terminal emulator (managing screens and cells)
-  without dealing with means of visualizing it
-- libterminal-jfx builds on libterminal-emulated and adds a visualization based on JavaFX
-- libterminal-jeditermfx is an alternative approach for (-emulated plus -literminal-jfx), based on JediTermFX
-- RealmRunner-Web provides a Webserver using Vaadin. The terminal emulation is done using a page that loads "xterm.js" and interacts with it 
-
+- **MUDClient-Base**: Connection handling, session management (`MUDSession`), and storing MUD server profiles.
+- **libterminal-core / libterminal-api**: Abstract API to the terminal emulation layer, input multiplexing (`SwitchableInputStream`), and stream buffer filtering (`ReceiveBuffer`, `ReadBufferHandler`).
+  - **`LLMAutoTranslate`**: Real-time translation handler in `libterminal-core` powered by LangChain4j. Features:
+    - ANSI styling preservation by mapping non-printable `AParsedElement` fragments to index tags (`<a0/>`, `<a1/>`, ...).
+    - ASCII art detection via alphanumeric-to-character ratio checking (`isAsciiArt`) to prevent corrupting visual diagrams/borders.
+    - SHA-256 digest hashing for compact cache keys.
+    - LRU eviction policy with bounded memory cache (`maxCacheSize`).
+- **libterminal-native**: API implementation for a native VT100 compatible terminal emulator.
+- **libterminal-emulated**: Terminal emulator managing screens and cells without visual coupling.
+- **libterminal-jfx**: JavaFX visualization building on `libterminal-emulated`.
+- **libterminal-jeditermfx**: Alternative visualization based on JediTermFX.
+- **RealmRunner-Web**: Vaadin web server providing terminal emulation via `xterm.js`.

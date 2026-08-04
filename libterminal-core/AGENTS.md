@@ -36,7 +36,25 @@ Wraps output blocks and delegates to a dynamic `sink` (`EchoChamber`). Overrides
 
 ---
 
-## 3. Terminal Emulator Lifecycle Contracts
+## 3. ReceiveBuffer & LLM Translation Stack
+
+### `ReceiveBuffer` & `ReadBufferHandler` (`org.prelle.terminal.ReceiveBuffer`)
+Decodes incoming ANSI stream fragments (`AParsedElement`) and passes full lines (`ReceivedLine`) to registered `ReadBufferHandler` instances before outputting to the terminal.
+
+* **`ReceivedLine`**: Contains `originalAnsi` (raw incoming elements), `originalAsText` (plain text), `raw` (`byte[]` array of concatenated raw fragment bytes via `AParsedElement.getRaw()`), and `finalAnsi` (elements sent to the terminal).
+* **Handler Contract**: Handlers implement `boolean onLineReceived(ReceivedLine line, List<ReceivedLine> history)`. Returning `false` allows line processing to continue. If `finalAnsi` is empty when unconsumed, `ReceiveBuffer` populates `finalAnsi` with `originalAnsi`.
+
+### `LLMAutoTranslate` (`org.prelle.terminal.LLMAutoTranslate`)
+Translates MUD line text in real time using LangChain4j `ChatModel` (e.g., Ollama `qwen3:8b`).
+
+* **ANSI Preservation**: Replaces non-printable `AParsedElement` fragments (colors, SGR styling) with index tags (`<a0/>`, `<a1/>`, ...). Translates only printable text while preserving tags in position, then reconstructs `finalAnsi` with original styling objects intact.
+* **ASCII Art & Decoration Filter**: `isAsciiArt(String text)` calculates the ratio of alphanumeric characters (`Character.isLetterOrDigit`) to non-whitespace characters. Lines below `minAlphanumericRatio` (default `0.4`) are identified as ASCII art/borders and bypass LLM translation to avoid corrupting terminal visuals.
+* **SHA-256 Digest Caching**: Computes SHA-256 hashes of tagged strings to serve as compact cache keys, reducing memory overhead.
+* **LRU Memory Retention**: Backed by a synchronized access-order `LinkedHashMap` bounded by `maxCacheSize` (default: 5,000 entries) to evict oldest translations and prevent memory leaks.
+
+---
+
+## 4. Terminal Emulator Lifecycle Contracts
 
 1. **`setLocalEchoActive(boolean)`**:
    * Telnet option negotiation (`IAC WILL/WONT ECHO`) calls `setLocalEchoActive` during connection setup.
@@ -49,7 +67,7 @@ Wraps output blocks and delegates to a dynamic `sink` (`EchoChamber`). Overrides
 
 ---
 
-## 4. Build and Test Commands
+## 5. Build and Test Commands
 
 * **Compile codebase**:
   ```bash
