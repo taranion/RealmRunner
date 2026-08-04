@@ -50,7 +50,8 @@ Translates MUD line text in real time using LangChain4j `ChatModel` (e.g., Ollam
 * **ANSI Preservation**: Replaces non-printable `AParsedElement` fragments (colors, SGR styling) with index tags (`<a0/>`, `<a1/>`, ...). Translates only printable text while preserving tags in position, then reconstructs `finalAnsi` with original styling objects intact.
 * **ASCII Art & Decoration Filter**: `isAsciiArt(String text)` calculates the ratio of alphanumeric characters (`Character.isLetterOrDigit`) to non-whitespace characters. Lines below `minAlphanumericRatio` (default `0.4`) are identified as ASCII art/borders and bypass LLM translation to avoid corrupting terminal visuals.
 * **SHA-256 Digest Caching**: Computes SHA-256 hashes of tagged strings to serve as compact cache keys, reducing memory overhead.
-* **LRU Memory Retention**: Backed by a synchronized access-order `LinkedHashMap` bounded by `maxCacheSize` (default: 5,000 entries) to evict oldest translations and prevent memory leaks.
+* **Timestamp Aging & LRU Retention**: Cache stores `TranslationEntry` instances containing `translation` and `LocalDateTime lastAccessed` timestamp. Backed by a synchronized access-order `LinkedHashMap` bounded by `maxCacheSize` (default: 10,000 entries) to evict oldest entries upon reaching capacity.
+* **Disk Persistence**: `loadTranslations(Path)` and `saveTranslations(Path)` persist cache entries to disk in Java Properties format (`DIGEST=TIMESTAMP|TRANSLATION`) with single line per entry and newline escaping (`\n`), preserving access ordering.
 
 ---
 
