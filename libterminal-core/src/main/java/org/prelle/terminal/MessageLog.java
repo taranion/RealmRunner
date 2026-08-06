@@ -10,7 +10,8 @@ public  class MessageLog {
 	
 	public static enum Layer {
 		TELNET,
-		ANSI
+		ANSI,
+		GMCP
 	}
 
 	private PrintWriter out;

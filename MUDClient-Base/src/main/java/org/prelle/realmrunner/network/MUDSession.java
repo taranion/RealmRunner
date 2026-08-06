@@ -15,6 +15,9 @@ import java.util.function.Consumer;
 import org.prelle.ansi.ANSIOutputStream;
 import org.prelle.ansi.FilteringANSIStream;
 import org.prelle.ansi.LinefeedToCRLFFilter;
+import org.prelle.mud4j.gmcp.GMCPCommand;
+import org.prelle.mud4j.gmcp.GMCPHandler;
+import org.prelle.mud4j.gmcp.GMCPHandler.GMCPReceiver;
 import org.prelle.mxp.MXPInputStreamFilter;
 import org.prelle.mxp.MXPOption;
 import org.prelle.mxp.MXPOption.MXPListener;
@@ -28,10 +31,11 @@ import org.prelle.telnet.TelnetOption;
 import org.prelle.telnet.TelnetOptionListener;
 import org.prelle.telnet.TelnetProtocol;
 import org.prelle.telnet.mud.MUDSoundProtocolOption;
-import org.prelle.realmrunner.feature.translate.LLMAutoTranslate;
 import org.prelle.telnet.option.EchoMode;
 import org.prelle.telnet.option.TelnetWindowSize;
 import org.prelle.telnet.option.TerminalType;
+import org.prelle.terminal.MessageLog;
+import org.prelle.terminal.MessageLog.Layer;
 import org.prelle.terminal.TerminalEmulator;
 
 import lombok.Getter;
@@ -53,11 +57,14 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 	
 	private EchoMode echo;
 	private MXPOption mxp;
+	private GMCPHandler gmcp;
 	private LLMAutoTranslate translator;
 	private AutoTTS tts;
 	private MXPInputStreamFilter mxpFilter;
 	@Setter
 	private Consumer<MUDSession> sessionListener;
+    
+    private MessageLog messageLog = new MessageLog();
 
 	//-------------------------------------------------------------------
 	public static MUDSessionBuilder builder(TerminalEmulator terminal) {
@@ -81,17 +88,18 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 //		streamFromMUD.setLoggingListener( (k,v) -> logger.log(Level.ERROR, "GhosttyTerminalView<init> input: {0}={1}", k, v));
 //		streamToMUD.setLoggingListener( (k,v) -> logger.log(Level.ERROR, "GhosttyTerminalView<init> output: {0}={1}", k, v));
 		
-		streamFromMUD = terminal.connectWith(in, streamToMUD);
 		
 		setupECHO();
 		setupNAWS();
 		setupTTYPE(builder.terminalTypes);
 		setupMSP();
+		setupGMCP();
 		
+		streamFromMUD = terminal.connectWith(messageLog,in, streamToMUD);
 		if (config.isMXPEnabled()) {
 			setupMXP();
 		}
-		setupTranslator(config);
+//		setupTranslator(config);
 		
 		// Is this a MUD that only sends LF, insteadt of CR LF
 		if (config.getDoesNotSendCR()!=null && config.getDoesNotSendCR()) {
@@ -163,6 +171,20 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 	private void setupMSP() {
 		telnet.add(new MUDSoundProtocolOption(CommunicationRole.CLIENT));
 		console.getReadBuffer().addReadBufferHandler(new MSPHandler(this));
+	}
+	
+	//-------------------------------------------------------------------
+	private void setupGMCP() {
+		logger.log(Level.INFO, "ENTER: setupGMCP");
+		gmcp = new GMCPHandler(CommunicationRole.CLIENT, "Realm Runner", "0.0.1",new GMCPReceiver() {
+			@Override
+			public void onGMCP(GMCPCommand message) {
+				logger.log(Level.INFO, message);
+				messageLog.log(false, Layer.GMCP, message.toNetwork());
+				System.err.println("GMCP: "+message.toNetwork());
+				
+			}});
+		telnet.add(gmcp);
 	}
 	
 	//-------------------------------------------------------------------
@@ -356,6 +378,8 @@ public class MUDSession implements TelnetListener, TelnetOptionListener {
 		if (extension==echo) {
 			console.setLocalEchoActive(!active);
 		}
+		
+		System.err.println("MUDSession.optionStateChanged: "+extension+"="+active);
 	}
 
 	@Override

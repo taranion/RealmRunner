@@ -38,6 +38,10 @@
             <artifactId>mudansi</artifactId>
             <version>0.3.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.prelle</groupId>
+            <artifactId>gmcp4j</artifactId>            
+        </dependency>
             <dependency>
                 <groupId>org.prelle</groupId>
                 <artifactId>libmxp</artifactId>

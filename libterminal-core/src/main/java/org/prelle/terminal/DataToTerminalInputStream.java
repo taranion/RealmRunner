@@ -167,7 +167,5 @@ public class DataToTerminalInputStream extends InputStream {
     }
 
 	public void releaseBuffer() {
-		// TODO Auto-generated method stub
-		logger.log(Logger.Level.WARNING, "ENTER: releaseBuffer()");
 		releaseBuffer = true;
 	}}

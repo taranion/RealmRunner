@@ -57,8 +57,7 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
     private ANSIInputStream ansiIn;
     private ANSIOutputStream ansiOut;
     private boolean localEcho = true;
-    
-    private MessageLog messageLog = new MessageLog();
+    private MessageLog messageLog;
 
 	//-------------------------------------------------------------------
 	public GhosttyTerminalView() {
@@ -94,7 +93,8 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	 * @see org.prelle.terminal.TerminalEmulator#connectWith(java.io.InputStream, java.io.InputStream)
 	 */
 	@Override
-	public FilteringANSIStream connectWith(InputStream in, OutputStream out) {
+	public FilteringANSIStream connectWith(MessageLog log, InputStream in, OutputStream out) {
+		this.messageLog = log;
 		ansiOut = new ANSIOutputStream(out);
 		ansiIn  = new ANSIInputStream(in);
 		ansiIn.setLoggingListener( (fragType,msg) -> messageLog.log(false, MessageLog.Layer.ANSI, msg));

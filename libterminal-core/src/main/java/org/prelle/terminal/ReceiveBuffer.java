@@ -151,6 +151,10 @@ public class ReceiveBuffer {
 	public ReceivedLine releaseBuffer(C0Fragment code) {
 		currentLine.originalAnsi = collectANSI;
 		currentLine.originalAsText = collectText.toString();
+		// TODO: Check if this is correct
+		if (collectANSI.size()>0) {
+			return null;
+		}
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		for (AParsedElement elem : collectANSI) {

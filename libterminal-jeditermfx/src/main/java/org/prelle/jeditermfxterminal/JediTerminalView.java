@@ -21,6 +21,7 @@ import org.prelle.ansi.C0Code;
 import org.prelle.ansi.FilteringANSIStream;
 import org.prelle.terminal.FromServerToTerminal;
 import org.prelle.terminal.FromTerminalToServer;
+import org.prelle.terminal.MessageLog;
 import org.prelle.terminal.ReceiveBuffer;
 import org.prelle.terminal.TerminalEmulator;
 import org.prelle.terminal.TerminalMode;
@@ -277,7 +278,7 @@ public class JediTerminalView implements TerminalEmulator {
 	}
 
 	@Override
-	public FilteringANSIStream connectWith(InputStream in, OutputStream out) {
+	public FilteringANSIStream connectWith(MessageLog log, InputStream in, OutputStream out) {
 		logger.log(Level.INFO, "ENTER: connectWith");
 		pin = new ANSIInputStream(in);
 		this.out = new ANSIOutputStream(out);

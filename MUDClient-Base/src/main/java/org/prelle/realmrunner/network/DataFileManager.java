@@ -33,7 +33,6 @@ public class DataFileManager {
 	private static Config activeWorldConfig;
 
 	private static Path mainDataDir;
-	private static Path currentDataDir;
 	private static HttpClient http;
 
 	//-------------------------------------------------------------------
@@ -72,6 +71,8 @@ public class DataFileManager {
 	public static Path downloadFileTo(MUDSession session, String filePath, URI uri) throws IOException {
 		logger.log(Level.DEBUG, "ENTER: downloadFileTo({0}, {1})", filePath, uri);
 		try {
+			Path currentDataDir = getCurrentDataDir(session);
+			
 			StringTokenizer tok = new StringTokenizer(filePath, "/");
 			Path targetFile = currentDataDir.resolve(tok.nextToken());
 			boolean checkParent =false;

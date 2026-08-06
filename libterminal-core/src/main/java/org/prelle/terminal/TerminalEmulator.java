@@ -55,7 +55,7 @@ public interface TerminalEmulator {
 	/** 
 	 * Setup streams, but do not start transmitting/receiving yet.
 	 */
-	FilteringANSIStream connectWith(InputStream in, OutputStream out);
+	FilteringANSIStream connectWith(MessageLog log, InputStream in, OutputStream out);
 
 	//-------------------------------------------------------------------
 	void start();

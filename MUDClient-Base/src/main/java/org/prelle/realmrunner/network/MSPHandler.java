@@ -43,7 +43,6 @@ public class MSPHandler implements ReadBufferHandler {
 	@Override
 	public HandlerResult onLineReceived(ReceivedLine rcvLine, List<ReceivedLine> history) {
 		String line = rcvLine.getOriginalAsText();
-		logger.log(Level.ERROR, "Check "+line);
 		if (line.startsWith("!!MUSIC") || line.startsWith("!!SOUND")) {
 			logger.log(Level.INFO, "MSP command: {0}", line);
 			System.err.println("MSP command: "+line);

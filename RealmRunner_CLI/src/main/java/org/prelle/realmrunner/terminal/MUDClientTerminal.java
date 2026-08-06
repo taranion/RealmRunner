@@ -40,9 +40,9 @@ import org.prelle.ansi.commands.SetLeftAndRightMargin;
 import org.prelle.ansi.commands.SetTopAndBottomMargin;
 import org.prelle.mud4j.gmcp.Char.Stats;
 import org.prelle.mud4j.gmcp.Char.Vitals;
-import org.prelle.mud4j.gmcp.Client.ClientMediaPlay;
-import org.prelle.mud4j.gmcp.Client.ClientMediaStop;
-import org.prelle.mud4j.gmcp.Room.GMCPRoomInfo;
+import org.prelle.mud4j.gmcp.ClientMedia.ClientMediaPlay;
+import org.prelle.mud4j.gmcp.ClientMedia.ClientMediaStop;
+import org.prelle.mud4j.gmcp.Room.RoomInfo;
 import org.prelle.mud4j.gmcp.beip.BeipTilemapData;
 import org.prelle.mud4j.gmcp.beip.BeipTilemapDef;
 import org.prelle.mud4j.gmcp.beip.BeipTilemapInfo;
@@ -633,7 +633,7 @@ public class MUDClientTerminal implements LineBufferListener,
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.mud4j.gmcp.Client.GMCPClientMediaListener#gmcpReceivedClientMedia(org.prelle.mud4j.gmcp.Client.ClientMediaPlay)
+	 * @see org.prelle.mud4j.gmcp.Client.GMCPClientMediaListener#gmcpReceivedClientMedia(org.prelle.mud4j.gmcp.ClientMedia.ClientMediaPlay)
 	 */
 	@Override
 	public void gmcpReceivedClientMedia(ClientMediaPlay play) {
@@ -682,7 +682,7 @@ public class MUDClientTerminal implements LineBufferListener,
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.mud4j.gmcp.Client.GMCPClientMediaListener#gmcpReceivedClientMedia(org.prelle.mud4j.gmcp.Client.ClientMediaPlay)
+	 * @see org.prelle.mud4j.gmcp.Client.GMCPClientMediaListener#gmcpReceivedClientMedia(org.prelle.mud4j.gmcp.ClientMedia.ClientMediaPlay)
 	 */
 	@Override
 	public void gmcpReceivedClientMedia(ClientMediaStop stop) {
@@ -919,10 +919,10 @@ public class MUDClientTerminal implements LineBufferListener,
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.mud4j.gmcp.Room.GMCPRoomListener#gmcpReceivedRoomInfo(org.prelle.mud4j.gmcp.Room.GMCPRoomInfo)
+	 * @see org.prelle.mud4j.gmcp.Room.GMCPRoomListener#gmcpReceivedRoomInfo(org.prelle.mud4j.gmcp.Room.RoomInfo)
 	 */
 	@Override
-	public void gmcpReceivedRoomInfo(GMCPRoomInfo info) {
+	public void gmcpReceivedRoomInfo(RoomInfo info) {
 		logger.log(Level.DEBUG, "Room "+info.getName());
 //		ANSIOutputStream out = console.getOutputStream();
 //

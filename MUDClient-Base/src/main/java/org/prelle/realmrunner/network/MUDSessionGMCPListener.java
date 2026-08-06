@@ -2,9 +2,9 @@ package org.prelle.realmrunner.network;
 
 import org.prelle.mud4j.gmcp.Char.Stats;
 import org.prelle.mud4j.gmcp.Char.Vitals;
-import org.prelle.mud4j.gmcp.Client.ClientMediaPlay;
-import org.prelle.mud4j.gmcp.Client.ClientMediaStop;
-import org.prelle.mud4j.gmcp.Room.GMCPRoomInfo;
+import org.prelle.mud4j.gmcp.ClientMedia.ClientMediaPlay;
+import org.prelle.mud4j.gmcp.ClientMedia.ClientMediaStop;
+import org.prelle.mud4j.gmcp.Room.RoomInfo;
 import org.prelle.mud4j.gmcp.beip.BeipTilemapData;
 import org.prelle.mud4j.gmcp.beip.BeipTilemapInfo;
 
@@ -16,7 +16,7 @@ public interface MUDSessionGMCPListener {
 	public void gmcpReceivedClientMedia(ClientMediaPlay play);
 	public void gmcpReceivedClientMedia(ClientMediaStop stop);
 
-	public void gmcpReceivedRoomInfo(GMCPRoomInfo info);
+	public void gmcpReceivedRoomInfo(RoomInfo info);
 
 	public void gmcpReceivedVitals(Vitals value);
 
