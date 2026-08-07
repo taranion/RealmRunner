@@ -1,0 +1,13 @@
+{
+  "name": "realmrunner-web",
+  "version": "1.0.0",
+  "description": "A web-based MUD client",
+  "main": "main.js",
+  "scripts": {},
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ghostty-web": "^0.4.0"
+  },
+  "devDependencies": {}
+}

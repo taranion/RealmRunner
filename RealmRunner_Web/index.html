@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RealmRunner</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="connection-dialog">
+        <h1>Connect to MUD</h1>
+        <form id="connection-form">
+            <input type="text" id="host" placeholder="Host" required>
+            <input type="number" id="port" placeholder="Port" required>
+            <button type="submit">Connect</button>
+        </form>
+    </div>
+    <div id="terminal" style="display: none;"></div>
+    <script type="module" src="main.js"></script>
+</body>
+</html>
