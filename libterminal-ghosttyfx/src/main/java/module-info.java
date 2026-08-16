@@ -9,4 +9,6 @@ module org.prelle.jeditermfxterminal {
 	requires ghosttyfx;
 	requires transitive  org.prelle.libansi;
 	requires lombok;
+	requires org.prelle.mudevents;
+	requires org.prelle.telnet;
 }

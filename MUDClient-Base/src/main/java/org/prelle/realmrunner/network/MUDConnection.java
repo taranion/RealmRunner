@@ -1,14 +1,31 @@
 package org.prelle.realmrunner.network;
 
-import java.io.InputStream;
-import java.io.OutputStream;
+import org.prelle.mudevents.MUDEventPipeline;
+import org.prelle.mudevents.MUDEventProcessor;
+
+import lombok.Getter;
 
 /**
  * 
  */
-public interface MUDConnection {
-
-	public InputStream getStreamFromMUD();
+public abstract class MUDConnection implements MUDEventProcessor{
 	
-	public OutputStream getStreamToMUD();
+	protected MUDEventPipeline receivePipe;
+	@Getter protected boolean supportsTelnet;
+	@Getter protected boolean supportsMUDDown;
+	
+	//-------------------------------------------------------------------
+	protected MUDConnection() {
+		receivePipe = new MUDEventPipeline("RCV");
+	}
+	
+	//-------------------------------------------------------------------
+	public MUDEventPipeline getReceivePipe() {
+		return receivePipe;
+	}
+
+	public abstract void start();
+	
+	public abstract void close();
+	
 }

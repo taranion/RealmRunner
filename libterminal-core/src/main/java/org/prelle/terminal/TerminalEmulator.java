@@ -7,11 +7,13 @@ import java.nio.charset.Charset;
 import java.util.function.Consumer;
 
 import org.prelle.ansi.FilteringANSIStream;
+import org.prelle.mudevents.MUDEventPipeline;
+import org.prelle.mudevents.MUDEventProcessor;
 
 /**
  *
  */
-public interface TerminalEmulator {
+public interface TerminalEmulator extends MUDEventProcessor {
 
 	public TerminalMode getMode();
 	public TerminalEmulator setMode(TerminalMode mode);
@@ -55,7 +57,14 @@ public interface TerminalEmulator {
 	/** 
 	 * Setup streams, but do not start transmitting/receiving yet.
 	 */
+	@Deprecated
 	FilteringANSIStream connectWith(MessageLog log, InputStream in, OutputStream out);
+
+	//-------------------------------------------------------------------
+	/** 
+	 * Setup streams, but do not start transmitting/receiving yet.
+	 */
+	void connectWith(MUDEventPipeline pipeOut);
 
 	//-------------------------------------------------------------------
 	void start();

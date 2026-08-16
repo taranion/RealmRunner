@@ -15,6 +15,10 @@
 			<groupId>org.prelle</groupId>
 		  	<artifactId>telnet</artifactId>
 	  	</dependency>
+        <dependency>
+            <groupId>org.prelle</groupId>
+            <artifactId>mudevents</artifactId>
+        </dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -45,7 +49,7 @@
             <dependency>
                 <groupId>org.prelle</groupId>
                 <artifactId>libmxp</artifactId>
-                <version>0.0.1-SNAPSHOT</version>                
+                <version>0.1.0-SNAPSHOT</version>                
             </dependency>
         <dependency>
             <groupId>jakarta.websocket</groupId>

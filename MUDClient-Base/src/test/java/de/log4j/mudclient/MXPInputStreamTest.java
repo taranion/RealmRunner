@@ -15,7 +15,7 @@ import org.prelle.ansi.ANSIInputStream;
 import org.prelle.ansi.ANSIInputStreamFilter;
 import org.prelle.ansi.AParsedElement;
 import org.prelle.ansi.commands.SelectGraphicRendition;
-import org.prelle.mxp.MXPInputStreamFilter;
+import org.prelle.mxp.stream.MXPInputStreamFilter;
 
 /**
  * 

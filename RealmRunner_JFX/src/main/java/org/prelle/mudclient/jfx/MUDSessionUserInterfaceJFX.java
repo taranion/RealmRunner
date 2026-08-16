@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.prelle.ghostty.GhosttyTerminalView;
 import org.prelle.jeditermfxterminal.JediTerminalView;
 import org.prelle.mudclient.jfx.MUDClientMain.HistoryEntry;
+import org.prelle.mudevents.MUDEventPipeline;
 import org.prelle.realmrunner.network.MUDSession;
 import org.prelle.realmrunner.network.MUDSessionUserInterface;
 import org.prelle.terminal.TerminalEmulator;

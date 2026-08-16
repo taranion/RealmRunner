@@ -16,11 +16,17 @@ import java.util.function.Consumer;
 import org.prelle.ansi.ANSIInputStream;
 import org.prelle.ansi.ANSIOutputStream;
 import org.prelle.ansi.AParsedElement;
+import org.prelle.ansi.C0Code;
+import org.prelle.ansi.C0Fragment;
 import org.prelle.ansi.FilteringANSIStream;
 import org.prelle.ansi.PrintableFragment;
 import org.prelle.ansi.commands.ResetMode;
 import org.prelle.ansi.commands.SetMode;
 import org.prelle.ansi.commands.SetMode.ANSIMode;
+import org.prelle.mudevents.BinaryDataEvent;
+import org.prelle.mudevents.MUDEvent;
+import org.prelle.mudevents.MUDEventPipeline;
+import org.prelle.mudevents.ansi.ANSIEvent;
 import org.prelle.terminal.DataFromTerminalOutputStream;
 import org.prelle.terminal.DataToTerminalInputStream;
 import org.prelle.terminal.InputBuffer;
@@ -56,6 +62,7 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
     
     private ANSIInputStream ansiIn;
     private ANSIOutputStream ansiOut;
+    private MUDEventPipeline pipeOut;
     private boolean localEcho = true;
     private MessageLog messageLog;
 
@@ -81,6 +88,24 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 
 	//-------------------------------------------------------------------
 	/**
+	 * @see org.prelle.mudevents.MUDEventProcessor#apply(org.prelle.mudevents.MUDEvent)
+	 */
+	public List<MUDEvent> apply(MUDEvent event) {
+//		logger.log(Level.INFO, "Ghostty.apply({0}) called with {1} bytes", event, event.asRawData().length);
+		if (event instanceof ANSIEvent) {
+			toTerminal.writeToTerminal(event.asRawData());
+			return List.of();
+		} else if (event instanceof BinaryDataEvent binary) {
+			toTerminal.writeToTerminal(binary.getData());
+			return List.of();
+		} else {
+			logger.log(Level.WARNING, "Unknown event type {0} received: {1}", event.getClass(), event);
+		}
+		return List.of(event);
+	}
+	
+	//-------------------------------------------------------------------
+	/**
 	 * @see org.prelle.terminal.TerminalEmulator#getReadBuffer()
 	 */
 	@Override
@@ -88,6 +113,14 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 		return readBuffer;
 	}
 
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.terminal.TerminalEmulator#connectWith(org.prelle.mudevents.MUDEventPipeline)
+	 */
+	public void connectWith(MUDEventPipeline pipeOut) {
+		this.pipeOut = pipeOut;
+	}
+	
 	//-------------------------------------------------------------------
 	/**
 	 * @see org.prelle.terminal.TerminalEmulator#connectWith(java.io.InputStream, java.io.InputStream)
@@ -422,7 +455,13 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 		byte[] data = (text + "\r\n").getBytes(StandardCharsets.UTF_8);
 		try {
 			// Send to game
-			ansiOut.write(data);
+			if (pipeOut!=null) {
+				pipeOut.publish(new ANSIEvent(this, new PrintableFragment(text)));
+				pipeOut.publish(new ANSIEvent(this, new C0Fragment(C0Code.CR)));
+				pipeOut.publish(new ANSIEvent(this, new C0Fragment(C0Code.LF)));
+			} else {			
+				ansiOut.write(data);
+			}
 			// Echo locally to terminal
 			if (localEcho)
 				toTerminal.writeToTerminal(data);

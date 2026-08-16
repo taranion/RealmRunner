@@ -12,7 +12,7 @@
   <packaging>jar</packaging>
 
   <properties>
-    <java.version>21</java.version>
+    <java.version>25</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -23,6 +23,14 @@
       <artifactId>mudclient-base</artifactId>
       <version>0.0.1</version>
     </dependency>
+
+    <!-- GraalVM Web Image JavaScript Interop API -->
+    <dependency>
+      <groupId>org.graalvm.webimage</groupId>
+      <artifactId>api</artifactId>
+      <version>25.2.4</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -31,7 +39,13 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.15.0</version>
         <configuration>
-          <release>${java.version}</release>
+          <source>25</source>
+          <target>25</target>
+          <parameters>true</parameters>
+          <compilerArgs>
+            <arg>--add-reads</arg>
+            <arg>org.prelle.realmrunner.wasm=ALL-UNNAMED</arg>
+          </compilerArgs>
         </configuration>
       </plugin>
     </plugins>
@@ -61,8 +75,36 @@
               <mainClass>org.prelle.realmrunner.wasm.Client</mainClass>
               <buildArgs>
                 <buildArg>--tool:svm-wasm</buildArg>
+                <buildArg>-H:+UnlockExperimentalVMOptions</buildArg>
+                <buildArg>--initialize-at-build-time=org.prelle,com.google.gson</buildArg>
               </buildArgs>
             </configuration>
+          </plugin>
+
+          <plugin>
+            <artifactId>maven-resources-plugin</artifactId>
+            <version>3.3.1</version>
+            <executions>
+              <execution>
+                <id>copy-wasm-to-web</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <configuration>
+                  <outputDirectory>${project.parent.basedir}/RealmRunner_Web</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>${project.build.directory}</directory>
+                      <includes>
+                        <include>realmrunner-web.js</include>
+                        <include>realmrunner-web.js.wasm</include>
+                      </includes>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>

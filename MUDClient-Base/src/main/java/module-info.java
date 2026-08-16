@@ -8,7 +8,7 @@ module org.prelle.mud.client.base {
 	requires org.prelle.gmcp;
 	requires transitive org.prelle.libansi;
 	requires transitive org.prelle.libterminal;
-	requires org.prelle.telnet;
+	requires transitive org.prelle.telnet;
 	requires org.yaml.snakeyaml;
 	requires lombok;
 	requires org.prelle.mudansi;
@@ -16,5 +16,6 @@ module org.prelle.mud.client.base {
 	requires org.prelle.libmxp;
 	requires langchain4j.core;
 	requires langchain4j.ollama;
+	requires org.prelle.mudevents;
 
 }

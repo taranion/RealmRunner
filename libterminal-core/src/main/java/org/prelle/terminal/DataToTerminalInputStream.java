@@ -4,13 +4,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.System.Logger;
+import java.util.List;
+
+import org.prelle.mudevents.MUDEvent;
+import org.prelle.mudevents.MUDEventProcessor;
 
 /**
  * This class helps with the need from the terminal to read from an InputStream,
  * while the same time the application needs to be able to write directly on the terminal.
  * This class provides a ring buffer that can be written to and read from.
  */
-public class DataToTerminalInputStream extends InputStream {
+public class DataToTerminalInputStream extends InputStream implements MUDEventProcessor {
 	
 	private final static Logger logger = System.getLogger("terminal");
 	
@@ -54,7 +58,7 @@ public class DataToTerminalInputStream extends InputStream {
 
 	//-------------------------------------------------------------------
 	public void write(int b) throws IOException {
-//		logger.log(Logger.Level.INFO, "ENTER: write: b={0}", b);
+		logger.log(Logger.Level.INFO, "ENTER: write: b={0}", b);
 		synchronized (ringBuffer) {
 			// Wait until there is space in the buffer
 			waitForCapacity(1);
@@ -75,7 +79,7 @@ public class DataToTerminalInputStream extends InputStream {
 	
 	//-------------------------------------------------------------------
 	public void writeToTerminal(byte[] data) {
-//		logger.log(Logger.Level.INFO, "ENTER: write: b={0}", data);
+//		logger.log(Logger.Level.INFO, "ENTER: write: b={0}", data.length);
 		synchronized (ringBuffer) {
 			// Wait until there is space in the buffer
 			waitForCapacity(data.length);
@@ -168,4 +172,14 @@ public class DataToTerminalInputStream extends InputStream {
 
 	public void releaseBuffer() {
 		releaseBuffer = true;
+	}
+
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.mudevents.MUDEventProcessor#apply(org.prelle.mudevents.MUDEvent)
+	 */
+	@Override
+	public List<MUDEvent> apply(MUDEvent event) {
+		writeToTerminal( event.asRawData() );
+		return List.of();
 	}}

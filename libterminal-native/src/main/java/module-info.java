@@ -3,5 +3,6 @@ module org.prelle.libterminal.console {
 
 	requires transitive org.prelle.libansi;
 	requires transitive org.prelle.libterminal;
+	requires org.prelle.mudevents;
 
 }

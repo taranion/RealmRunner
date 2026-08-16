@@ -20,6 +20,10 @@
   			<artifactId>libterminal-api</artifactId>
             <version>${revision}</version>
 		</dependency>
+        <dependency>
+            <groupId>org.prelle</groupId>
+            <artifactId>mudevents</artifactId>
+        </dependency>
 		<!--<dependency>
     		<groupId>net.java.dev.jna</groupId>
     		<artifactId>jna</artifactId>

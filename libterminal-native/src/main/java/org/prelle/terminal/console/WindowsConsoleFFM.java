@@ -28,6 +28,8 @@ import java.util.function.Consumer;
 import org.prelle.ansi.ANSIInputStream;
 import org.prelle.ansi.ANSIOutputStream;
 import org.prelle.ansi.FilteringANSIStream;
+import org.prelle.mudevents.MUDEvent;
+import org.prelle.mudevents.MUDEventPipeline;
 import org.prelle.terminal.MessageLog;
 import org.prelle.terminal.ReceiveBuffer;
 import org.prelle.terminal.TerminalEmulator;
@@ -620,6 +622,15 @@ public class WindowsConsoleFFM implements TerminalEmulator {
 		}
 	}
 
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.mudevents.MUDEventProcessor#apply(org.prelle.mudevents.MUDEvent)
+	 */
+	public List<MUDEvent> apply(MUDEvent event) {
+		System.getLogger("TERM").log(Logger.Level.INFO, "TerminalEmulatorModel received event: {0}", event);
+		return List.of(event);
+	}
+
 	@Override
 	public FilteringANSIStream connectWith(MessageLog log, InputStream in, OutputStream out) {
 		// TODO Auto-generated method stub
@@ -653,6 +664,12 @@ public class WindowsConsoleFFM implements TerminalEmulator {
 	public ReceiveBuffer getReadBuffer() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void connectWith(MUDEventPipeline pipeOut) {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

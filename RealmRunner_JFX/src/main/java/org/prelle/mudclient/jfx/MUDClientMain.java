@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PipedWriter;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
+import java.net.URI;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -432,9 +433,11 @@ public class MUDClientMain extends Application {
 		
 		// Start a new MUDSession
 		try {
-			MUDSession session = MUDSession.builder(ui.getTerminal())
-					.setClientConfig(connectWith)
-					.setTerminalTypes("Realm Runner","xterm","MTTS 271")
+			MUDSession session = MUDSession.builder()
+					.withTarget(URI.create("telnet://"+connectWith.getServer()+":"+connectWith.getPort()))
+					.withTerminal(ui.getTerminal())
+//					.setClientConfig(connectWith)
+//					.setTerminalTypes("Realm Runner","xterm","MTTS 271")
 					.build();
 			if (session!=null) {
 				Tab tab = new Tab(connectWith.getServer(), ui);

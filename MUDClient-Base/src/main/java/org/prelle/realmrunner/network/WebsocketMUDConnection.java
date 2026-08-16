@@ -1,18 +1,14 @@
 package org.prelle.realmrunner.network;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.net.InetAddress;
 import java.net.URI;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.prelle.telnet.ReceiveDatagramInputStream;
-import org.prelle.telnet.SendDatagramOutputStream;
+import org.prelle.mudevents.BinaryDataEvent;
+import org.prelle.mudevents.MUDEvent;
 
 import jakarta.websocket.ClientEndpointConfig;
 import jakarta.websocket.CloseReason;
@@ -28,7 +24,7 @@ import lombok.Getter;
 /**
  * 
  */
-public class WebsocketMUDConnection implements MUDConnection {
+public class WebsocketMUDConnection extends MUDConnection {
 	
 	private final static Logger logger = System.getLogger("mud.client.ws");
 	
@@ -65,23 +61,18 @@ public class WebsocketMUDConnection implements MUDConnection {
 	@Getter private int port;
 	@Getter private String negotiatedSubprotocol;
 	
-	ReceiveDatagramInputStream incomingData;
-	SendDatagramOutputStream outgoingData;
 
 	//-------------------------------------------------------------------
 	/**
 	 */
-	public WebsocketMUDConnection(InetAddress host, int port) {
-		this.host = host;
-		this.port = port;
-		
-		incomingData = new ReceiveDatagramInputStream();
+	public WebsocketMUDConnection(URI uri) throws IOException {
+		this.host = InetAddress.getByName(uri.getHost());
+		this.port = uri.getPort() != -1 ? uri.getPort() : (uri.getScheme().equals("wss") ? 443 : 80);
 		
 		MessageHandler binaryHandler = new MessageHandler.Whole<byte[]>() {
 		    @Override
 		    public void onMessage(byte[] message) {
-
-		        incomingData.receiveData(message);
+		        getReceivePipe().publish(new BinaryDataEvent(this,message));
 		    }
 		};
 		
@@ -95,161 +86,49 @@ public class WebsocketMUDConnection implements MUDConnection {
 				})
 				.build();
 		 WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-	        String uri = "ws://"+host.getHostName()+":"+port; // Example WebSocket server
 	        try {
-	        	Session session = container.connectToServer(MyWebSocketClient.class, config, URI.create(uri));
+	        	Session session = container.connectToServer(MyWebSocketClient.class, config, uri);
 	        	session.addMessageHandler(binaryHandler);
 	        	negotiatedSubprotocol = session.getNegotiatedSubprotocol();
-	    		outgoingData = new SendDatagramOutputStream( buf -> {
-					try {
-						session.getBasicRemote().sendBinary(ByteBuffer.wrap(buf));
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				});
 	            System.out.println("Connected to server: "+session.getNegotiatedSubprotocol());
+	            if (negotiatedSubprotocol == null || "telnet.mudstandards.org".equals(negotiatedSubprotocol) ) {
+	            	super.supportsTelnet = true;
+	            } else if ("muddown".equals(negotiatedSubprotocol)) {
+	            	super.supportsMUDDown = true;
+	            }
 	        } catch (Exception e) {
 	            e.printStackTrace();
 	        }
 	}
 
-	//-------------------------------------------------------------------
-	/**
-	 * @see org.prelle.realmrunner.network.MUDConnection#getStreamFromMUD()
-	 */
-	@Override
-	public InputStream getStreamFromMUD() {
-		return incomingData;
-	}
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.realmrunner.network.MUDConnection#getStreamToMUD()
+	 * @see org.prelle.mudevents.MUDEventProcessor#apply(org.prelle.mudevents.MUDEvent)
 	 */
 	@Override
-	public OutputStream getStreamToMUD() {
-		return outgoingData;
+	public List<MUDEvent> apply(MUDEvent event) {
+		if (event instanceof BinaryDataEvent binary) {
+			logger.log(Level.INFO,"Send binary data of length: "+binary.getData().length);
+			byte[] data = binary.getData();
+			// ToDo: Send on websocket
+		} else
+			logger.log(Level.ERROR, "Unhandled send event type: "+event.getClass().getName());
+		return List.of();
+	}
+
+
+	@Override
+	public void start() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void close() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
-
-//class ProcessIncomingData extends InputStream {
-//	
-//	private final static Logger logger = System.getLogger("mud.client.ws");
-//	
-//	private List<byte[]> incomingData = new ArrayList<>();
-//	
-//	private byte[] currentlyConsuming;
-//	private int currentIndex = 0;
-//
-//	@Override
-//	public int available() throws IOException {
-//		logger.log(Level.INFO, "available: "+incomingData.size()+" currently: "+(currentlyConsuming != null ? currentlyConsuming.length : 0));
-//		if (currentlyConsuming != null && currentIndex < currentlyConsuming.length) {
-//			return currentlyConsuming.length - currentIndex;
-//		}
-//		synchronized (incomingData) {
-//			int totalAvailable = 0;
-//			for (byte[] data : incomingData) {
-//				totalAvailable += data.length;
-//			}
-//			return totalAvailable;
-//		}
-//	}
-//	
-//	@Override
-//	public int read() throws IOException {
-//		logger.log(Level.WARNING, "readSingle");
-//		if (currentlyConsuming != null && currentIndex < currentlyConsuming.length) {
-//			return currentlyConsuming[currentIndex++] & 0xFF; // Return the next byte as an int
-//		}
-//		
-//		synchronized (incomingData) {
-//			while (incomingData.isEmpty()) {
-//				try {
-//					incomingData.wait(); // Wait for new data to arrive
-//				} catch (InterruptedException e) {
-//					Thread.currentThread().interrupt();
-//					throw new IOException("Thread interrupted while waiting for data", e);
-//				}
-//			}
-//			byte[] data = incomingData.remove(0);
-//			currentlyConsuming = data;
-//			currentIndex = 0;
-//			return currentlyConsuming[currentIndex++] & 0xFF; // Return the next byte as an int
-//		}
-//	}
-//	
-//	public int read(byte[] b, int off, int len) throws IOException {
-//		logger.log(Level.WARNING, "readMulti");
-//		if (currentlyConsuming != null && currentIndex < currentlyConsuming.length) {
-//			int bytesToRead = Math.min(len, currentlyConsuming.length - currentIndex);
-//			System.arraycopy(currentlyConsuming, currentIndex, b, off, bytesToRead);
-//			currentIndex += bytesToRead;
-//			return bytesToRead;
-//		}
-//		
-//		synchronized (incomingData) {
-//			while (incomingData.isEmpty()) {
-//				try {
-//					incomingData.wait(); // Wait for new data to arrive
-//				} catch (InterruptedException e) {
-//					Thread.currentThread().interrupt();
-//					throw new IOException("Thread interrupted while waiting for data", e);
-//				}
-//			}
-//			byte[] data = incomingData.remove(0);
-//			currentlyConsuming = data;
-//			currentIndex = 0;
-//			int bytesToRead = Math.min(len, currentlyConsuming.length - currentIndex);
-//			System.arraycopy(currentlyConsuming, currentIndex, b, off, bytesToRead);
-//			currentIndex += bytesToRead;
-//			return bytesToRead;
-//		}
-//	}
-//
-//	@Override
-//	public int read(byte[] data) throws IOException {
-//		return read(data, 0, data.length);
-//	}
-//	
-//	
-//	void receiveData(byte[] data) {
-//        logger.log(Level.WARNING,"Received binary message of length: " + data.length);
-//        synchronized (incomingData) {
-//			if (currentlyConsuming == null) {
-//				currentlyConsuming = data;
-//				currentIndex = 0;
-//			} else {
-//				incomingData.add(data);
-//			}
-//			incomingData.notifyAll(); // Notify any waiting threads that new data is available
-//		}
-//	}	
-//}
-//
-//
-//class SendOutgoingData extends OutputStream {
-//	
-//	private final static Logger logger = System.getLogger("mud.client.ws");
-//	
-//	private Session session;
-//	
-//	public SendOutgoingData(Session session) {
-//		this.session = session;
-//		// TODO Auto-generated constructor stub
-//	}
-//
-//	@Override
-//	public void write(int b) throws IOException {
-//		logger.log(Level.WARNING, "writeSingle");
-////		session.getBasicRemote().sendBinary(new ByteBuffer(new byte[] {(byte)b}));
-//	}
-//	
-//	@Override
-//	public void write(byte[] buf) throws IOException {
-//		logger.log(Level.WARNING, "writeMulti");
-//		session.getBasicRemote().sendBinary(ByteBuffer.wrap(buf));
-//	}
-//}

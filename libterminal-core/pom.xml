@@ -23,6 +23,14 @@
   			<artifactId>libansi</artifactId>
 		</dependency>
         <dependency>
+            <groupId>org.prelle</groupId>
+            <artifactId>mudevents</artifactId>            
+        </dependency>
+        <dependency>
+            <groupId>org.prelle</groupId>
+            <artifactId>telnet</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>

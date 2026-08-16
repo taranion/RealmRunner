@@ -3,11 +3,14 @@ package org.prelle.terminal.emulated;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.System.Logger.Level;
+import java.lang.System.Logger;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.function.Consumer;
 
 import org.prelle.ansi.FilteringANSIStream;
+import org.prelle.mudevents.MUDEvent;
+import org.prelle.mudevents.MUDEventPipeline;
 import org.prelle.terminal.MessageLog;
 import org.prelle.terminal.ReceiveBuffer;
 import org.prelle.terminal.TerminalEmulator;
@@ -105,6 +108,21 @@ public class TerminalEmulatorModel implements TerminalEmulator {
 	public ReceiveBuffer getReadBuffer() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.mudevents.MUDEventProcessor#apply(org.prelle.mudevents.MUDEvent)
+	 */
+	public List<MUDEvent> apply(MUDEvent event) {
+		System.getLogger("TERM").log(Logger.Level.INFO, "TerminalEmulatorModel received event: {0}", event);
+		return List.of(event);
+	}
+
+	@Override
+	public void connectWith(MUDEventPipeline pipeOut) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

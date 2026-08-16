@@ -10,4 +10,5 @@ module org.prelle.jeditermfxterminal {
 	requires com.techsenger.jeditermfx.core;
 	requires org.prelle.libansi;
 	requires lombok;
+	requires org.prelle.mudevents;
 }

@@ -4,4 +4,5 @@ module org.prelle.libterminal.emulated {
 
 	requires transitive org.prelle.libansi;
 	requires org.prelle.libterminal;
+	requires org.prelle.mudevents;
 }

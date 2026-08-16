@@ -61,8 +61,6 @@ import org.prelle.realmrunner.network.MUDSessionGMCPListener;
 import org.prelle.realmrunner.network.MainConfig;
 import org.prelle.realmrunner.network.SessionConfig;
 import org.prelle.realmrunner.network.SoundManager;
-import org.prelle.telnet.mud.AardwolfMushclientProtocol.AardwolfMushclientListener;
-import org.prelle.telnet.mud.AardwolfMushclientProtocol.MUDMode;
 import org.prelle.terminal.TerminalEmulator;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.TypeDescription;
@@ -82,7 +80,7 @@ import javazoom.jl.player.Player;
  *
  */
 public class MUDClientTerminal implements LineBufferListener,
-	AardwolfMushclientListener, MUDSessionGMCPListener  {
+	MUDSessionGMCPListener  {
 
 	private enum OSType {
 	    Windows, MacOS, Linux, Other
@@ -450,10 +448,11 @@ public class MUDClientTerminal implements LineBufferListener,
 
 	//-------------------------------------------------------------------
 	private void setupSession(SessionConfig config, Config activeConfig) throws IOException, InterruptedException {
-		session = MUDSession.builder(console)
-				.setCharset(charset)
-				.setClientConfig(activeConfig)
-				.setConfig(config)
+		session = MUDSession.builder()
+				.withTerminal(console)
+//				.setCharset(charset)
+//				.setClientConfig(activeConfig)
+//				.setConfig(config)
 				.build();
 ////		session = new MUDSession(config, console.getConsoleSize(), charset);
 ////		session.getSocket().setOptionListener(WellKnownTelnetOptions.MUSHCLIENT, (AardwolfMushclientListener)this);
@@ -992,23 +991,23 @@ public class MUDClientTerminal implements LineBufferListener,
 
 
 
-	//-------------------------------------------------------------------
-	/**
-	 * @see org.prelle.telnet.mud.AardwolfMushclientProtocol.AardwolfMushclientListener#telnetMudModeChanged(org.prelle.telnet.mud.AardwolfMushclientProtocol.MUDMode)
-	 */
-	@Override
-	public void telnetMudModeChanged(MUDMode mode) {
-		logger.log(Level.WARNING, "TODO: MUSHCLIENT mode changed to {0}", mode);
-	}
-
-	//-------------------------------------------------------------------
-	/**
-	 * @see org.prelle.telnet.mud.AardwolfMushclientProtocol.AardwolfMushclientListener#telnetTickReceived()
-	 */
-	@Override
-	public void telnetTickReceived() {
-		logger.log(Level.WARNING, "TODO: MUSHCLIENT TICK");
-	}
+//	//-------------------------------------------------------------------
+//	/**
+//	 * @see org.prelle.telnet.mud.AardwolfMushclientProtocol.AardwolfMushclientListener#telnetMudModeChanged(org.prelle.telnet.mud.AardwolfMushclientProtocol.MUDMode)
+//	 */
+//	@Override
+//	public void telnetMudModeChanged(MUDMode mode) {
+//		logger.log(Level.WARNING, "TODO: MUSHCLIENT mode changed to {0}", mode);
+//	}
+//
+//	//-------------------------------------------------------------------
+//	/**
+//	 * @see org.prelle.telnet.mud.AardwolfMushclientProtocol.AardwolfMushclientListener#telnetTickReceived()
+//	 */
+//	@Override
+//	public void telnetTickReceived() {
+//		logger.log(Level.WARNING, "TODO: MUSHCLIENT TICK");
+//	}
 
 
 	//-------------------------------------------------------------------
