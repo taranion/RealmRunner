@@ -157,7 +157,7 @@ public class MUDClientMain extends Application {
         //Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
 		tabs = new TabPane();
 		// Add welcome pane
-		welcome = new WelcomePane( (cfg) -> connectWith(cfg, stage));
+		welcome = new WelcomePane( (name,cfg) -> connectWith(name,cfg, stage));
 		var mainTab = new Tab("New", welcome);
 		mainTab.setClosable(false);
 		tabs.getTabs().add(mainTab);
@@ -186,205 +186,11 @@ public class MUDClientMain extends Application {
        
         stage.initStyle(StageStyle.EXTENDED);
 		stage.show();
-
-//		Stage dialogStage = new Stage();
-//		ConnectionDialog choices = new ConnectionDialog(mainConfig);
-//		Scene dialogScene = new Scene(choices);
-//		dialogStage.setScene(dialogScene);
-//		dialogStage.showAndWait();
-//
-//		Config connectWith = choices.getSelected();
-//		logger.log(Level.DEBUG, "Connect to {0}", connectWith);
-//		if (connectWith!=null) {
-//			connectWith(connectWith);
-//		}
-		
-//		Config connectWith = mainConfig.getWorld().get("eden");
-//		connectWith(connectWith);
 		
 		Platform.accessibilityActiveProperty().addListener( (_,_,n ) -> {
 			logger.log(Level.INFO, "Accessibility is now {0}", n?"active":"inactive");
 		});
 	}
-
-//	//-------------------------------------------------------------------
-//	public void connect(MUDConnection connection) {
-//		logger.log(Level.INFO, "Connecting to MUD {0}", connection);
-//		try {
-//			TelnetProtocol protocol = new TelnetProtocol(CommunicationRole.CLIENT)
-//					.add(new TelnetCharset(null, "UTF-8","ASCII"))
-//					.add(new TerminalType("ghostty","ghostty-xterm"))
-//					.add(new MXPOption("b"))
-//					;
-//			
-//			TelnetOutputStream tout = new TelnetOutputStream(connection.getStreamToMUD(), protocol);
-//			TelnetInputStream   tin = new TelnetInputStream(connection.getStreamFromMUD(), protocol);
-//			tin.setReverseStream(tout);
-//			
-//			MXPInputStreamFilter mxpFilter = new MXPInputStreamFilter();
-//			
-//			ANSIInputStream in = new ANSIInputStream(tin);
-//			in.addFilter(mxpFilter);
-//			// TODO: create config option "assumeCRbeforeLF" - some MUDs send only LF, but we want CRLF for the terminal
-//			if (true)
-//				in.addFilter(new LinefeedToCRLFFilter());
-//			
-//			protocol.addListener(new TelnetListener() {
-//				@Override
-//				public void telnetCommandReceived(TelnetCommand command) {
-//					if (command.getCode()==ControlCode.GA) {
-//						logger.log(Level.INFO, "Telnet command received: {0}", command);
-//						in.releaseBuffer();
-//					}
-//				}
-//				@Override
-//				public void optionStateChanged(TelnetSubnegotiationHandler extension, boolean active) {
-//					if (extension instanceof MXPOption) {
-//						logger.log(Level.INFO, "MXP option state changed: {0} = {1}", extension, active);
-//						mxpFilter.setMXPActive(active);
-//					}
-//				}
-//			});
-//			
-//			console.connectWith(in, tout);
-//			
-//			protocol.initializeExtensions();
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//	}
-
-
-//	private MUDSession startReadingFromMUD(SessionConfig config, Config activeConfig) throws IOException, InterruptedException {
-//		Charset useCharset = StandardCharsets.UTF_8;
-//		if (activeConfig.getServerEncoding()!=null)
-//			useCharset = Charset.forName(activeConfig.getServerEncoding());
-//
-//
-//		MUDSession session = new MUDSession(config,  console.getConsoleSize(), useCharset);
-//		session.getSocket().setOptionListener(WellKnownTelnetOptions.MUSHCLIENT, (AardwolfMushclientListener)this);
-////		session.getSocket().setOptionListener(TelnetOption.MSP, sound);
-////		session.setGmcpListener(this);
-//
-//		if ((activeConfig instanceof Config)  &&((Config)activeConfig).getServerEncoding()!=null) {
-//			console.getInputStream().setEncoding(useCharset);
-//		}
-//
-//		logger.log(Level.INFO, "Read from MUD with charset {0}", useCharset);
-//		ReadFromMUDTask readTask = new ReadFromMUDTask(session.getSocket(), console.getOutputStream(), activeConfig, useCharset);
-//		readTask.setControlSequenceFilter( frag -> filterFragmentFromMUD(frag));
-//		session.getStreamToMUD().setLoggingListener( (type,text) -> {if (!"PRINT".equals(type)) logger.log(Level.INFO, "MUD --> {0} = {1}", type,text);});
-//		Thread readThread = new Thread(readTask);
-//		readThread.start();
-//
-//		return session;
-//	}
-//
-//	//-------------------------------------------------------------------
-//	private AParsedElement filterFragmentFromMUD(AParsedElement frag) {
-//		return frag;
-//	}
-//
-//	//-------------------------------------------------------------------
-//	private ReadFromConsoleTask startReadingFromTerminal(Config activeConfig) throws IOException {
-//		ReadFromConsoleTask readFromConsole = new ReadFromConsoleTask(console, activeConfig, null);
-//
-//		Thread readFromTerminal = new Thread(readFromConsole, "FromConsole");
-//		readFromTerminal.start();
-//		return readFromConsole;
-//	}
-
-//	//-------------------------------------------------------------------
-//	/**
-//	 * @param connectWith
-//	 */
-//	private void connectWith(Config connectWith) {
-//		Thread thread = new Thread(() -> {
-//			logger.log(Level.INFO, "Now create session");
-//			try {
-//	//			session = SessionManager.createSession("rom.mud.de", 4000);
-//	//			session = SessionManager.createSession("mg.mud.de", 4711);
-//				session = SessionManager.createSession(connectWith.getServer(), connectWith.getPort());
-//	//			session = SessionManager.createSession("localhost", 4000);
-//				InetAddress host = InetAddress.getByName("rom.mud.de");
-//				MUDConnection con = new TCPMUDConnection(host, 4000);
-////				connect(con);
-////				MUDConnection con = new WebsocketMUDConnection(host, 4002);
-//				connect(con);
-//				
-////				Thread readFromMUD = new Thread(new InputStreamThread(con.getStreamFromMUD(), console.getOutputStream()));
-////				readFromMUD.start();
-//
-////				session.connect(new SessionListener() {
-////
-////					@Override
-////					public void textReceived(String msg) {
-////						System.out.println("-----\n"+msg);
-////						terminal.getTerminal().write(msg);
-////						try {
-////							console.getOutputStream().write(msg);
-////						} catch (IOException e) {
-////							// TODO Auto-generated catch block
-////							e.printStackTrace();
-////						}
-//////						try {
-////////							terminalWriter.write(msg);
-////////							ttyConnector.write(msg);
-//////						} catch (IOException e) {
-//////							// TODO Auto-generated catch block
-//////							e.printStackTrace();
-//////						}
-//////				        Platform.runLater( () -> {
-//////				        	Node pane = FlowBuilder.configure()
-//////				        			.fontFamily("Monospaced Regular")
-//////				        			.fontSize(12)
-//////				        			.darkMode(false)
-//////				        		.message(msg)
-//////				        		.build();
-//////				        	HistoryEntry entry = new HistoryEntry(msg, pane);
-//////				        	history.add(entry);
-//////				        	historyPane.getChildren().add(pane);
-//////				        	if (historyPane.getChildren().size()>20) {
-//////				        		historyPane.getChildren().remove(0);
-//////				        		history.remove(0);
-//////				        	}
-//////				        	//scroll.setVvalue(1.0);
-//////				        	});
-////					}
-////
-////					@Override
-////					public void connectionLost(Session session) {
-////						System.exit(0);
-////					}
-////
-////					@Override
-////					public void mapReceived(org.prelle.telnet.mud.MUDTilemapProtocol.TileMapData data) {
-////						// TODO Auto-generated method stub
-////						mapView.setData(data.getRawData());
-////					}
-////				});
-//
-////				ReadFromConsoleTask readFromConsole = startReadingFromTerminal(connectWith);
-////				MUDSession session = startReadingFromMUD(null, connectWith);
-////				MUDSession session = MUDSession.builder(console)
-////						.setCharset(StandardCharsets.UTF_8)
-////						.build();
-//				//session.co
-//
-//			} catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//		});
-//		thread.start();
-//
-//	}
-//
-//	//-------------------------------------------------------------------
-//	private void sendInput(String text) {
-//		console.sendUserInput(text);
-//	}
 
 	//-------------------------------------------------------------------
 	public void readConfig() throws FileNotFoundException {
@@ -426,7 +232,7 @@ public class MUDClientMain extends Application {
 	}
 
 	//-------------------------------------------------------------------
-	private void connectWith(Config connectWith, Stage stage) {
+	private void connectWith(String name, Config connectWith, Stage stage) {
 		logger.log(Level.INFO, "Connect with {0}", connectWith);
 		
 		MUDSessionUserInterfaceJFX ui = new MUDSessionUserInterfaceJFX();
@@ -434,8 +240,9 @@ public class MUDClientMain extends Application {
 		// Start a new MUDSession
 		try {
 			MUDSession session = MUDSession.builder()
+					.withWorld(name)
 					.withTarget(URI.create("telnet://"+connectWith.getServer()+":"+connectWith.getPort()))
-					.withTerminal(ui.getTerminal())
+					.withUserInterface(ui)
 //					.setClientConfig(connectWith)
 //					.setTerminalTypes("Realm Runner","xterm","MTTS 271")
 					.build();
@@ -449,7 +256,24 @@ public class MUDClientMain extends Application {
 				tabs.getTabs().add(tab);
 				tabs.getSelectionModel().select(tab);
 				sessionTabs.put(session, tab);
-				ui.setSession(session);
+				
+				logger.log(Level.INFO, session.getStreamFromMUD());
+				logger.log(Level.INFO, session.getStreamToMUD());
+				session.setSessionListener(sess -> {
+					logger.log(Level.INFO, "Session {0} changed (Fx={1})", sess.getWorld(), Platform.isFxApplicationThread());
+					if (sess.isClosed()) {
+						Platform.runLater( () -> {
+							Tab t = sessionTabs.get(sess);
+							if (t!=null) {
+								tabs.getTabs().remove(t);
+								t.setClosable(true);
+								t.setDisable(true);
+								sessionTabs.remove(sess);
+							}
+						});
+					}
+				});
+				session.start();
 			}
 		} catch (UnknownHostException e) {
 			    var alert = new Alert(AlertType.ERROR);

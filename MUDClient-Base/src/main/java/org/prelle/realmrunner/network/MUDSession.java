@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -18,15 +19,18 @@ import org.prelle.mud4j.gmcp.GMCPHandler;
 import org.prelle.mudevents.MUDEvent;
 import org.prelle.mudevents.MUDEventPipeline;
 import org.prelle.mudevents.MUDEventProcessor;
+import org.prelle.mudevents.StartEvent;
 import org.prelle.mudevents.ansi.ANSILayer;
 import org.prelle.mudevents.telnet.MUDClientTelnet;
 import org.prelle.mxp.stream.MXPInputStreamFilter;
 import org.prelle.mxp.telnet.MXPOption;
 import org.prelle.realmrunner.feature.translate.LLMAutoTranslate;
 import org.prelle.realmrunner.feature.tts.AutoTTS;
+import org.prelle.telnet.mud.MUDServerStatusProtocol;
 import org.prelle.telnet.option.CommunicationRole;
 import org.prelle.telnet.option.EchoMode;
 import org.prelle.telnet.option.TelnetWindowSize;
+import org.prelle.terminal.InputBuffer;
 import org.prelle.terminal.MessageLog;
 import org.prelle.terminal.TerminalEmulator;
 
@@ -42,7 +46,11 @@ public class MUDSession implements MUDEventProcessor {
 
 	final static Logger logger = System.getLogger("mud.client");
 
+	private String subprotocol;
+	/** TRUE, if connection has been closed */
+	private boolean closed;
 	private String world;
+	private MUDSessionUserInterface ui;
 	private TerminalEmulator console;
 	
 	private MUDConnection connection;
@@ -68,14 +76,15 @@ public class MUDSession implements MUDEventProcessor {
 
 	//-------------------------------------------------------------------
     @Builder(setterPrefix = "with")
-    public MUDSession(URI target, Charset encoding, TerminalEmulator terminal) throws IOException {
+    public MUDSession(String world, URI target, Charset encoding, MUDSessionUserInterface userInterface, String websocketSubprotocol) throws IOException {
 		logger.log(Level.INFO, "ENTER: MUDSession.<init>");
+		Objects.requireNonNull(userInterface, "User interface must be set ");
+		Objects.requireNonNull(world, "World name must be set");
+		this.ui = userInterface;
+		this.world = world;
+		this.subprotocol = websocketSubprotocol;
 		
-		if (terminal==null) {
-			terminal = new DummyTerminal();
-		}
-		this.console = terminal;
-		streamToMUD   = new MUDEventPipeline("SND");
+		streamToMUD   = new MUDEventPipeline("SND").then(new InputBuffer());
 		
 		connection = createConnection(target);
 		streamFromMUD = connection.getReceivePipe();
@@ -83,28 +92,24 @@ public class MUDSession implements MUDEventProcessor {
 		if (connection.isSupportsTelnet()) {
 			configureClassicTelnet(connection);
 		} else if (connection.isSupportsMUDDown()) {
-			
+			configureMUDDown(connection);
 		}
 		
-		
-		//streamFromMUD.then(terminal);
-		//terminal.start();
+		withUserInterface(userInterface);
 	}
     
 	//-------------------------------------------------------------------
-    private static MUDConnection createConnection(URI target) throws IOException {
+    private MUDConnection createConnection(URI target) throws IOException {
     	InetAddress host = InetAddress.getByName(target.getHost());
 		String scheme = target.getScheme();
 		if (scheme == null || scheme.equals("telnet")) {
 			TCPMUDConnection var= new TCPMUDConnection(host, target.getPort() != -1 ? target.getPort() : 23);
-			var.start();
 			return var;
 		} else if (scheme == null || scheme.equals("telnets")) {
 			TCPSSLMUDConnection var = new TCPSSLMUDConnection(host, target.getPort() != -1 ? target.getPort() : 992);
-			var.start();
 			return var;
 		} else if (scheme.equals("ws") || scheme.equals("wss")) {
-			return new WebsocketMUDConnection(target);
+			return new WebsocketMUDConnection(target, subprotocol);
 		} else {
 			throw new IllegalArgumentException("Unsupported URI scheme: " + scheme);
 		}
@@ -117,13 +122,13 @@ public class MUDSession implements MUDEventProcessor {
 		// GMCP
 		setupGMCP();
 		telnet.add(gmcp);
+		telnet.add(new MUDServerStatusProtocol());
 		ANSILayer ansi = new ANSILayer();
 		
 		telnet.setReversePipeline(streamToMUD);
 		streamFromMUD
 			.then(telnet.receiver())
 			.then(ansi.receiver())
-			.then(console)
 			;
 		
 		streamToMUD
@@ -131,6 +136,13 @@ public class MUDSession implements MUDEventProcessor {
 			.then(telnet.sender())
 			.then(connection)
 			;
+    }
+    
+	//-------------------------------------------------------------------
+    private void configureMUDDown(MUDConnection connection) {
+    	ClientMUDDownParser mudDownReceiver = new ClientMUDDownParser();
+    	streamFromMUD
+    		.then(mudDownReceiver);
     }
 
 //	//-------------------------------------------------------------------
@@ -408,22 +420,50 @@ public class MUDSession implements MUDEventProcessor {
 //	public void setGmcpListener(MUDSessionGMCPListener gmcpListener) {
 //		this.gmcpListener = gmcpListener;
 //	}
+	
+	//-------------------------------------------------------------------
+	public MUDSession withUserInterface(MUDSessionUserInterface ui) {
+		streamFromMUD
+			.then(ui)
+			.then(ui.getTerminal())
+			;
 
+		ui.connectWithSession(this);
+		this.console = ui.getTerminal();
+		return this;
+	}
+
+	//-------------------------------------------------------------------
+	public void start() {
+		logger.log(Level.INFO, "ENTER: MUDSession.start");
+		Objects.requireNonNull(ui, "MUDSessionUserInterface must be set before starting the session");
+		Objects.requireNonNull(console, "Terminal must be set before starting the session");
+		
+		connection.start();
+		console.start();
+		
+		StartEvent startEvent = new StartEvent(this);
+		streamFromMUD.publish(startEvent);
+		logger.log(Level.INFO, "LEAVE: MUDSession.start");
+	}
+	
 	//-------------------------------------------------------------------
 	public void close() {
 		logger.log(Level.WARNING, "TODO: closing session");
-//		try {
+		try {
+			closed = true;
 //			streamToMUD.close();
-////			streamFromMUD.close();
-////			socket.close();
-//			getConsole().close();
-//			
-//			if (translator!=null) translator.onConnectionLost();
-//			if (tts!=null) tts.onConnectionLost();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+//			streamFromMUD.close();
+//			socket.close();
+			getConsole().close();
+			
+			if (translator!=null) translator.onConnectionLost();
+			if (tts!=null) tts.onConnectionLost();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		sessionListener.accept(this);
 	}
 
 //	@Override

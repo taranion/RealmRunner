@@ -1,5 +1,7 @@
 package org.prelle.realmrunner.network;
 
+import java.net.URI;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -19,6 +21,7 @@ public class Config extends AbstractConfig {
 	private String password;
 	private String serverEncoding;
 	private Boolean doesNotSendCR;
+	private URI url;
 
 	//-------------------------------------------------------------------
 	/**

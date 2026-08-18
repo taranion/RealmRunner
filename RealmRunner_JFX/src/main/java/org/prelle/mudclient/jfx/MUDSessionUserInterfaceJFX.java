@@ -2,16 +2,25 @@ package org.prelle.mudclient.jfx;
 
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.prelle.ghostty.GhosttyTerminalView;
-import org.prelle.jeditermfxterminal.JediTerminalView;
 import org.prelle.mudclient.jfx.MUDClientMain.HistoryEntry;
-import org.prelle.mudevents.MUDEventPipeline;
+import org.prelle.mudevents.MUDEvent;
+import org.prelle.mudevents.telnet.TelnetCommandEvent;
+import org.prelle.realmrunner.network.ConnectionLostEvent;
+import org.prelle.realmrunner.network.DataFileManager;
 import org.prelle.realmrunner.network.MUDSession;
 import org.prelle.realmrunner.network.MUDSessionUserInterface;
+import org.prelle.telnet.mud.MUDServerStatusProtocol.MSSPDataEvent;
 import org.prelle.terminal.TerminalEmulator;
 
 import com.graphicmud.symbol.SymbolManager;
@@ -164,12 +173,13 @@ public class MUDSessionUserInterfaceJFX extends VBox implements MUDSessionUserIn
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.realmrunner.network.MUDSessionUserInterface#setSession(org.prelle.realmrunner.network.MUDSession)
+	 * @see org.prelle.realmrunner.network.MUDSessionUserInterface#connectWithSession(org.prelle.realmrunner.network.MUDSession)
 	 */
 	@Override
-	public void setSession(MUDSession value) {
+	public void connectWithSession(MUDSession value) {
 		this.session = value;
 		this.session.setSessionListener( sess -> sessionDetailsChanged(sess) );
+		console.connectWith( this.session.getStreamToMUD() );
 		
 		Optional<String> mxp = value.getMXPDefinitions();
 		if (mxp.isPresent()) {
@@ -179,6 +189,7 @@ public class MUDSessionUserInterfaceJFX extends VBox implements MUDSessionUserIn
 		} else {
 			sessionTabs.getTabs().remove(tabMXP);
 		}
+		
 	}
 
 	//-------------------------------------------------------------------
@@ -193,6 +204,60 @@ public class MUDSessionUserInterfaceJFX extends VBox implements MUDSessionUserIn
 			sessionTabs.getTabs().remove(tabMXP);
 		}
 		logger.log(Level.TRACE, "LEAVE: sessionDetailsChanged");
+	}
+	
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.mudevents.MUDEventProcessor#getName()
+	 */
+	@Override
+	public String getName() {
+		return "UI";
+	}
+
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.mudevents.MUDEventProcessor#apply(org.prelle.mudevents.MUDEvent)
+	 */
+	@Override
+	public List<MUDEvent> apply(MUDEvent event) {
+		if (event instanceof TelnetCommandEvent telnet) {
+			if (telnet.getWrapped() instanceof MSSPDataEvent mssp) {
+				logger.log(Level.INFO, "MSSP Data: "+mssp.getData());
+				processMSSPData(mssp.getData());
+				return List.of();
+			}
+		} else if (event instanceof ConnectionLostEvent lost) {
+			logger.log(Level.WARNING, "Connection lost!");
+			session.close();
+			return List.of();
+		}
+		
+		logger.log(Level.WARNING, "Unprocessed: "+event);
+		return List.of(event);
+	}
+
+	private void processMSSPData(Map<String, String> data) {
+		// TODO Auto-generated method stub
+		String icon = data.get("ICON");
+		if (icon!=null) {
+			logger.log(Level.ERROR, "Downloading ICON from "+icon);
+			HttpClient client = HttpClient.newHttpClient();
+			HttpRequest request = HttpRequest.newBuilder()
+					.uri(java.net.URI.create(icon))
+					.build();
+			try {
+				HttpResponse<byte[]> resp = client.send(request, BodyHandlers.ofByteArray());
+				DataFileManager.getCurrentDataDir(session).resolve("icon.png").toFile().delete();
+				// Store file
+				logger.log(Level.ERROR, "Write to "+DataFileManager.getCurrentDataDir(session).resolve("icon.png"));
+				Files.write(DataFileManager.getCurrentDataDir(session).resolve("icon.png"), resp.body());
+				
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 }

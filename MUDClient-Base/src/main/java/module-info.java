@@ -3,8 +3,6 @@ module org.prelle.mud.client.base {
 	exports org.prelle.realmrunner.feature.translate;
 	exports org.prelle.realmrunner.feature.tts;
 
-	requires java.desktop;
-	requires java.net.http;
 	requires org.prelle.gmcp;
 	requires transitive org.prelle.libansi;
 	requires transitive org.prelle.libterminal;
@@ -17,5 +15,10 @@ module org.prelle.mud.client.base {
 	requires langchain4j.core;
 	requires langchain4j.ollama;
 	requires org.prelle.mudevents;
+	requires okhttp3;
+	requires okio;
+	requires com.google.gson;
+	requires org.prelle.muddown;
+	requires java.net.http;
 
 }

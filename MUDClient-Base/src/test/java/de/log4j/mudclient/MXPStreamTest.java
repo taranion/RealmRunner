@@ -1,7 +1,5 @@
 package de.log4j.mudclient;
 
-import javax.sound.sampled.AudioSystem;
-
 import org.prelle.realmrunner.network.SoundManager;
 import org.prelle.realmrunner.network.SoundManager.PlayCommand;
 

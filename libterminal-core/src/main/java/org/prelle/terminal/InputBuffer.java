@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -15,7 +14,9 @@ import org.prelle.ansi.AParsedElement;
 import org.prelle.ansi.C0Code;
 import org.prelle.ansi.C0Fragment;
 import org.prelle.ansi.PrintableFragment;
-import org.prelle.ansi.commands.CursorBackward;
+import org.prelle.mudevents.MUDEvent;
+import org.prelle.mudevents.MUDEventProcessor;
+import org.prelle.mudevents.ansi.ANSIEvent;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -23,15 +24,7 @@ import lombok.Setter;
 /**
  * 
  */
-public class InputBuffer {
-
-	public static interface InputBufferHandler {
-		/**
-		 * @param line User input line, without the trailing CR/LF
-		 * @return Text to send to server. If NULL is returned, nothing is sent to the server.
-		 */
-		String onInputBufferLine(String line);
-	}
+public class InputBuffer implements MUDEventProcessor {
 	
 	private final static Logger logger = System.getLogger("terminal");
 	private final static int MAX_HISTORY = 100;
@@ -39,13 +32,7 @@ public class InputBuffer {
 	@Setter @Getter
 	private TerminalMode mode = TerminalMode.LINE_MODE;
 
-	private Thread readFromTerminalThread;
-	private ANSIInputStream in;
 	private Consumer<byte[]> echoListener;
-	@Setter
-	private InputBufferHandler inputHandler;
-	
-	private ANSIOutputStream sink;
 
 	private StringBuilder text = new StringBuilder();
 	private List<String> history;
@@ -53,87 +40,13 @@ public class InputBuffer {
 	//-------------------------------------------------------------------
 	/**
 	 */
-	public InputBuffer(DataFromTerminalOutputStream terminal) {
-		in = new ANSIInputStream(terminal.getAsInputStream());
-		in.setCollectPrintable(false);
-		readFromTerminalThread = new Thread( () -> run(), "InputBuffer");
-		
+	public InputBuffer() {
 		history = new ArrayList<>();
-	}
-
-	//-------------------------------------------------------------------
-	public void setSink(ANSIOutputStream sink) {
-		this.sink = sink;
-		readFromTerminalThread.start();
 	}
 
 	//-------------------------------------------------------------------
 	public void setEchoListener(Consumer<byte[]> echoListener) {
 		this.echoListener = echoListener;
-	}
-
-	//-------------------------------------------------------------------
-	public void stop() {
-		readFromTerminalThread.interrupt();
-	}
-	
-	//-------------------------------------------------------------------
-	private void run() {
-		while (true) {
-			try {
-				AParsedElement frag = in.readFragment();
-				logger.log(Level.INFO,"InputBuffer: read fragment: " + frag+" - mode is " + mode);
-				if (mode==TerminalMode.RAW) {
-					// In RAW mode don't filter anything, just pass it to the sink
-					sink.write(frag);
-					sink.flush();
-				} else {
-					processInLineMode(frag);
-				}
-				
-				// If an EchoListener has been defined, echo all Printable and C0 fragments
-				if (echoListener != null) {
-					switch (frag) {
-					case PrintableFragment _ -> echoListener.accept(frag.getRaw());
-					case C0Fragment c0 when c0.getCode()==C0Code.DEL -> echoDelete();
-					case C0Fragment c0 ->  {
-						echoListener.accept(frag.getRaw());
-						if (c0.getCode()==C0Code.CR) {
-							echoListener.accept("\r\n".getBytes());
-						}
-					}
-					default -> {
-						
-						sink.write(frag);
-					}
-					}
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
-
-	private void processInLineMode(AParsedElement frag) {
-		switch (frag) {
-		case PrintableFragment pf -> {
-				text.append(pf.getText());
-				logger.log(Level.INFO, "InputBuffer now: {0}", text);
-		}
-		case C0Fragment c0 -> {
-			switch (c0.getCode()) {
-			case CR ->  enterPressed();
-			case DEL -> deleteLast();
-			default ->  {
-				logger.log(Level.WARNING, "TODO: C0Fragment: {0} - text is {1}", c0, text);
-			}
-			}
-		} // case C0
-		default -> {
-			// Ignore other fragment types
-		}
-		} // switch
 	}
 
 	//-------------------------------------------------------------------
@@ -145,20 +58,20 @@ public class InputBuffer {
 		}
 		
 		// Eventually an input handler has been set
-		String toSend = (inputHandler != null) ? inputHandler.onInputBufferLine(text.toString()) : text.toString();
-		// Clear the buffer
-		text.setLength(0);
-		if (toSend != null) {
-			logger.log(Level.INFO, "InputBuffer: sending to server: {0}", toSend);
-			try {
-				sink.write(new PrintableFragment(toSend).getRaw());
-				sink.write(C0Code.CR.code());
-				sink.flush();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+//		String toSend = (inputHandler != null) ? inputHandler.onInputBufferLine(text.toString()) : text.toString();
+//		// Clear the buffer
+//		text.setLength(0);
+//		if (toSend != null) {
+//			logger.log(Level.INFO, "InputBuffer: sending to server: {0}", toSend);
+//			try {
+////				sink.write(new PrintableFragment(toSend).getRaw());
+////				sink.write(C0Code.CR.code());
+////				sink.flush();
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
 	}
 	
 	//-------------------------------------------------------------------
@@ -194,5 +107,44 @@ public class InputBuffer {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public List<MUDEvent> apply(MUDEvent event) {
+		logger.log(Level.INFO, "InputBuffer received event: {0}", event);
+		// In raw mode, just pass on every event
+		if (mode==TerminalMode.RAW) {
+			return List.of(event);
+		}
+		
+		if (event instanceof ANSIEvent ansi) {
+			return switch (ansi.getFragment()) {
+			case PrintableFragment pf -> {
+				text.append(pf.getText());
+				logger.log(Level.INFO, "InputBuffer now: {0}", text);
+				if (echoListener != null) {
+					echoListener.accept(pf.getRaw());
+				}
+				yield List.of();
+			}
+			case C0Fragment c0 -> {
+				switch (c0.getCode()) {
+					case CR -> enterPressed();
+					case BS -> {
+						deleteLast();
+						echoDelete();
+					}
+					default -> logger.log(Level.INFO, "InputBuffer received unhandled C0 code: {0}", c0.getCode());
+				}
+				yield List.of(event);
+			}
+			default -> { 
+				logger.log(Level.INFO, "InputBuffer received unhandled ANSI fragment: {0}", ansi.getFragment());
+				yield List.of(event);
+				}
+			};
+		
+		}
+		return List.of(event);
 	}
 }

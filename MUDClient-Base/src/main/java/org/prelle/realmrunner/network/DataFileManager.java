@@ -59,12 +59,17 @@ public class DataFileManager {
 	}
 
 	//-------------------------------------------------------------------
-	public static Path getCurrentDataDir(MUDSession session) throws IOException {
-		Path dir = mainDataDir.resolve(session.getWorld());
+	public static Path getWorldDir(String name) throws IOException {
+		Path dir = mainDataDir.resolve(name);
 		if (!Files.exists(dir)) {
 			Files.createDirectories(dir);
 		}
 		return dir;
+	}
+	
+	//-------------------------------------------------------------------
+	public static Path getCurrentDataDir(MUDSession session) throws IOException {
+		return getWorldDir(session.getWorld());
 	}
 
 	//-------------------------------------------------------------------

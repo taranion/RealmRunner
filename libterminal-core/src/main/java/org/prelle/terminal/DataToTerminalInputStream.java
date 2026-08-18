@@ -182,4 +182,13 @@ public class DataToTerminalInputStream extends InputStream implements MUDEventPr
 	public List<MUDEvent> apply(MUDEvent event) {
 		writeToTerminal( event.asRawData() );
 		return List.of();
+	}
+
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.mudevents.MUDEventProcessor#getName()
+	 */
+	@Override
+	public String getName() {
+		return "ToINS";
 	}}

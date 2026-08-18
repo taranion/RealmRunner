@@ -16,7 +16,7 @@ public abstract class MUDConnection implements MUDEventProcessor{
 	
 	//-------------------------------------------------------------------
 	protected MUDConnection() {
-		receivePipe = new MUDEventPipeline("RCV");
+		receivePipe = new MUDEventPipeline("RCV", System.getLogger("RCV"));
 	}
 	
 	//-------------------------------------------------------------------

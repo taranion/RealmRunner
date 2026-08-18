@@ -1,27 +1,30 @@
 package org.prelle.mudclient.jfx;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map.Entry;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 import org.prelle.realmrunner.network.Config;
+import org.prelle.realmrunner.network.DataFileManager;
 import org.prelle.realmrunner.network.MainConfig;
 import org.prelle.realmrunner.network.SessionProtocol;
 
 import com.graphicmud.Localization;
 
-import atlantafx.base.controls.Card;
 import atlantafx.base.controls.Tile;
 import atlantafx.base.layout.InputGroup;
 import atlantafx.base.theme.Styles;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
@@ -33,12 +36,12 @@ import javafx.scene.layout.VBox;
  */
 public class WelcomePane extends VBox {
 
-	private Consumer<Config> onWorldSelected;
+	private BiConsumer<String,Config> onWorldSelected;
 	private TilePane tpRecent;
 	private TilePane tpAll;
 
 	//-------------------------------------------------------------------
-	public WelcomePane(Consumer<Config> onWorldSelected) {
+	public WelcomePane(BiConsumer<String,Config> onWorldSelected) {
 		super(20);
 		this.getStyleClass().add("welcome-pane");
 		this.onWorldSelected = onWorldSelected;
@@ -148,17 +151,37 @@ public class WelcomePane extends VBox {
 //		card1.setOnMouseExited( _ -> card1.getStyleClass().remove(Styles.ELEVATED_2));
 //		card1.setOnMouseClicked( _ -> onWorldSelected.accept(config));
 
+		// Check if there is a graphic for the world, if so use it, otherwise use a default tile
+		ImageView iView = new ImageView();
+		iView.setFitWidth(64);
+		iView.setFitHeight(64);
+		try {
+			Path path1 = DataFileManager.getWorldDir(name).resolve("icon.png");
+			Path path2 = DataFileManager.getWorldDir(name).resolve("icon.jpg");
+			if (Files.exists(path1)) {
+				iView.setImage(new Image(path1.toUri().toString()));
+			} else if (Files.exists(path2)) {
+				iView.setImage(new Image(path2.toUri().toString()));
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		Tile tile = new Tile(
 			    name,
 			    config.getServer()
 			);
+		if (iView.getImage()!=null) {
+			tile.setGraphic(iView);
+		}
 		tile.setOnMouseEntered( _ -> tile.setStyle("-fx-background-color: #e0e0e0;"));
 		tile.setOnMouseExited( _ -> tile.setStyle("-fx-background-color: transparent;"));
 		//tile.setOnMouseClicked( _ -> onWorldSelected.accept(config));
 //		Button tile = new Button(null,bxData);
 //		tile.setMaxWidth(Double.MAX_VALUE);
 //		
-		tile.setActionHandler( () -> onWorldSelected.accept(config));
+		tile.setActionHandler( () -> onWorldSelected.accept(name,config));
 		
 		return tile;
 	}

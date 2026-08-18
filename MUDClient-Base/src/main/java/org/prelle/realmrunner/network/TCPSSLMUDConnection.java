@@ -49,6 +49,15 @@ public class TCPSSLMUDConnection extends MUDConnection {
 		out = socket.getOutputStream();
 //		socket.setSoTimeout(100);
 	}
+	
+	//-------------------------------------------------------------------
+	/**
+	 * @see org.prelle.mudevents.MUDEventProcessor#getName()
+	 */
+	@Override
+	public String getName() {
+		return "TCPSSL";
+	}
 
 	//-------------------------------------------------------------------
 	/**

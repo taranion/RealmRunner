@@ -449,7 +449,7 @@ public class MUDClientTerminal implements LineBufferListener,
 	//-------------------------------------------------------------------
 	private void setupSession(SessionConfig config, Config activeConfig) throws IOException, InterruptedException {
 		session = MUDSession.builder()
-				.withTerminal(console)
+//				.withTerminal(console)
 //				.setCharset(charset)
 //				.setClientConfig(activeConfig)
 //				.setConfig(config)

@@ -37,6 +37,10 @@
             <artifactId>libansi</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.prelle</groupId>
+            <artifactId>libansi</artifactId>
+        </dependency>
+          <dependency>
             <groupId>io.github.vlaaad</groupId>
             <artifactId>ghosttyfx</artifactId>
             <version>0.1.210</version>
