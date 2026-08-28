@@ -120,6 +120,12 @@ public class TerminalEmulatorModel implements TerminalEmulator {
 	}
 
 	@Override
+	public List<PipeEvent> onSendToRemote(PipeEvent event) {
+		// TODO Auto-generated method stub
+		return List.of(event);
+	}
+
+	@Override
 	public void connectWith(MUDEventPipeline pipeOut) {
 		// TODO Auto-generated method stub
 		

@@ -16,9 +16,9 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import org.prelle.mud4j.gmcp.GMCPHandler;
-import org.prelle.mudevents.PipeEvent;
 import org.prelle.mudevents.MUDEventPipeline;
 import org.prelle.mudevents.MUDEventProcessor;
+import org.prelle.mudevents.PipeEvent;
 import org.prelle.mudevents.StartEvent;
 import org.prelle.mudevents.ansi.ANSILayer;
 import org.prelle.mudevents.telnet.MUDClientTelnet;
@@ -127,13 +127,13 @@ public class MUDSession implements MUDEventProcessor {
 		
 		telnet.setReversePipeline(streamToMUD);
 		streamFromMUD
-			.then(telnet.receiver())
-			.then(ansi.receiver())
+			.then(telnet)
+			.then(ansi)
 			;
 		
 		streamToMUD
-			.then(ansi.sender())
-			.then(telnet.sender())
+			.then(ansi)
+			.then(telnet)
 			.then(connection)
 			;
     }
@@ -532,6 +532,12 @@ public class MUDSession implements MUDEventProcessor {
 	public List<PipeEvent> onReceiveFromRemote(PipeEvent event) {
 		logger.log(Level.INFO, "MUDSession.apply: "+event.getClass().getSimpleName());
 		return List.of();
+	}
+
+	@Override
+	public List<PipeEvent> onSendToRemote(PipeEvent event) {
+		// TODO Auto-generated method stub
+		return List.of(event);
 	}
 
 //	@Override

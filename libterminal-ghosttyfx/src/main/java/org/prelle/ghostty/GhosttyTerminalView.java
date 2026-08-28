@@ -540,4 +540,16 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 	public String getName() {
 		return "GHOSTTY";
 	}
+
+	@Override
+	public List<PipeEvent> onReceiveFromRemote(PipeEvent event) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<PipeEvent> onSendToRemote(PipeEvent event) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

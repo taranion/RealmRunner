@@ -40,6 +40,12 @@ public class ClientMUDDownParser implements MUDEventProcessor, PipeEvent {
 		return List.of(event);
 	}
 
+	@Override
+	public List<PipeEvent> onSendToRemote(PipeEvent event) {
+		// TODO Auto-generated method stub
+		return List.of(event);
+	}
+
 	private List<PipeEvent> processMudDown(MessageEnvelope muddown) {
 		logger.log(Level.INFO, "TODO: "+muddown);
 		switch (muddown.getType()) {

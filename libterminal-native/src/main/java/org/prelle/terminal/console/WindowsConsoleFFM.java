@@ -632,6 +632,12 @@ public class WindowsConsoleFFM implements TerminalEmulator {
 	}
 
 	@Override
+	public List<PipeEvent> onSendToRemote(PipeEvent event) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	public FilteringANSIStream connectWith(MessageLog log, InputStream in, OutputStream out) {
 		// TODO Auto-generated method stub
 		return null;

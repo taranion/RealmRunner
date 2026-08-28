@@ -282,6 +282,12 @@ public class JediTerminalView implements TerminalEmulator {
 		return List.of(event);
 	}
 
+	@Override
+	public List<PipeEvent> onSendToRemote(PipeEvent event) {
+		// TODO Auto-generated method stub
+		return List.of(event);
+	}
+
 	//-------------------------------------------------------------------
 	/**
 	 * @see org.prelle.terminal.TerminalEmulator#addConsoleSizeListener(java.util.function.Consumer)

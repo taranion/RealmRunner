@@ -74,6 +74,12 @@ public class TCPMUDConnection extends MUDConnection {
 	}
 
 	@Override
+	public List<PipeEvent> onSendToRemote(PipeEvent event) {
+		// TODO Auto-generated method stub
+		return List.of(event);
+	}
+
+	@Override
 	public void start() {
 		Runnable read = () -> {
 			try {
@@ -87,7 +93,7 @@ public class TCPMUDConnection extends MUDConnection {
 				closed = true;
 			} catch (IOException e) {
 				logger.log(Level.WARNING, "IO error while reading from MUD: {0}", e.getMessage());
-				receivePipe.publish(new ConnectionLostEvent(e.toString()));
+				receivePipe.publish(new ConnectionLostEvent());
 			}
 		};
 		Thread.startVirtualThread(read);

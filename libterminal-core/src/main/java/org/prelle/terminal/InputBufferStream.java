@@ -201,4 +201,10 @@ public class InputBufferStream implements MUDEventProcessor {
 		logger.log(Level.INFO, "InputBuffer received event: {0}", event);
 		return List.of(event);
 	}
+
+	@Override
+	public List<PipeEvent> onSendToRemote(PipeEvent event) {
+		// TODO Auto-generated method stub
+		return List.of(event);
+	}
 }

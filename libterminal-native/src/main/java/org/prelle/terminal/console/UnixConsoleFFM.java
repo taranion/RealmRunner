@@ -152,6 +152,12 @@ public class UnixConsoleFFM implements TerminalEmulator {
 		return List.of(event);
 	}
 
+	@Override
+	public List<PipeEvent> onSendToRemote(PipeEvent event) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	//-------------------------------------------------------------------
 	private void listenForConsoleSizeChanges() {
 		TimerTask updateNAWSTask = new TimerTask() {

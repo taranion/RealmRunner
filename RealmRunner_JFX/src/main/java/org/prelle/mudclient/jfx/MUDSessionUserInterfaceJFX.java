@@ -237,6 +237,12 @@ public class MUDSessionUserInterfaceJFX extends VBox implements MUDSessionUserIn
 		return List.of(event);
 	}
 
+	@Override
+	public List<PipeEvent> onSendToRemote(PipeEvent event) {
+		// TODO Auto-generated method stub
+		return List.of(event);
+	}
+
 	private void processMSSPData(Map<String, String> data) {
 		// TODO Auto-generated method stub
 		String icon = data.get("ICON");

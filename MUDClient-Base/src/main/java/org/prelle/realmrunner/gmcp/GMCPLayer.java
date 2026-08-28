@@ -49,6 +49,12 @@ public class GMCPLayer extends GMCPHandler{
 			public String getName() {
 				return "ANSI";
 			}
+
+			@Override
+			public List<PipeEvent> onSendToRemote(PipeEvent event) {
+				// TODO Auto-generated method stub
+				return List.of(event);
+			}
 		};
 	}
 
@@ -64,6 +70,12 @@ public class GMCPLayer extends GMCPHandler{
 			}
 			public String getName() {
 				return "GMCP";
+			}
+
+			@Override
+			public List<PipeEvent> onSendToRemote(PipeEvent event) {
+				// TODO Auto-generated method stub
+				return List.of(event);
 			}
 		};
 	}

@@ -147,4 +147,10 @@ public class InputBuffer implements MUDEventProcessor {
 		}
 		return List.of(event);
 	}
+
+	@Override
+	public List<PipeEvent> onSendToRemote(PipeEvent event) {
+		// TODO Auto-generated method stub
+		return List.of(event);
+	}
 }
