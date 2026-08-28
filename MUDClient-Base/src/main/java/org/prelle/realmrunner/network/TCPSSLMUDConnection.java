@@ -12,7 +12,7 @@ import java.util.List;
 import javax.net.ssl.SSLSocketFactory;
 
 import org.prelle.mudevents.BinaryDataEvent;
-import org.prelle.mudevents.MUDEvent;
+import org.prelle.mudevents.PipeEvent;
 import org.prelle.mudevents.StartEvent;
 
 import lombok.Getter;
@@ -61,16 +61,16 @@ public class TCPSSLMUDConnection extends MUDConnection {
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.mudevents.MUDEventProcessor#apply(org.prelle.mudevents.MUDEvent)
+	 * @see org.prelle.mudevents.MUDEventProcessor#apply(org.prelle.mudevents.PipeEvent)
 	 */
 	@Override
-	public List<MUDEvent> apply(MUDEvent event) {
+	public List<PipeEvent> onReceiveFromRemote(PipeEvent event) {
 		if (event instanceof BinaryDataEvent binary) {
 			try {
 				out.write(binary.getData());
 			} catch (IOException e) {
 				logger.log(Level.WARNING, "IO error while sending data to MUD: {0}", e.getMessage());
-				receivePipe.publish(new ConnectionLostEvent(e.toString()));
+				receivePipe.publish(new ConnectionLostEvent());
 			}
 		}
 		return null;
@@ -85,16 +85,16 @@ public class TCPSSLMUDConnection extends MUDConnection {
 				while ((bytesRead = in.read(buffer)) != -1) {
 					byte[] data = new byte[bytesRead];
 					System.arraycopy(buffer, 0, data, 0, bytesRead);
-					receivePipe.publish(new BinaryDataEvent(this,data));
+					receivePipe.publish(new BinaryDataEvent(data));
 				}
 				closed = true;
 			} catch (IOException e) {
 				logger.log(Level.WARNING, "IO error while reading from MUD: {0}", e.getMessage());
-				receivePipe.publish(new ConnectionLostEvent(e.toString()));
+				receivePipe.publish(new ConnectionLostEvent());
 			}
 		};
 		Thread.startVirtualThread(read);
-		receivePipe.publish(new StartEvent(this));
+		receivePipe.publish(new StartEvent());
 	}
 
 	@Override

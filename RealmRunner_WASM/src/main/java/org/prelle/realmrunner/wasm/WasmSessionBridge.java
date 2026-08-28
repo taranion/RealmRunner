@@ -4,13 +4,8 @@ import java.util.function.Consumer;
 
 import org.graalvm.webimage.api.JS;
 import org.graalvm.webimage.api.JSValue;
-import org.prelle.realmrunner.event.GMCPEvent;
-import org.prelle.realmrunner.event.MUDEventBus;
-import org.prelle.realmrunner.event.SoundEvent;
-import org.prelle.realmrunner.event.StreamLineEvent;
+import org.prelle.mudevents.MUDEventPipeline;
 import org.prelle.realmrunner.network.MUDSession;
-import org.prelle.realmrunner.network.bridge.TelnetOptionManager;
-import org.prelle.realmrunner.network.pipeline.SessionPipelineFactory;
 
 /**
  * WebAssembly Session Bridge connecting Java MUDClient-Base event bus and Telnet pipeline
@@ -138,7 +133,7 @@ public class WasmSessionBridge {
 		session = new MUDSession();
 		transport = new WasmBrowserTransport();
 
-		MUDEventBus eventBus = session.getEventBus();
+		MUDEventPipeline eventBus = session.getEventBus();
 
 		eventBus.subscribe(StreamLineEvent.class, event -> {
 			System.out.println("[WasmSessionBridge] StreamLineEvent: " + event.getPlainText());

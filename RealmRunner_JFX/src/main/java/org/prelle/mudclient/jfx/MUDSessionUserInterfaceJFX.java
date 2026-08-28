@@ -14,7 +14,7 @@ import java.util.Optional;
 
 import org.prelle.ghostty.GhosttyTerminalView;
 import org.prelle.mudclient.jfx.MUDClientMain.HistoryEntry;
-import org.prelle.mudevents.MUDEvent;
+import org.prelle.mudevents.PipeEvent;
 import org.prelle.mudevents.telnet.TelnetCommandEvent;
 import org.prelle.realmrunner.network.ConnectionLostEvent;
 import org.prelle.realmrunner.network.DataFileManager;
@@ -217,10 +217,10 @@ public class MUDSessionUserInterfaceJFX extends VBox implements MUDSessionUserIn
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.mudevents.MUDEventProcessor#apply(org.prelle.mudevents.MUDEvent)
+	 * @see org.prelle.mudevents.MUDEventProcessor#apply(org.prelle.mudevents.PipeEvent)
 	 */
 	@Override
-	public List<MUDEvent> apply(MUDEvent event) {
+	public List<PipeEvent> onReceiveFromRemote(PipeEvent event) {
 		if (event instanceof TelnetCommandEvent telnet) {
 			if (telnet.getWrapped() instanceof MSSPDataEvent mssp) {
 				logger.log(Level.INFO, "MSSP Data: "+mssp.getData());

@@ -22,7 +22,7 @@ import org.prelle.ansi.C0Code;
 import org.prelle.ansi.C0Fragment;
 import org.prelle.ansi.FilteringANSIStream;
 import org.prelle.ansi.PrintableFragment;
-import org.prelle.mudevents.MUDEvent;
+import org.prelle.mudevents.PipeEvent;
 import org.prelle.mudevents.MUDEventPipeline;
 import org.prelle.mudevents.ansi.ANSIEvent;
 import org.prelle.terminal.FromServerToTerminal;
@@ -275,9 +275,9 @@ public class JediTerminalView implements TerminalEmulator {
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.mudevents.MUDEventProcessor#apply(org.prelle.mudevents.MUDEvent)
+	 * @see org.prelle.mudevents.MUDEventProcessor#apply(org.prelle.mudevents.PipeEvent)
 	 */
-	public List<MUDEvent> apply(MUDEvent event) {
+	public List<PipeEvent> onReceiveFromRemote(PipeEvent event) {
 		System.getLogger("TERM").log(Logger.Level.INFO, "TerminalEmulatorModel received event: {0}", event);
 		return List.of(event);
 	}
@@ -310,9 +310,9 @@ public class JediTerminalView implements TerminalEmulator {
 	public void sendUserInput(String text) {
 		try {
 			if (pipeOut!=null) {
-				pipeOut.publish(new ANSIEvent(this, new PrintableFragment(text)));
-				pipeOut.publish(new ANSIEvent(this, new C0Fragment(C0Code.CR)));
-				pipeOut.publish(new ANSIEvent(this, new C0Fragment(C0Code.LF)));
+				pipeOut.publish(new ANSIEvent(new PrintableFragment(text)));
+				pipeOut.publish(new ANSIEvent(new C0Fragment(C0Code.CR)));
+				pipeOut.publish(new ANSIEvent(new C0Fragment(C0Code.LF)));
 			} else {
 				out.write(text);
 				out.write(C0Code.CR);

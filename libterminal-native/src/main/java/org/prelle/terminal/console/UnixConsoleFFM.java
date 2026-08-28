@@ -30,7 +30,7 @@ import java.util.function.Consumer;
 import org.prelle.ansi.ANSIInputStream;
 import org.prelle.ansi.ANSIOutputStream;
 import org.prelle.ansi.FilteringANSIStream;
-import org.prelle.mudevents.MUDEvent;
+import org.prelle.mudevents.PipeEvent;
 import org.prelle.mudevents.MUDEventPipeline;
 import org.prelle.terminal.MessageLog;
 import org.prelle.terminal.ReceiveBuffer;
@@ -145,9 +145,9 @@ public class UnixConsoleFFM implements TerminalEmulator {
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.mudevents.MUDEventProcessor#apply(org.prelle.mudevents.MUDEvent)
+	 * @see org.prelle.mudevents.MUDEventProcessor#apply(org.prelle.mudevents.PipeEvent)
 	 */
-	public List<MUDEvent> apply(MUDEvent event) {
+	public List<PipeEvent> onReceiveFromRemote(PipeEvent event) {
 		System.getLogger("TERM").log(Logger.Level.INFO, "TerminalEmulatorModel received event: {0}", event);
 		return List.of(event);
 	}

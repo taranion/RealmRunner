@@ -173,4 +173,10 @@ public class DummyTerminal implements TerminalEmulator {
 		
 	}
 
+	@Override
+	public List<PipeEvent> onSendToRemote(PipeEvent event) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

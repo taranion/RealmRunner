@@ -2,7 +2,7 @@ package de.log4j.mudclient;
 
 import java.util.List;
 
-import org.prelle.mudevents.MUDEvent;
+import org.prelle.mudevents.PipeEvent;
 import org.prelle.mudevents.ansi.ANSIEvent;
 import org.prelle.realmrunner.network.MUDSession;
 import org.prelle.realmrunner.network.MUDSessionUserInterface;
@@ -24,10 +24,10 @@ public class TestUserInterface implements MUDSessionUserInterface {
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.mudevents.MUDEventProcessor#apply(org.prelle.mudevents.MUDEvent)
+	 * @see org.prelle.mudevents.MUDEventProcessor#apply(org.prelle.mudevents.PipeEvent)
 	 */
 	@Override
-	public List<MUDEvent> apply(MUDEvent event) {
+	public List<PipeEvent> onReceiveFromRemote(PipeEvent event) {
 		return List.of(event);
 	}
 

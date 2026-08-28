@@ -16,7 +16,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import org.prelle.mud4j.gmcp.GMCPHandler;
-import org.prelle.mudevents.MUDEvent;
+import org.prelle.mudevents.PipeEvent;
 import org.prelle.mudevents.MUDEventPipeline;
 import org.prelle.mudevents.MUDEventProcessor;
 import org.prelle.mudevents.StartEvent;
@@ -442,7 +442,7 @@ public class MUDSession implements MUDEventProcessor {
 		connection.start();
 		console.start();
 		
-		StartEvent startEvent = new StartEvent(this);
+		StartEvent startEvent = new StartEvent();
 		streamFromMUD.publish(startEvent);
 		logger.log(Level.INFO, "LEAVE: MUDSession.start");
 	}
@@ -529,7 +529,7 @@ public class MUDSession implements MUDEventProcessor {
 	}
 
 	@Override
-	public List<MUDEvent> apply(MUDEvent event) {
+	public List<PipeEvent> onReceiveFromRemote(PipeEvent event) {
 		logger.log(Level.INFO, "MUDSession.apply: "+event.getClass().getSimpleName());
 		return List.of();
 	}

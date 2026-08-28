@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import org.prelle.ansi.FilteringANSIStream;
-import org.prelle.mudevents.MUDEvent;
 import org.prelle.mudevents.MUDEventPipeline;
+import org.prelle.mudevents.PipeEvent;
 import org.prelle.terminal.MessageLog;
 import org.prelle.terminal.ReceiveBuffer;
 import org.prelle.terminal.TerminalEmulator;
@@ -29,10 +29,10 @@ public class TestTerminal implements TerminalEmulator {
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.mudevents.MUDEventProcessor#apply(org.prelle.mudevents.MUDEvent)
+	 * @see org.prelle.mudevents.MUDEventProcessor#apply(org.prelle.mudevents.PipeEvent)
 	 */
 	@Override
-	public List<MUDEvent> apply(MUDEvent event) {
+	public List<PipeEvent> onReceiveFromRemote(PipeEvent event) {
 //		System.err.println("TestTerminal: Received event: "+event);
 		return List.of();
 	}

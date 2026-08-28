@@ -14,7 +14,7 @@ import org.prelle.ansi.AParsedElement;
 import org.prelle.ansi.C0Code;
 import org.prelle.ansi.C0Fragment;
 import org.prelle.ansi.PrintableFragment;
-import org.prelle.mudevents.MUDEvent;
+import org.prelle.mudevents.PipeEvent;
 import org.prelle.mudevents.MUDEventProcessor;
 
 import lombok.Getter;
@@ -197,7 +197,7 @@ public class InputBufferStream implements MUDEventProcessor {
 	}
 
 	@Override
-	public List<MUDEvent> apply(MUDEvent event) {
+	public List<PipeEvent> onReceiveFromRemote(PipeEvent event) {
 		logger.log(Level.INFO, "InputBuffer received event: {0}", event);
 		return List.of(event);
 	}

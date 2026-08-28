@@ -26,7 +26,7 @@ import org.prelle.ansi.commands.ResetMode;
 import org.prelle.ansi.commands.SetMode;
 import org.prelle.ansi.commands.SetMode.ANSIMode;
 import org.prelle.mudevents.BinaryDataEvent;
-import org.prelle.mudevents.MUDEvent;
+import org.prelle.mudevents.PipeEvent;
 import org.prelle.mudevents.MUDEventPipeline;
 import org.prelle.mudevents.ansi.ANSIEvent;
 import org.prelle.terminal.DataFromTerminalOutputStream;
@@ -91,9 +91,9 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.mudevents.MUDEventProcessor#apply(org.prelle.mudevents.MUDEvent)
+	 * @see org.prelle.mudevents.MUDEventProcessor#apply(org.prelle.mudevents.PipeEvent)
 	 */
-	public List<MUDEvent> apply(MUDEvent event) {
+	public List<PipeEvent> apply(PipeEvent event) {
 //		logger.log(Level.INFO, "Ghostty.apply({0}) called with {1} bytes", event, event.asRawData().length);
 		if (event instanceof ANSIEvent) {
 			toTerminal.writeToTerminal(event.asRawData());
@@ -168,7 +168,7 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 					ansiParser.parse(data);
 					listener.releaseCollectPrintable();
 					listener.consumeFragments()	.stream()
-						.map(frag -> (MUDEvent)new ANSIEvent(this,frag))
+						.map(frag -> (PipeEvent)new ANSIEvent(frag))
 						.forEach( e -> {
 							if (pipeOut!=null) {
 								pipeOut.publish(e);
@@ -176,7 +176,7 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 								logger.log(Level.WARNING, "No pipeOut defined, cannot send event {0}", e);
 							}
 						});
-					pipeOut.publish(new BinaryDataEvent(this, new byte[] {(byte)data}));
+					pipeOut.publish(new BinaryDataEvent(new byte[] {(byte)data}));
 				}
 			} catch (IOException e) {
 				logger.log(Level.WARNING, "Error reading from terminal: {0}", e.getMessage());
@@ -487,9 +487,9 @@ public class GhosttyTerminalView implements TerminalEmulator, Terminal {
 		try {
 			// Send to game
 			if (pipeOut!=null) {
-				pipeOut.publish(new ANSIEvent(this, new PrintableFragment(text)));
-				pipeOut.publish(new ANSIEvent(this, new C0Fragment(C0Code.CR)));
-				pipeOut.publish(new ANSIEvent(this, new C0Fragment(C0Code.LF)));
+				pipeOut.publish(new ANSIEvent(new PrintableFragment(text)));
+				pipeOut.publish(new ANSIEvent(new C0Fragment(C0Code.CR)));
+				pipeOut.publish(new ANSIEvent(new C0Fragment(C0Code.LF)));
 			} else {			
 				ansiOut.write(data);
 			}

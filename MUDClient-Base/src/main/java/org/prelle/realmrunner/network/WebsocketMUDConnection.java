@@ -15,7 +15,7 @@ import java.util.List;
 import org.prelle.ansi.PrintableFragment;
 import org.prelle.muddown.MessageEnvelope;
 import org.prelle.mudevents.BinaryDataEvent;
-import org.prelle.mudevents.MUDEvent;
+import org.prelle.mudevents.PipeEvent;
 import org.prelle.mudevents.ansi.ANSIEvent;
 
 import com.google.gson.Gson;
@@ -128,7 +128,7 @@ public class WebsocketMUDConnection extends MUDConnection {
 		MessageHandler binaryHandler = new MessageHandler.Whole<byte[]>() {
 		    @Override
 		    public void onMessage(byte[] message) {
-		        getReceivePipe().publish(new BinaryDataEvent(this,message));
+		        getReceivePipe().publish(new BinaryDataEvent(message));
 		    }
 		};
 		MessageHandler textHandler = new MessageHandler.Whole<String>() {
@@ -137,13 +137,13 @@ public class WebsocketMUDConnection extends MUDConnection {
 		    	logger.log(Level.INFO,"Received text message: " +supportsTelnet+" ="+ message);
 		    	if (supportsTelnet) {
 		    		byte[] buf = Base64.getDecoder().decode(message);
-			        getReceivePipe().publish(new BinaryDataEvent(this,buf));
+			        getReceivePipe().publish(new BinaryDataEvent(buf));
 		    	} else if (supportsMUDDown) {
 					var mudDownMsg = gson.fromJson(message, MessageEnvelope.class);
 					getReceivePipe().publish(mudDownMsg);
 		    	} else {
 		    		// Send as ANSI Event with a PrintableDataFragment
-		    		getReceivePipe().publish(new ANSIEvent(this, new PrintableFragment(message)));
+		    		getReceivePipe().publish(new ANSIEvent(new PrintableFragment(message)));
 		    		
 		    	}
 		        //getReceivePipe().publish(new BinaryDataEvent(this,message));
@@ -192,10 +192,10 @@ public class WebsocketMUDConnection extends MUDConnection {
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.mudevents.MUDEventProcessor#apply(org.prelle.mudevents.MUDEvent)
+	 * @see org.prelle.mudevents.MUDEventProcessor#apply(org.prelle.mudevents.PipeEvent)
 	 */
 	@Override
-	public List<MUDEvent> apply(MUDEvent event) {
+	public List<PipeEvent> onReceiveFromRemote(PipeEvent event) {
 		if (event instanceof BinaryDataEvent binary) {
 			logger.log(Level.INFO,"Send binary data of length: "+binary.getData().length);
 			byte[] data = binary.getData();

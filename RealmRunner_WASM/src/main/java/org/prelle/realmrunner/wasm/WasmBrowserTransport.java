@@ -6,9 +6,6 @@ import java.util.function.Consumer;
 import org.prelle.realmrunner.transport.MUDTransport;
 import org.prelle.realmrunner.transport.MUDTransportListener;
 
-import lombok.Getter;
-import lombok.Setter;
-
 /**
  * WebAssembly browser transport implementation of MUDTransport.
  * Bridges incoming binary frames from JS WebSocket to pipeline decoders,

@@ -10,7 +10,7 @@ import java.util.List;
 
 import org.prelle.ansi.PrintableFragment;
 import org.prelle.mudevents.BinaryDataEvent;
-import org.prelle.mudevents.MUDEvent;
+import org.prelle.mudevents.PipeEvent;
 import org.prelle.mudevents.ansi.ANSIEvent;
 
 import lombok.Getter;
@@ -87,16 +87,16 @@ public class WebsocketMUDConnection2 extends MUDConnection {
                 logger.log(Level.INFO, "OkHttp received text message: " + text);
                 if (WebsocketMUDConnection2.this.supportsTelnet) {
                     byte[] buf = Base64.getDecoder().decode(text);
-                    getReceivePipe().publish(new BinaryDataEvent(this, buf));
+                    getReceivePipe().publish(new BinaryDataEvent(buf));
                 } else {
-                    getReceivePipe().publish(new ANSIEvent(this, new PrintableFragment(text)));
+                    getReceivePipe().publish(new ANSIEvent(new PrintableFragment(text)));
                 }
             }
 
             @Override
             public void onMessage(WebSocket webSocket, ByteString bytes) {
                 logger.log(Level.INFO, "OkHttp received binary message of length: " + bytes.size());
-                getReceivePipe().publish(new BinaryDataEvent(this, bytes.toByteArray()));
+                getReceivePipe().publish(new BinaryDataEvent(bytes.toByteArray()));
             }
 
             @Override
@@ -125,7 +125,7 @@ public class WebsocketMUDConnection2 extends MUDConnection {
     }
 
     @Override
-    public List<MUDEvent> apply(MUDEvent event) {
+    public List<PipeEvent> onReceiveFromRemote(PipeEvent event) {
         if (event instanceof BinaryDataEvent binary) {
             logger.log(Level.INFO, "Send binary data of length: " + binary.getData().length);
             byte[] data = binary.getData();
