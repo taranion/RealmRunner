@@ -8,16 +8,16 @@ import org.prelle.mudansi.FormatUtil;
 import org.prelle.mudansi.OutputFormatter.ANSIOutputConfig;
 import org.prelle.mudansi.TextWithMarkup;
 import org.prelle.muddown.MessageEnvelope;
-import org.prelle.muddown.MuddownMessage;
 import org.prelle.muddown.MuddownParser;
 import org.prelle.muddown.RoomMessage;
-import org.prelle.mudevents.MUDEvent;
+import org.prelle.mudevents.PipeEvent;
 import org.prelle.mudevents.MUDEventProcessor;
+import org.prelle.mudevents.PipeEvent;
 
 /**
  * 
  */
-public class ClientMUDDownParser implements MUDEventProcessor, MUDEvent {
+public class ClientMUDDownParser implements MUDEventProcessor, PipeEvent {
 	
 	private final static Logger logger = System.getLogger("muddown");
 
@@ -30,17 +30,17 @@ public class ClientMUDDownParser implements MUDEventProcessor, MUDEvent {
 
 	//-------------------------------------------------------------------
 	/**
-	 * @see org.prelle.mudevents.MUDEventProcessor#apply(org.prelle.mudevents.MUDEvent)
+	 * @see org.prelle.mudevents.MUDEventProcessor#apply(org.prelle.mudevents.PipeEvent)
 	 */
 	@Override
-	public List<MUDEvent> apply(MUDEvent event) {
+	public List<PipeEvent> onReceiveFromRemote(PipeEvent event) {
 		if (event instanceof MessageEnvelope muddown) {
 			return processMudDown(muddown);			
 		}
 		return List.of(event);
 	}
 
-	private List<MUDEvent> processMudDown(MessageEnvelope muddown) {
+	private List<PipeEvent> processMudDown(MessageEnvelope muddown) {
 		logger.log(Level.INFO, "TODO: "+muddown);
 		switch (muddown.getType()) {
 		case ROOM:
@@ -51,7 +51,7 @@ public class ClientMUDDownParser implements MUDEventProcessor, MUDEvent {
 		return List.of();
 	}
 
-	private List<MUDEvent> parseRoomBlock(String markdown) {
+	private List<PipeEvent> parseRoomBlock(String markdown) {
 		RoomMessage room = MuddownParser.parse(markdown, RoomMessage.class);
 		logger.log(Level.INFO, "room = "+room);
 		

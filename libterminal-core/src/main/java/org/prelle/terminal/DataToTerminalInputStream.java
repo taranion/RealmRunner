@@ -6,8 +6,8 @@ import java.io.OutputStream;
 import java.lang.System.Logger;
 import java.util.List;
 
-import org.prelle.mudevents.MUDEvent;
 import org.prelle.mudevents.MUDEventProcessor;
+import org.prelle.mudevents.PipeEvent;
 
 /**
  * This class helps with the need from the terminal to read from an InputStream,
@@ -179,7 +179,7 @@ public class DataToTerminalInputStream extends InputStream implements MUDEventPr
 	 * @see org.prelle.mudevents.MUDEventProcessor#apply(org.prelle.mudevents.MUDEvent)
 	 */
 	@Override
-	public List<MUDEvent> apply(MUDEvent event) {
+	public List<PipeEvent> onReceiveFromRemote(PipeEvent event) {
 		writeToTerminal( event.asRawData() );
 		return List.of();
 	}
@@ -191,4 +191,10 @@ public class DataToTerminalInputStream extends InputStream implements MUDEventPr
 	@Override
 	public String getName() {
 		return "ToINS";
+	}
+
+	@Override
+	public List<PipeEvent> onSendToRemote(PipeEvent event) {
+		// TODO Auto-generated method stub
+		return null;
 	}}
